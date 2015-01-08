@@ -1,7 +1,7 @@
-<project name="Battlecode 2013" basedir="." default="run">
+<project name="Battlecode 2015" basedir="." default="run">
 
   <description>
-    Build file for Battlecode 2013 players.
+    Build file for Battlecode 2015 players.
   </description>
 
   <property name="path.base" location="."/>
@@ -35,23 +35,24 @@
   </target>
 
   <target name="build-scala" if="scala">
-	<taskdef resource="scala/tools/ant/antlib.xml">
-		<classpath>
-			<fileset dir="${path.lib}">
-				<include name="scala-library-2.9.1.jar"/>
-				<include name="scala-compiler-2.9.1.jar"/>
-			</fileset>
-		</classpath>
-	</taskdef>
-		
-	<scalac
-		srcdir="${path.teams}"
-    	destdir="${path.bin}"
-    	target="jvm-1.5"
-		classpathref="classpath.run">
-		<include name="**/*.scala"/>
-		<include name="**/*.java"/>
-  	</scalac>
+    <taskdef resource="scala/tools/ant/antlib.xml">
+        <classpath>
+            <fileset dir="${path.lib}">
+                <include name="scala-library-2.11.4.jar"/>
+                <include name="scala-compiler-2.11.4.jar"/>
+                <include name="scala-reflect-2.11.4.jar"/>
+            </fileset>
+        </classpath>
+    </taskdef>
+        
+    <scalac
+        srcdir="${path.teams}"
+        destdir="${path.bin}"
+        target="jvm-1.5"
+        classpathref="classpath.run">
+        <include name="**/*.scala"/>
+        <include name="**/*.java"/>
+    </scalac>
   </target>
 
   <target name="build" depends="-init,build-scala">
@@ -59,9 +60,10 @@
      classpathref="classpath.run" 
      destdir="${path.bin}" 
      srcdir="${path.teams}"
-	 target="1.6"
-	 source="1.6"
-     debug="true">
+     target="1.7"
+     source="1.7"
+     debug="true"
+     includeantruntime="false">
       <compilerarg line="-Xlint"/>
     </javac>
   </target>
@@ -74,7 +76,7 @@
       <jvmarg value="-Dapple.awt.graphics.UseQuartz=true"/>
       <jvmarg value="-Dbc.server.map-path=${path.maps}"/>
       <jvmarg value="-Xmx256m"/> 
-	  <jvmarg value="-Djava.library.path=${path.lib}" />
+      <jvmarg value="-Djava.library.path=${path.lib}" />
       <arg line="-c bc.conf"/>
     </java>
   </target> 
@@ -88,7 +90,7 @@
       <jvmarg value="-Dbc.server.map-path=${path.maps}"/>
       <jvmarg value="-Dbc.client.match=${match}"/>
       <jvmarg value="-Xmx256m"/> 
-	  <jvmarg value="-Djava.library.path=${path.lib}" />
+      <jvmarg value="-Djava.library.path=${path.lib}" />
       <arg line="-c bc.conf"/>
     </java>
   </target> 
