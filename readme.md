@@ -18,9 +18,9 @@ First, make sure you have installed:
 
 1. git
 
-2. Eclipse 4.2 or higher (https://eclipse.org/)
+2. Java JDK 7 or JDK 8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
-3. Java JDK 7 or JDK 8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+3. Eclipse 4.2 or higher (https://eclipse.org/)
 
 First, clone the repository. This will make these files appear on your local machine. From Terminal, run: `git clone https://github.com/axc/bcode2015-scaffold.git`
 
