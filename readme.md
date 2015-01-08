@@ -11,9 +11,16 @@ For full specs check http://battlecode.org
 
 Created for 2013 by Cory Li.
 
-Detailed Instructions
+How to Use
 -----------------------
 
-This is just one way to use this scaffold. One alternative is to fork. This just describes how to clone it.
+First, make sure you have installed:
+1. git
+2. Eclipse 4.2 or higher (https://eclipse.org/)
+3. Java JDK 7 or JDK 8 (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
-TO BE CONTINUED
+First, clone the repository. This will make these files appear on your local machine. From Terminal, run: `git clone https://github.com/axc/bcode2015-scaffold.git`
+
+Then, open Eclipse. Go to File->Import->General->Existing Projects into Workspace and then select bcode2015-scaffold. The source code for the players will be in the teams folder. To run the client, press the green play button.
+
+Whenever there is a new release, you can either use the installer online (http://www.battlecode.org/contestants/releases/) or you can just pull from this repository (`git pull origin master`).
