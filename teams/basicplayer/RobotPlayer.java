@@ -22,6 +22,10 @@ public class RobotPlayer
                         rc.spawn(Direction.NORTH, RobotType.BEAVER);
                     }
                 }
+                else if (rc.getType() == RobotType.BEAVER)
+                {
+                    rc.move(Direction.NORTH);
+                }
             }
             catch (Exception e)
             {
