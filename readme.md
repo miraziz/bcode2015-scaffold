@@ -9,7 +9,7 @@ Add your new bot as a package team000 (replacing 000 with your team ID) under th
 
 For full specs check http://battlecode.org
 
-Created for 2013 by Cory Li.
+Originally created for Battlecode 2013 by Cory Li.
 
 How to Use
 -----------------------
