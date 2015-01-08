@@ -17,7 +17,10 @@ public class RobotPlayer
             {
                 if (rc.getType() == RobotType.HQ)
                 {
-                    rc.spawn(Direction.NORTH, RobotType.BEAVER);
+                    if (rc.canSpawn(Direction.NORTH, RobotType.BEAVER))
+                    {
+                        rc.spawn(Direction.NORTH, RobotType.BEAVER);
+                    }
                 }
             }
             catch (Exception e)
