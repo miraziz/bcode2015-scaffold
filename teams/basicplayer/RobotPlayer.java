@@ -26,6 +26,10 @@ public class RobotPlayer
                 {
                     rc.move(Direction.NORTH);
                 }
+                else
+                {
+                    
+                }
             }
             catch (Exception e)
             {
