@@ -13,6 +13,17 @@ public class RobotPlayer
 
         while (true)
         {
+            try
+            {
+                if (rc.getType() == RobotType.HQ)
+                {
+                    rc.spawn(Direction.NORTH, RobotType.BEAVER);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
             rc.yield();
         }
     }
