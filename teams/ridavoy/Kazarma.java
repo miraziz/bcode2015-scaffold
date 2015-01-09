@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.*;
 
 public class Kazarma
-    extends Zdaniya
+    extends Proizvodstvennoye
 {
 
     public Kazarma(RobotController rc)

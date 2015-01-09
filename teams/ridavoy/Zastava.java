@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.RobotController;
 
 public class Zastava
-    extends Zdaniya
+    extends Proizvodstvennoye
 {
 
     public Zastava(RobotController rc)

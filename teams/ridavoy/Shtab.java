@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.RobotController;
 
 public class Shtab
-    extends Zdaniya
+    extends Atakuyushchiy
 {
 
     public Shtab(RobotController rc)

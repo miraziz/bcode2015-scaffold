@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.*;
 
 public class Bashna
-    extends Zdaniya
+    extends Atakuyushchiy
 {
 
     public Bashna(RobotController rc)
