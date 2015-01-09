@@ -4,7 +4,8 @@ import battlecode.common.*;
 
 public class RobotPlayer
 {
-    public void run(RobotController rc)
+    public static void run(RobotController rc)
+        throws GameActionException
     {
         Soveti robot = null;
         if (rc.getType() == RobotType.HQ)
@@ -19,7 +20,7 @@ public class RobotPlayer
         {
             robot = new Zastava(rc);
         }
-        else if(rc.getType() == RobotType.MINERFACTORY)
+        else if (rc.getType() == RobotType.MINERFACTORY)
         {
             robot = new Ferma(rc);
         }
@@ -31,7 +32,7 @@ public class RobotPlayer
         {
             robot = new Molotok(rc);
         }
-        else if(rc.getType() == RobotType.MINER)
+        else if (rc.getType() == RobotType.MINER)
         {
             robot = new Serp(rc);
         }
