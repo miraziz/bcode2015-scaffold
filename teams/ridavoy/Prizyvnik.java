@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.RobotController;
 
 public class Prizyvnik
-    extends Proletariat
+    extends Molotok
 {
 
     public Prizyvnik(RobotController rc)

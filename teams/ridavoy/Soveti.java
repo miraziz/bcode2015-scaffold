@@ -3,11 +3,15 @@ package ridavoy;
 import battlecode.common.*;
 
 public abstract class Soveti
-    extends Robot
 {
+    protected RobotController rc;
 
-    public Soveti(RobotController rc)
+
+    public Soveti(RobotController rcc)
     {
-        super(rc);
+        rc = rcc;
     }
+
+
+    public abstract void run();
 }

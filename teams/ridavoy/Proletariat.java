@@ -2,7 +2,7 @@ package ridavoy;
 
 import battlecode.common.*;
 
-public class Proletariat
+public abstract class Proletariat
     extends Soveti
 {
 
@@ -10,11 +10,4 @@ public class Proletariat
     {
         super(rc);
     }
-
-
-    @Override
-    public void run()
-    {
-    }
-
 }

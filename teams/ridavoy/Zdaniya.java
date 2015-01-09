@@ -3,7 +3,7 @@ package ridavoy;
 import battlecode.common.*;
 
 public abstract class Zdaniya
-    extends Robot
+    extends Soveti
 {
     public Zdaniya(RobotController rc)
     {
