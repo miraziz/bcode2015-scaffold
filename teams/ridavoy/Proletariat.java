@@ -32,8 +32,8 @@ public abstract class Proletariat
 
 
     /**
-     * returns true if a move was made in the direction given, returns false if
-     * no move was made
+     * @return true if a move was made in the direction given
+     * @return false if no move was made
      */
     protected boolean move(Direction dir)
         throws GameActionException
@@ -61,15 +61,12 @@ public abstract class Proletariat
         {
             return false;
         }
-        TerrainTile tileAhead =
-            rc.senseTerrainTile(rc.getLocation().add(facing));
         // if we are already attached and traveling along a wall
         if (onWall)
         {
             // there is a wall ahead of us, sets onWall to false, so that the
             // next code will run
-            if (tileAhead != TerrainTile.NORMAL
-                || visited.contains(rc.getLocation().add(facing)))
+            if (!isNormalTile(facing))
             {
                 onWall = false;
             }
@@ -77,8 +74,7 @@ public abstract class Proletariat
             {
                 MapLocation right =
                     rc.getLocation().add(facing.rotateRight().rotateRight());
-                if (rc.senseTerrainTile(right) == TerrainTile.NORMAL
-                    && !visited.contains(right))
+                if (isNormalTile(facing))
                 {
                     onWall = false;
                     facing = rc.getLocation().directionTo(dest);
@@ -90,13 +86,14 @@ public abstract class Proletariat
         {
             int count = 0;
             // there is a wall ahead, need to start bugging mode
-            while (tileAhead != TerrainTile.NORMAL
-                || visited.contains(rc.getLocation().add(facing)) && count < 8)
+            // need to handle if count is 8 afterwards. Means the robot is
+            // kind of stuck or something, tried turning every way
+            // Maybe dump the whole visited HashSet in this case?
+            while (!isNormalTile(facing) && count < 8)
             {
                 count++;
                 facing = facing.rotateLeft();
                 onWall = true;
-                tileAhead = rc.senseTerrainTile(rc.getLocation().add(facing));
             }
         }
         if (move(facing))
@@ -108,5 +105,18 @@ public abstract class Proletariat
         {
             return false;
         }
+    }
+
+
+    private boolean isNormalTile(Direction dir)
+        throws GameActionException
+    {
+        MapLocation loc = rc.getLocation().add(dir);
+        if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
+            || visited.contains(loc) || rc.senseRobotAtLocation(loc) != null)
+        {
+            return false;
+        }
+        return true;
     }
 }
