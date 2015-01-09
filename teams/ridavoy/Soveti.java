@@ -24,6 +24,7 @@ public abstract class Soveti
 
 
     public abstract void run();
+//    public abstract void transferSupplies();
 
 
     /**

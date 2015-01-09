@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class RobotPlayer
 {
-    public void run(RobotController rc)
+    public static void run(RobotController rc)
     {
         Soveti robot = null;
         if (rc.getType() == RobotType.HQ)
