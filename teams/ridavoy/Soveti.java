@@ -26,6 +26,12 @@ public abstract class Soveti
     public abstract void run();
 
 
+    /**
+     * Attacks the lowest HP enemy unit in this robot's attack range.
+     * 
+     * @return True if the attack is successful, false otherwise.
+     * @throws GameActionException
+     */
     public boolean attack()
         throws GameActionException
     {
