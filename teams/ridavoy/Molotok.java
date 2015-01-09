@@ -9,7 +9,7 @@ public class Molotok
     public Molotok(RobotController rc)
     {
         super(rc);
-        this.setDestination(this.enemyHQ);
+        this.setDestination(enemyHQ);
     }
 
 

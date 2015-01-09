@@ -1,6 +1,7 @@
 package ridavoy;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import battlecode.common.*;
 
 public abstract class Proletariat
@@ -8,16 +9,21 @@ public abstract class Proletariat
 {
     // super class for mobile units
 
-    private MapLocation          dest;
-    private Boolean              onWall;
-    private Direction            facing;
-    private HashSet<MapLocation> visited;
+    private MapLocation             dest;
+    private Boolean                 onWall;
+    private Direction               facing;
+    private LinkedList<MapLocation> helper; // using for experimenting
+                                             // something, may be completely
+                                             // useless
+    private HashSet<MapLocation>    visited; // only necessary for very specific
+                                             // cases i think.
 
 
     public Proletariat(RobotController rc)
     {
         super(rc);
         visited = new HashSet<MapLocation>();
+        helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
     }
@@ -74,8 +80,11 @@ public abstract class Proletariat
             {
                 MapLocation right =
                     rc.getLocation().add(facing.rotateRight().rotateRight());
-                if (isNormalTile(facing))
+                if (isNormalTile(facing.rotateRight().rotateRight()))
                 {
+                    rc.setIndicatorString(
+                        2,
+                        "switched onwall off at: " + Clock.getRoundNum());
                     onWall = false;
                     facing = rc.getLocation().directionTo(dest);
                 }
@@ -95,10 +104,15 @@ public abstract class Proletariat
                 facing = facing.rotateLeft();
                 onWall = true;
             }
+            if (count == 8)
+            {
+                visited.remove(helper.removeFirst());
+            }
         }
         if (move(facing))
         {
             visited.add(rc.getLocation());
+            helper.addLast(rc.getLocation());
             return true;
         }
         else
@@ -113,7 +127,9 @@ public abstract class Proletariat
     {
         MapLocation loc = rc.getLocation().add(dir);
         if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
-            || visited.contains(loc) || rc.senseRobotAtLocation(loc) != null)
+            || visited.contains(loc) // comment this line to not have any
+            // effects from the hashtable/linked list
+            || rc.senseRobotAtLocation(loc) != null)
         {
             return false;
         }
