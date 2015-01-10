@@ -1,5 +1,6 @@
 package ridavoy;
 
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Prizyvnik
@@ -7,6 +8,7 @@ public class Prizyvnik
 {
 
     public Prizyvnik(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }

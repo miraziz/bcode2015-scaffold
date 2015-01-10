@@ -14,6 +14,7 @@ public class Shtab
     {
         super(rc);
         rc.spawn(Direction.SOUTH, RobotType.BEAVER);
+        this.broadcastLocation(1, enemyHQ);
     }
 
 

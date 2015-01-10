@@ -20,12 +20,15 @@ public abstract class Proletariat
 
 
     public Proletariat(RobotController rc)
+        throws GameActionException
     {
         super(rc);
         visited = new HashSet<MapLocation>();
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
+        MapLocation test = this.getLocation(1);
+        rc.setIndicatorString(0, "Enemy HQ At: " + test.x + ", " + test.y);
     }
 
 
@@ -54,8 +57,9 @@ public abstract class Proletariat
 
 
     /**
-     * moves towards the dest variable and bugs around walls in the way returns
-     * All rotations are currently to the left.
+     * You MUST call setDestination before using this method, or false will be
+     * returned automatically. Moves towards the dest variable and bugs around
+     * walls in the way returns All rotations are currently to the left.
      * 
      * @return true if a move made was made.
      * @return false if no move call was made.
@@ -78,8 +82,6 @@ public abstract class Proletariat
             }
             else
             {
-                MapLocation right =
-                    rc.getLocation().add(facing.rotateRight().rotateRight());
                 if (isNormalTile(facing.rotateRight().rotateRight()))
                 {
                     rc.setIndicatorString(

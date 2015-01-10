@@ -58,4 +58,40 @@ public abstract class Soveti
         }
         return false;
     }
+
+
+    /**
+     * broadcasts a location to a single channel by putting the x's and y's
+     * offset from the headquarter in the broadcast
+     * 
+     * @throws GameActionException
+     */
+    protected void broadcastLocation(int channel, MapLocation loc)
+        throws GameActionException
+    {
+        int x = allyHQ.x - loc.x + 120;
+        int y = allyHQ.y - loc.y + 120;
+        int broadcast = x + (1000 * y);
+        rc.broadcast(channel, broadcast);
+        rc.setIndicatorString(0, "This is what I Broadcasted: " + broadcast);
+    }
+
+
+    /**
+     * @param channel
+     * @return location of the broadcasted channel
+     * @throws GameActionException
+     */
+    protected MapLocation getLocation(int channel)
+        throws GameActionException
+    {
+        int num = rc.readBroadcast(channel);
+        int x = num % 1000;
+        num /= 1000;
+        int y = num % 1000;
+        x -= 120 + allyHQ.x;
+        y -= 120 + allyHQ.y;
+        return new MapLocation(x * -1, y * -1);
+
+    }
 }

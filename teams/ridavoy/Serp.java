@@ -1,5 +1,6 @@
 package ridavoy;
 
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Serp
@@ -7,6 +8,7 @@ public class Serp
 {
 
     public Serp(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }

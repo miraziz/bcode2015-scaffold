@@ -7,6 +7,7 @@ public class Molotok
 {
 
     public Molotok(RobotController rc)
+        throws GameActionException
     {
         super(rc);
         this.setDestination(enemyHQ);
