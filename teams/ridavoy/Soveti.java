@@ -36,24 +36,27 @@ public abstract class Soveti
     public boolean attack()
         throws GameActionException
     {
-        RobotInfo[] nearbyEnemies =
-            rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam()
-                .opponent());
-        RobotInfo target = null;
-
-        if (nearbyEnemies.length > 0 && rc.isWeaponReady())
+        if (rc.isWeaponReady())
         {
-            for (RobotInfo ri : nearbyEnemies)
+            RobotInfo[] nearbyEnemies =
+                rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc
+                    .getTeam().opponent());
+            RobotInfo target = null;
+
+            if (nearbyEnemies.length > 0 && rc.isWeaponReady())
             {
-                if (target == null || ri.health < target.health)
+                for (RobotInfo ri : nearbyEnemies)
                 {
-                    target = ri;
+                    if (target == null || ri.health < target.health)
+                    {
+                        target = ri;
+                    }
                 }
-            }
-            if (rc.canAttackLocation(target.location))
-            {
-                rc.attackLocation(target.location);
-                return true;
+                if (rc.canAttackLocation(target.location))
+                {
+                    rc.attackLocation(target.location);
+                    return true;
+                }
             }
         }
         return false;
@@ -69,11 +72,15 @@ public abstract class Soveti
     protected void broadcastLocation(int channel, MapLocation loc)
         throws GameActionException
     {
-        int x = allyHQ.x - loc.x + 120;
-        int y = allyHQ.y - loc.y + 120;
+        rc.setIndicatorString(1, "Called with " + loc.x + ", " + loc.y);
+        int x = (allyHQ.x - loc.x);// + 200;
+        int y = (allyHQ.y - loc.y);// + 200;
+        x += 200;
+        y += 200;
         int broadcast = x + (1000 * y);
         rc.broadcast(channel, broadcast);
-        rc.setIndicatorString(0, "This is what I Broadcasted: " + broadcast);
+        MapLocation result = getLocation(channel);
+        rc.setIndicatorString(2, "Result with: " + result.x + ", " + result.y);
     }
 
 
@@ -86,12 +93,12 @@ public abstract class Soveti
         throws GameActionException
     {
         int num = rc.readBroadcast(channel);
-        int x = num % 1000;
+        int x = num % 1000 - 200;
         num /= 1000;
-        int y = num % 1000;
-        x -= 120 + allyHQ.x;
-        y -= 120 + allyHQ.y;
-        return new MapLocation(x * -1, y * -1);
+        int y = num % 1000 - 200;
+        x = allyHQ.x - x;
+        y = allyHQ.y - y;
+        return new MapLocation(x, y);
 
     }
 }

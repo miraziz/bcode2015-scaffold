@@ -40,6 +40,10 @@ public class RobotPlayer
         {
             robot = new Prizyvnik(rc);
         }
+        else if (rc.getType() == RobotType.HELIPAD)
+        {
+            robot = new Helipad(rc);
+        }
 
         while (true)
         {

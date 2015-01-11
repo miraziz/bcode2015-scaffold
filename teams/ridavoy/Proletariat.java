@@ -9,14 +9,17 @@ public abstract class Proletariat
 {
     // super class for mobile units
 
+    protected boolean               reachedFarm;
+    protected MapLocation           farmArea;
     private MapLocation             dest;
     private Boolean                 onWall;
-    private Direction               facing;
-    private LinkedList<MapLocation> helper; // using for experimenting
-                                             // something, may be completely
-                                             // useless
-    private HashSet<MapLocation>    visited; // only necessary for very specific
-                                             // cases i think.
+    protected Direction             facing;
+    private LinkedList<MapLocation> helper;     // using for experimenting
+                                                 // something, may be completely
+                                                 // useless
+    private HashSet<MapLocation>    visited;    // only necessary for very
+// specific
+                                                 // cases i think.
 
 
     public Proletariat(RobotController rc)
@@ -27,13 +30,16 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
-        MapLocation test = this.getLocation(1);
-        rc.setIndicatorString(0, "Enemy HQ At: " + test.x + ", " + test.y);
+        reachedFarm = true;
     }
 
 
     protected void setDestination(MapLocation loc)
     {
+        if (dest != null && dest.equals(loc))
+        {
+            return;
+        }
         dest = loc;
         facing = rc.getLocation().directionTo(dest);
         visited.clear();
@@ -108,7 +114,14 @@ public abstract class Proletariat
             }
             if (count == 8)
             {
-                visited.remove(helper.removeFirst());
+                if (!helper.isEmpty())
+                {
+                    visited.remove(helper.removeFirst());
+                }
+                else
+                {
+
+                }
             }
         }
         if (move(facing))
@@ -136,5 +149,70 @@ public abstract class Proletariat
             return false;
         }
         return true;
+    }
+
+
+    protected void mine()
+        throws GameActionException
+    {
+        rc.broadcast(
+            Channel.minerCount,
+            rc.readBroadcast(Channel.minerCount) + 1);
+        // if not in any danger
+        if (rc.isCoreReady())
+        {
+            if (reachedFarm)
+            {
+                if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
+                {
+                    rc.mine();
+                }
+                else
+                {
+                    Direction bestDir = Direction.NORTH;
+                    double bestScore = 0;
+                    Direction dir = Direction.NORTH;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (rc.canMove(dir))
+                        {
+                            double oreCount =
+                                rc.senseOre(rc.getLocation().add(dir));
+                            if (oreCount > bestScore)
+                            {
+                                bestDir = dir;
+                                bestScore = oreCount;
+                            }
+                        }
+                        dir = dir.rotateRight();
+                    }
+                    if (bestScore == 0)
+                    {
+                        this.setDestination(allyHQ);
+                        bug();
+                    }
+                    else
+                    {
+                        move(bestDir);
+                    }
+                }
+            }
+            else
+            {
+                if (rc.canMine() && rc.senseOre(rc.getLocation()) > 1)
+                {
+                    rc.mine();
+                }
+                else
+                {
+                    this.setDestination(farmArea);
+                    bug();
+                    if (farmArea.distanceSquaredTo(rc.getLocation()) <= 25)
+                    {
+                        reachedFarm = true;
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ridavoy;
 
+import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -11,13 +12,22 @@ public abstract class Atakuyushchiy
 {
 
     public Atakuyushchiy(RobotController rc)
+        throws GameActionException
     {
         super(rc);
         broadcastScores();
     }
 
 
+    public void run()
+        throws GameActionException
+    {
+        this.attack();
+    }
+
+
     void broadcastScores()
+        throws GameActionException
     {
         int droneVulnerabilityScore = 0;
         int vulnerabilityScore = 150;
@@ -63,8 +73,29 @@ public abstract class Atakuyushchiy
         }
         droneVulnerabilityScore += vulnerabilityScore;
 
-        /*
-         * tell others of these scores, broadcast!
-         */
+        int farmScore1 = rc.readBroadcast(Channel.farmScore1);
+        int farmScore2 = rc.readBroadcast(Channel.farmScore2);
+        if (farmScore > farmScore1)
+        {
+            rc.broadcast(Channel.farmScore3, farmScore2);
+            broadcastLocation(Channel.farmLoc3, getLocation(Channel.farmLoc2));
+            rc.broadcast(Channel.farmScore2, farmScore1);
+            broadcastLocation(Channel.farmLoc2, getLocation(Channel.farmLoc1));
+            rc.broadcast(Channel.farmScore1, farmScore);
+            broadcastLocation(Channel.farmLoc1, rc.getLocation());
+        }
+        else if (farmScore > farmScore2)
+        {
+            rc.broadcast(Channel.farmScore3, farmScore2);
+            broadcastLocation(Channel.farmLoc3, getLocation(Channel.farmLoc2));
+            rc.broadcast(Channel.farmScore2, farmScore);
+            broadcastLocation(Channel.farmLoc2, rc.getLocation());
+        }
+        else if (farmScore > rc.readBroadcast(Channel.farmScore3))
+        {
+            rc.broadcast(Channel.farmScore3, farmScore);
+            broadcastLocation(Channel.farmLoc3, rc.getLocation());
+        }
+
     }
 }

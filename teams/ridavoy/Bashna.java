@@ -7,6 +7,7 @@ public class Bashna
 {
 
     public Bashna(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
@@ -16,9 +17,7 @@ public class Bashna
     public void run()
         throws GameActionException
     {
-
-        this.attack();
-
+        super.run();
     }
 
 }
