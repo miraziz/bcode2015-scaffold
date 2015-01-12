@@ -80,7 +80,7 @@ public class Molotok
                 }
                 else
                 {
-                    if (steps >= 2)
+                    if (steps >= 1)
                     {
                         if (build())
                         {
