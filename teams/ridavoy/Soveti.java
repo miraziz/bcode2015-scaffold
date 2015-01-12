@@ -3,8 +3,10 @@ package ridavoy;
 import battlecode.common.*;
 
 public abstract class Soveti
-{
+{    
     protected RobotController rc;
+    protected MapLocation     mLocation;
+    protected int               type;
     protected Team            myTeam;
     protected Team            enemyTeam;
     protected MapLocation     allyHQ;
@@ -20,11 +22,31 @@ public abstract class Soveti
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
+        
     }
 
 
-    public abstract void run();
-//    public abstract void transferSupplies();
+    /**
+     * Robot's main running loop.
+     * 
+     * @throws GameActionException
+     */
+    public abstract void run()
+        throws GameActionException;
+
+
+    /**
+     * Transfers supplies from this unit to nearby allied units.
+     * 
+     * @throws GameActionException
+     */
+    public abstract void transferSupplies()
+        throws GameActionException;
+    
+    public void broadcastType()
+    {
+        
+    }
 
 
     /**

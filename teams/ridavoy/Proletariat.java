@@ -26,8 +26,21 @@ public abstract class Proletariat
 
 
     /**
-     * moves towards the dest variable returns true if a move made was made.
+     * Gets the robot's current location at the start of every turn.
+     */
+    @Override
+    public void run()
+        throws GameActionException
+    {
+        mLocation = rc.getLocation();
+    }
+
+
+    /**
+     * Moves towards the dest variable returns true if a move made was made.
      * returns false if no move call was made.
+     * 
+     * @return
      */
     public boolean bug()
     {
@@ -60,6 +73,39 @@ public abstract class Proletariat
         }
         return false;
     }
-    
-    
+
+
+    /**
+     * Shares supply evenly between this unit and its least supplied ally within
+     * range.
+     */
+    @Override
+    public void transferSupplies()
+        throws GameActionException
+    {
+        RobotInfo[] nearbyAllies =
+            rc.senseNearbyRobots(
+                rc.getLocation(),
+                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
+                rc.getTeam());
+
+        double lowestSupply = rc.getSupplyLevel();
+        double transferAmount = 0;
+        MapLocation suppliesToThisLocation = null;
+        for (RobotInfo ri : nearbyAllies)
+        {
+            if (ri.supplyLevel < lowestSupply)
+            {
+                lowestSupply = ri.supplyLevel;
+                transferAmount = (rc.getSupplyLevel() - ri.supplyLevel) / 2;
+                suppliesToThisLocation = ri.location;
+            }
+        }
+
+        if (suppliesToThisLocation != null)
+        {
+            rc.transferSupplies((int)transferAmount, suppliesToThisLocation);
+        }
+    }
+
 }
