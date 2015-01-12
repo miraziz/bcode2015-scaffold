@@ -2,11 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
-public class Drone
-    extends Proletariat
+public class Vertolet
+    extends Boyets
 {
 
-    public Drone(RobotController rc)
+    public Vertolet(RobotController rc)
         throws GameActionException
     {
         super(rc);

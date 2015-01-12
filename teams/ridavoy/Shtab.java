@@ -106,7 +106,7 @@ public class Shtab
         {
             if (beaverCount < Constants.beaverLimit)
             {
-                this.spawn(RobotType.BEAVER);
+                this.spawnToEnemy(RobotType.BEAVER);
             }
         }
         String str = "Tasks: ";

@@ -72,30 +72,5 @@ public abstract class Atakuyushchiy
             vulnerabilityScore -= 25;
         }
         droneVulnerabilityScore += vulnerabilityScore;
-
-        int farmScore1 = rc.readBroadcast(Channel.farmScore1);
-        int farmScore2 = rc.readBroadcast(Channel.farmScore2);
-        if (farmScore > farmScore1)
-        {
-            rc.broadcast(Channel.farmScore3, farmScore2);
-            broadcastLocation(Channel.farmLoc3, getLocation(Channel.farmLoc2));
-            rc.broadcast(Channel.farmScore2, farmScore1);
-            broadcastLocation(Channel.farmLoc2, getLocation(Channel.farmLoc1));
-            rc.broadcast(Channel.farmScore1, farmScore);
-            broadcastLocation(Channel.farmLoc1, rc.getLocation());
-        }
-        else if (farmScore > farmScore2)
-        {
-            rc.broadcast(Channel.farmScore3, farmScore2);
-            broadcastLocation(Channel.farmLoc3, getLocation(Channel.farmLoc2));
-            rc.broadcast(Channel.farmScore2, farmScore);
-            broadcastLocation(Channel.farmLoc2, rc.getLocation());
-        }
-        else if (farmScore > rc.readBroadcast(Channel.farmScore3))
-        {
-            rc.broadcast(Channel.farmScore3, farmScore);
-            broadcastLocation(Channel.farmLoc3, rc.getLocation());
-        }
-
     }
 }

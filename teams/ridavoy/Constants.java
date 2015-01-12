@@ -20,7 +20,7 @@ public class Constants
     static double     tankFactoryRate;
     static double     helipadRate   = 125 / 30;
 
-
+    
     static BeaverTask getTask(int value)
     {
         if (value == 0)

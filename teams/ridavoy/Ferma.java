@@ -24,7 +24,7 @@ public class Ferma
             rc.setIndicatorString(1, "Miner count: " + minerCount);
             if (minerCount < Constants.minerLimit)
             {
-                this.spawn(RobotType.MINER);
+                this.spawnToEnemy(RobotType.MINER);
             }
         }
 

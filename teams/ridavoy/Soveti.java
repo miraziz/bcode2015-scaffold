@@ -6,7 +6,10 @@ public abstract class Soveti
 {
     protected RobotController rc;
     protected MapLocation     mLocation;
-    protected int             type;
+    protected int             mapOffsetX;
+    protected int             mapOffsetY;
+    protected int             broadcastO;
+
     protected Team            myTeam;
     protected Team            enemyTeam;
     protected MapLocation     allyHQ;
@@ -23,6 +26,9 @@ public abstract class Soveti
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
 
+        mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
+        mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
+        broadcastO = GameConstants.MAP_MAX_HEIGHT * 2;
     }
 
 
@@ -42,12 +48,6 @@ public abstract class Soveti
      */
     public abstract void transferSupplies()
         throws GameActionException;
-
-
-    public void broadcastType()
-    {
-
-    }
 
 
     /**
@@ -87,8 +87,8 @@ public abstract class Soveti
 
 
     /**
-     * broadcasts a location to a single channel by putting the x's and y's
-     * offset from the headquarter in the broadcast
+     * Broadcasts a location to a single channel by putting the x's and y's
+     * offset from the HQ in the broadcast.
      * 
      * @throws GameActionException
      */
@@ -96,18 +96,20 @@ public abstract class Soveti
         throws GameActionException
     {
         rc.setIndicatorString(1, "Called with " + loc.x + ", " + loc.y);
-        int x = (allyHQ.x - loc.x);// + 200;
-        int y = (allyHQ.y - loc.y);// + 200;
-        x += 200;
-        y += 200;
-        int broadcast = x + (1000 * y);
+        int x = (loc.x - mapOffsetX);
+        int y = (loc.y - mapOffsetY);
+
+        int broadcast = broadcastO * x + y;
         rc.broadcast(channel, broadcast);
+
         MapLocation result = getLocation(channel);
         rc.setIndicatorString(2, "Result with: " + result.x + ", " + result.y);
     }
 
 
     /**
+     * Get a location from the specified channel.
+     * 
      * @param channel
      * @return location of the broadcasted channel
      * @throws GameActionException
@@ -115,13 +117,16 @@ public abstract class Soveti
     protected MapLocation getLocation(int channel)
         throws GameActionException
     {
-        int num = rc.readBroadcast(channel);
-        int x = num % 1000 - 200;
-        num /= 1000;
-        int y = num % 1000 - 200;
-        x = allyHQ.x - x;
-        y = allyHQ.y - y;
-        return new MapLocation(x, y);
+        MapLocation res = null;
 
+        int num = rc.readBroadcast(channel);
+        if (num > 0)
+        {
+            int x = num / 300 + mapOffsetX;
+            int y = num % 300 + mapOffsetY;
+            res = new MapLocation(x, y);
+        }
+
+        return res;
     }
 }

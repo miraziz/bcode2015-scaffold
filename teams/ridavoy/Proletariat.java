@@ -4,6 +4,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import battlecode.common.*;
 
+/**
+ * @author Miraziz
+ */
+/**
+ * @author Miraziz
+ */
 public abstract class Proletariat
     extends Soveti
 {
@@ -34,6 +40,17 @@ public abstract class Proletariat
     }
 
 
+    /**
+     * Gets the robot's location.
+     */
+    @Override
+    public void run()
+        throws GameActionException
+    {
+        mLocation = rc.getLocation();
+    }
+
+
     protected void setDestination(MapLocation loc)
     {
         if (dest != null && dest.equals(loc))
@@ -41,7 +58,7 @@ public abstract class Proletariat
             return;
         }
         dest = loc;
-        facing = rc.getLocation().directionTo(dest);
+        facing = mLocation.directionTo(dest);
         visited.clear();
     }
 

@@ -46,7 +46,7 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.DRONE)
         {
-            robot = new Drone(rc);
+            robot = new Vertolet(rc);
         }
 
         while (true)
