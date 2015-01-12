@@ -8,18 +8,22 @@ public abstract class Proletariat
     extends Soveti
 {
     // super class for mobile units
-
+    // mining vars
     protected boolean               reachedFarm;
-    protected MapLocation           farmArea;
+    Direction                       priorityDirection;
+
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
-    private LinkedList<MapLocation> helper;     // using for experimenting
-                                                 // something, may be completely
-                                                 // useless
-    private HashSet<MapLocation>    visited;    // only necessary for very
+    private LinkedList<MapLocation> helper;           // using for
+// experimenting
+                                                       // something, may be
+// completely
+                                                       // useless
+    private HashSet<MapLocation>    visited;          // only necessary for
+// very
 // specific
-                                                 // cases i think.
+                                                       // cases i think.
 
 
     public Proletariat(RobotController rc)
@@ -31,6 +35,23 @@ public abstract class Proletariat
         onWall = false;
         dest = null;
         reachedFarm = true;
+        int choice = (int)(Math.random() * 4);
+        if (choice == 1)
+        {
+            priorityDirection = Direction.NORTH;
+        }
+        else if (choice == 2)
+        {
+            priorityDirection = Direction.EAST;
+        }
+        else if (choice == 3)
+        {
+            priorityDirection = Direction.SOUTH;
+        }
+        else
+        {
+            priorityDirection = Direction.WEST;
+        }
     }
 
 
@@ -161,66 +182,43 @@ public abstract class Proletariat
         // if not in any danger
         if (rc.isCoreReady())
         {
-            if (reachedFarm)
+            if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
             {
-                if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
-                {
-                    double oreCount = rc.getTeamOre();
-                    rc.mine();
-                    oreCount = rc.getTeamOre() - oreCount;
-                    rc.broadcast(
-                        Channel.miningTotal,
-                        (int)(rc.readBroadcast(Channel.miningTotal) + oreCount));
-                }
-                else
-                {
-                    Direction bestDir = Direction.NORTH;
-                    double bestScore = 0;
-                    Direction dir = Direction.NORTH;
-                    for (int i = 0; i < 8; i++)
-                    {
-                        if (rc.canMove(dir))
-                        {
-                            double oreCount =
-                                rc.senseOre(rc.getLocation().add(dir));
-                            if (oreCount > bestScore)
-                            {
-                                bestDir = dir;
-                                bestScore = oreCount;
-                            }
-                        }
-                        dir = dir.rotateRight();
-                    }
-                    if (bestScore == 0)
-                    {
-                        this.setDestination(allyHQ);
-                        bug();
-                    }
-                    else
-                    {
-                        move(bestDir);
-                    }
-                }
+                double oreCount = rc.getTeamOre();
+                rc.mine();
+                oreCount = rc.getTeamOre() - oreCount;
+                rc.broadcast(
+                    Channel.miningTotal,
+                    (int)(rc.readBroadcast(Channel.miningTotal) + oreCount));
             }
             else
             {
-                if (rc.canMine() && rc.senseOre(rc.getLocation()) > 1)
+                Direction bestDir = priorityDirection;
+                double bestScore = 0;
+                Direction dir = priorityDirection;
+                for (int i = 0; i < 8; i++)
                 {
-                    double oreCount = rc.getTeamOre();
-                    rc.mine();
-                    oreCount = rc.getTeamOre() - oreCount;
-                    rc.broadcast(
-                        Channel.miningTotal,
-                        (int)(rc.readBroadcast(Channel.miningTotal) - oreCount));
+                    if (rc.canMove(dir))
+                    {
+                        double oreCount =
+                            rc.senseOre(rc.getLocation().add(dir));
+                        if (oreCount > bestScore)
+                        {
+                            bestDir = dir;
+                            bestScore = oreCount;
+                        }
+                    }
+                    dir = dir.rotateRight();
+                }
+                if (bestScore == 0)
+                {
+                    this.setDestination(rc.getLocation().add(priorityDirection));
+                    bug();
                 }
                 else
                 {
-                    this.setDestination(farmArea);
-                    bug();
-                    if (farmArea.distanceSquaredTo(rc.getLocation()) <= 25)
-                    {
-                        reachedFarm = true;
-                    }
+                    this.priorityDirection = bestDir;
+                    move(bestDir);
                 }
             }
         }

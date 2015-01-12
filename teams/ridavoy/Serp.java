@@ -11,15 +11,7 @@ public class Serp
     {
         super(rc);
         reachedFarm = false;
-        int choice = (int)(Math.random() * 3);
-        if (choice == 1)
-        {
-            farmArea = getLocation(Channel.farmLoc2);
-        }
-        else
-        {
-            farmArea = getLocation(Channel.farmLoc1);
-        }
+
     }
 
 
