@@ -3,15 +3,27 @@ package ridavoy;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
+/**
+ * Fighter (mobile) class.
+ * 
+ * @author Miraziz
+ */
 public class Boyets
     extends Proletariat
 {
 
+    /**
+     * Sets rally point.
+     * 
+     * @param rc
+     * @throws GameActionException
+     */
     public Boyets(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        // TODO Auto-generated constructor stub
+
+        setDestination(getLocation(Channels.rallyLoc));
     }
 
 
@@ -19,8 +31,10 @@ public class Boyets
     public void run()
         throws GameActionException
     {
-        // TODO Auto-generated method stub
-
+        super.run();
+        if (!attack())
+        {
+            bug();
+        }
     }
-
 }

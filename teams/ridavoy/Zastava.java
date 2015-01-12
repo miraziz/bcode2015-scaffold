@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.RobotController;
 
+/**
+ * Supply depot class.
+ * 
+ * @author Miraziz
+ */
 public class Zastava
     extends Proizvodstvennoye
 {
@@ -15,8 +20,7 @@ public class Zastava
     @Override
     public void run()
     {
-        // TODO Auto-generated method stub
-
+        // TODO: Do something
     }
 
 }

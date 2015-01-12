@@ -3,6 +3,11 @@ package ridavoy;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
+/**
+ * Soldier class.
+ * 
+ * @author Miraziz
+ */
 public class Prizyvnik
     extends Boyets
 {
@@ -12,13 +17,4 @@ public class Prizyvnik
     {
         super(rc);
     }
-
-
-    @Override
-    public void run()
-    {
-        // TODO Auto-generated method stub
-
-    }
-
 }

@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
+/**
+ * Miner class.
+ * 
+ * @author Miraziz
+ */
 public class Serp
     extends Proletariat
 {
@@ -11,10 +16,12 @@ public class Serp
     {
         super(rc);
         reachedFarm = false;
-
     }
 
 
+    /**
+     * Mines.
+     */
     @Override
     public void run()
         throws GameActionException

@@ -4,14 +4,18 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
-public class Helipad
+/**
+ * Helipad class.
+ * 
+ * @author Miraziz
+ */
+public class Ploshchadka
     extends Proizvodstvennoye
 {
 
-    public Helipad(RobotController rc)
+    public Ploshchadka(RobotController rc)
     {
         super(rc);
-        // TODO Auto-generated constructor stub
     }
 
 
@@ -19,8 +23,7 @@ public class Helipad
     public void run()
         throws GameActionException
     {
-        this.spawnUnit(RobotType.DRONE);
-
+        spawnToEnemy(RobotType.DRONE);
     }
 
 }

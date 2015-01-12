@@ -9,6 +9,7 @@ public class Shtab
     MapLocation                    rallyLoc;
     private LinkedList<BeaverTask> tasks;
     private boolean                needsToRun;
+    private boolean                attacking;
     private int                    buildCooldown;
 
 
@@ -19,10 +20,11 @@ public class Shtab
 
         buildCooldown = 0;
 
+        attacking = false;
         rallyLoc = findRallyPoint();
 
-        broadcastLocation(Channel.rallyLoc, rallyLoc);
-        broadcastLocation(Channel.buildLoc, allyHQ);
+        broadcastLocation(Channels.rallyLoc, rallyLoc);
+        broadcastLocation(Channels.buildLoc, allyHQ);
         broadcastLocation(123, enemyHQ);
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
@@ -50,18 +52,18 @@ public class Shtab
         {
             return;
         }
-        int tasksTaken = rc.readBroadcast(Channel.beaverTasksTaken);
+        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         for (int i = 0; i < tasksTaken; i++)
         {
             tasks.removeFirst();
         }
-        int i = Channel.beaverTask1;
+        int i = Channels.beaverTask1;
         for (BeaverTask t : tasks)
         {
             rc.broadcast(i, t.value());
             i++;
         }
-        rc.broadcast(Channel.beaverTasksTaken, 0);
+        rc.broadcast(Channels.beaverTasksTaken, 0);
         needsToRun = false;
     }
 
@@ -100,7 +102,7 @@ public class Shtab
         throws GameActionException
     {
         super.run();
-        int beaverCount = rc.readBroadcast(Channel.beaverCount);
+        int beaverCount = rc.readBroadcast(Channels.beaverCount);
 
         if (rc.isCoreReady())
         {
@@ -112,21 +114,27 @@ public class Shtab
         String str = "Tasks: ";
         for (int i = 0; i < 6; i++)
         {
-            str += rc.readBroadcast(Channel.beaverTask1 + i) + ", ";
+            str += rc.readBroadcast(Channels.beaverTask1 + i) + ", ";
         }
         rc.setIndicatorString(
             0,
-            "Beaver count: " + rc.readBroadcast(Channel.beaverCount));
+            "Beaver count: " + rc.readBroadcast(Channels.beaverCount));
         rc.setIndicatorString(
             1,
-            "Tasks Taken: " + rc.readBroadcast(Channel.beaverTasksTaken));
+            "Tasks Taken: " + rc.readBroadcast(Channels.beaverTasksTaken));
         rc.setIndicatorString(2, str);
 
         // do broadcast things with the counts so people know what to do
 
-        rc.broadcast(Channel.beaverCount, 0);
+        rc.broadcast(Channels.beaverCount, 0);
 
         sendBeaverTasks();
+
+        if (!attacking && Clock.getRoundNum() > 1500)
+        {
+            broadcastLocation(Channels.rallyLoc, enemyHQ);
+            attacking = true;
+        }
     }
 
 
@@ -139,12 +147,12 @@ public class Shtab
         buildCooldown++;
         if (roundNum > 100 && roundNum % 5 == 0 && buildCooldown < 50)
         {
-            int mined = rc.readBroadcast(Channel.miningTotal);
-            rc.broadcast(Channel.miningTotal, 0);
+            int mined = rc.readBroadcast(Channels.miningTotal);
+            rc.broadcast(Channels.miningTotal, 0);
             double mineRate = mined / 5;
-            int barracksCount = rc.readBroadcast(Channel.barracksCount);
-            int helipadCount = rc.readBroadcast(Channel.helipadCount);
-            int tankFactoryCount = rc.readBroadcast(Channel.tankFactoryCount);
+            int barracksCount = rc.readBroadcast(Channels.barracksCount);
+            int helipadCount = rc.readBroadcast(Channels.helipadCount);
+            int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
             double spawnRate =
                 (Constants.barracksRate * barracksCount)
                     + (Constants.tankFactoryRate * tankFactoryCount)

@@ -5,16 +5,13 @@ import java.util.LinkedList;
 import battlecode.common.*;
 
 /**
- * @author Miraziz
- */
-/**
+ * Mobile units class.
+ * 
  * @author Miraziz
  */
 public abstract class Proletariat
     extends Soveti
 {
-    // super class for mobile units
-    // mining vars
     protected boolean               reachedFarm;
     Direction                       priorityDirection;
 
@@ -22,14 +19,9 @@ public abstract class Proletariat
     private Boolean                 onWall;
     protected Direction             facing;
     private LinkedList<MapLocation> helper;           // using for
-// experimenting
-                                                       // something, may be
-// completely
-                                                       // useless
+// experimenting something, may be completely useless
     private HashSet<MapLocation>    visited;          // only necessary for
-// very
-// specific
-                                                       // cases i think.
+// very specific cases i think.
 
 
     public Proletariat(RobotController rc)
@@ -72,15 +64,23 @@ public abstract class Proletariat
     }
 
 
-    protected void setDestination(MapLocation loc)
+    /**
+     * Sets this robot's destination to loc.
+     * 
+     * @param loc
+     *            Destination to head towards.
+     * @return True if the destination was changed, false otherwise.
+     */
+    protected boolean setDestination(MapLocation loc)
     {
-        if (dest != null && dest.equals(loc))
+        if ((loc != null) && (dest == null || !dest.equals(loc)))
         {
-            return;
+            dest = loc;
+            facing = mLocation.directionTo(dest);
+            visited.clear();
+            return true;
         }
-        dest = loc;
-        facing = mLocation.directionTo(dest);
-        visited.clear();
+        return false;
     }
 
 
@@ -132,7 +132,7 @@ public abstract class Proletariat
                         2,
                         "switched onwall off at: " + Clock.getRoundNum());
                     onWall = false;
-                    facing = rc.getLocation().directionTo(dest);
+                    facing = mLocation.directionTo(dest);
                 }
             }
         }
@@ -164,8 +164,8 @@ public abstract class Proletariat
         }
         if (move(facing))
         {
-            visited.add(rc.getLocation());
-            helper.addLast(rc.getLocation());
+            visited.add(mLocation);
+            helper.addLast(mLocation);
             return true;
         }
         else
@@ -178,7 +178,7 @@ public abstract class Proletariat
     private boolean isNormalTile(Direction dir)
         throws GameActionException
     {
-        MapLocation loc = rc.getLocation().add(dir);
+        MapLocation loc = mLocation.add(dir);
         if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
             || visited.contains(loc) // comment this line to not have any
             // effects from the hashtable/linked list
@@ -194,19 +194,19 @@ public abstract class Proletariat
         throws GameActionException
     {
         rc.broadcast(
-            Channel.minerCount,
-            rc.readBroadcast(Channel.minerCount) + 1);
+            Channels.minerCount,
+            rc.readBroadcast(Channels.minerCount) + 1);
         // if not in any danger
         if (rc.isCoreReady())
         {
-            if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
+            if (rc.canMine() && rc.senseOre(mLocation) > 0)
             {
                 double oreCount = rc.getTeamOre();
                 rc.mine();
                 oreCount = rc.getTeamOre() - oreCount;
                 rc.broadcast(
-                    Channel.miningTotal,
-                    (int)(rc.readBroadcast(Channel.miningTotal) + oreCount));
+                    Channels.miningTotal,
+                    (int)(rc.readBroadcast(Channels.miningTotal) + oreCount));
             }
             else
             {
@@ -217,8 +217,7 @@ public abstract class Proletariat
                 {
                     if (rc.canMove(dir))
                     {
-                        double oreCount =
-                            rc.senseOre(rc.getLocation().add(dir));
+                        double oreCount = rc.senseOre(mLocation.add(dir));
                         if (oreCount > bestScore)
                         {
                             bestDir = dir;
@@ -229,7 +228,7 @@ public abstract class Proletariat
                 }
                 if (bestScore == 0)
                 {
-                    this.setDestination(rc.getLocation().add(priorityDirection));
+                    this.setDestination(mLocation.add(priorityDirection));
                     bug();
                 }
                 else
@@ -246,7 +245,7 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
-        // TODO Auto-generated method stub
+        // TODO Distribute to lowest ally
 
     }
 }

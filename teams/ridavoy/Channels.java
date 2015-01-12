@@ -1,35 +1,11 @@
 package ridavoy;
 
-// stores broadcast channels
-enum BeaverTask
-{
-    BUILD_BARRACKS(0),
-    BUILD_MINERFACTORY(1),
-    BUILD_TANKFACTORY(2),
-    BUILD_SUPPLYDEPOT(3),
-    BUILD_HELIPAD(4),
-    MINE(5),
-    JOIN_ARMY(6);
-
-    private int value;
-
-
-    BeaverTask(int id)
-    {
-        value = id;
-    }
-
-
-    int value()
-    {
-        return value;
-    }
-}
-
-
-
-
-public class Channel
+/**
+ * Constants used for channel communication.
+ * 
+ * @author Miraziz
+ */
+public class Channels
 {
     // unit counts
     static int beaverCount       = 0;

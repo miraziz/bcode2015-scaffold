@@ -42,7 +42,7 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.HELIPAD)
         {
-            robot = new Helipad(rc);
+            robot = new Ploshchadka(rc);
         }
         else if (rc.getType() == RobotType.DRONE)
         {
@@ -54,6 +54,7 @@ public class RobotPlayer
             try
             {
                 robot.run();
+                robot.transferSupplies();
             }
             catch (Exception e)
             {
