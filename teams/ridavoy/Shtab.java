@@ -25,11 +25,9 @@ public class Shtab
         broadcastLocation(Channel.buildLoc, allyHQ);
         broadcastLocation(123, enemyHQ);
         tasks = new LinkedList<BeaverTask>();
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.MINE);
         sendBeaverTasks();

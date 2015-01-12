@@ -15,7 +15,7 @@ public class Molotok
         throws GameActionException
     {
         super(rc);
-                
+
         this.setDestination(getLocation(Channel.rallyLoc));
         task = getNextTask();
         reached = false;
@@ -74,7 +74,7 @@ public class Molotok
                 }
                 else
                 {
-                    if (steps >= 2)
+                    if (steps >= 1)
                     {
                         if (build())
                         {

@@ -12,15 +12,15 @@ public class Constants
 
     // other constants
 
-    static int        beaverLimit   = 4;
-    static int        minerLimit    = 8;
+    static int        beaverLimit   = 2;
+    static int        minerLimit    = 20;
 
     // Production rates in ore/turn
     static double     barracksRate;
     static double     tankFactoryRate;
     static double     helipadRate   = 125 / 30;
 
-    
+
     static BeaverTask getTask(int value)
     {
         if (value == 0)
