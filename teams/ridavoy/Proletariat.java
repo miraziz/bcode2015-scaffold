@@ -165,7 +165,12 @@ public abstract class Proletariat
             {
                 if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
                 {
+                    double oreCount = rc.getTeamOre();
                     rc.mine();
+                    oreCount = rc.getTeamOre() - oreCount;
+                    rc.broadcast(
+                        Channel.miningTotal,
+                        (int)(rc.readBroadcast(Channel.miningTotal) + oreCount));
                 }
                 else
                 {
@@ -201,7 +206,12 @@ public abstract class Proletariat
             {
                 if (rc.canMine() && rc.senseOre(rc.getLocation()) > 1)
                 {
+                    double oreCount = rc.getTeamOre();
                     rc.mine();
+                    oreCount = rc.getTeamOre() - oreCount;
+                    rc.broadcast(
+                        Channel.miningTotal,
+                        (int)(rc.readBroadcast(Channel.miningTotal) - oreCount));
                 }
                 else
                 {

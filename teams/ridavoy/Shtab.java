@@ -9,12 +9,15 @@ public class Shtab
     MapLocation                    rallyLoc;
     private LinkedList<BeaverTask> tasks;
     private boolean                needsToRun;
+    private int                    buildCooldown;
 
 
     public Shtab(RobotController rc)
         throws GameActionException
     {
         super(rc);
+
+        buildCooldown = 0;
 
         rallyLoc = findRallyPoint();
 
@@ -24,7 +27,7 @@ public class Shtab
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -124,6 +127,33 @@ public class Shtab
         rc.broadcast(Channel.beaverCount, 0);
 
         sendBeaverTasks();
+    }
 
+
+    // returns a robottype that should be built next
+    // or returns null if no building needs to be built.
+    private RobotType needMoreBuildings()
+        throws GameActionException
+    {
+        int roundNum = Clock.getRoundNum();
+        buildCooldown++;
+        if (roundNum > 100 && roundNum % 5 == 0 && buildCooldown < 50)
+        {
+            int mined = rc.readBroadcast(Channel.miningTotal);
+            rc.broadcast(Channel.miningTotal, 0);
+            double mineRate = mined / 5;
+            int barracksCount = rc.readBroadcast(Channel.barracksCount);
+            int helipadCount = rc.readBroadcast(Channel.helipadCount);
+            int tankFactoryCount = rc.readBroadcast(Channel.tankFactoryCount);
+            double spawnRate =
+                (Constants.barracksRate * barracksCount)
+                    + (Constants.tankFactoryRate * tankFactoryCount)
+                    + (Constants.helipadRate * helipadCount);
+            if (mineRate >= spawnRate)
+            {
+                tasks.add(BeaverTask.BUILD_HELIPAD);
+            }
+        }
+        return null;
     }
 }

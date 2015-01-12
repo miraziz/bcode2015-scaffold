@@ -2,6 +2,7 @@ package ridavoy;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 public class Helipad
     extends Proizvodstvennoye
@@ -18,7 +19,7 @@ public class Helipad
     public void run()
         throws GameActionException
     {
-        // TODO Auto-generated method stub
+        this.spawnUnit(RobotType.DRONE);
 
     }
 

@@ -43,6 +43,7 @@ public class Channel
     static int barracksCount     = 20;
     static int minerFactoryCount = 21;
     static int helipadCount      = 22;
+    static int tankFactoryCount  = 23;
 
     // commands
     static int beaverTask1       = 50; // channels 51-? are tasks needed to be
@@ -61,5 +62,5 @@ public class Channel
     static int rallyLoc          = 36;
     static int buildLoc          = 37;
 
-    static int moneyLock         = 200;
+    static int miningTotal       = 200;
 }

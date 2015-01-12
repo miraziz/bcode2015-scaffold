@@ -44,6 +44,10 @@ public class RobotPlayer
         {
             robot = new Helipad(rc);
         }
+        else if (rc.getType() == RobotType.DRONE)
+        {
+            robot = new Drone(rc);
+        }
 
         while (true)
         {
