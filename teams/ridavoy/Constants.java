@@ -1,22 +1,47 @@
 package ridavoy;
 
-import battlecode.common.RobotType;
-
 public class Constants
 {
-    // Unit counts
-    public static int bashnaChannel = 0;
-    public static int FermaChannel = 0;
-    public static int KazarmaChannel = 0;
-    public static int Channel = 0;
-    //TODO: If tower goes down, update some channel through HQ and have every unit update their tower 
-    
+    // TODO: If tower goes down, update some channel through HQ and have every
+// unit update their tower
+
     // Rally points
-    public static int BestFarmScore          = 3;
-    public static int BestFarmX              = 4;
-    public static int BestFarmY              = 5;
+    public static int bestFarmScore = 3;
+    public static int bestFarmX     = 4;
+    public static int bestFarmY     = 5;
 
     // other constants
-    public static int BeaverLimit            = 10;
-    public static int MinerLimit             = 5;
+
+    static int        beaverLimit   = 4;
+    static int        minerLimit    = 6;
+
+
+    static BeaverTask getTask(int value)
+    {
+        if (value == 0)
+        {
+            return BeaverTask.BUILD_BARRACKS;
+        }
+        else if (value == 1)
+        {
+            return BeaverTask.BUILD_MINERFACTORY;
+        }
+        else if (value == 2)
+        {
+            return BeaverTask.BUILD_TANKFACTORY;
+        }
+        else if (value == 3)
+        {
+            return BeaverTask.BUILD_SUPPLYDEPOT;
+        }
+        else if (value == 4)
+        {
+            return BeaverTask.BUILD_HELIPAD;
+        }
+        else if (value == 5)
+        {
+            return BeaverTask.MINE;
+        }
+        return BeaverTask.JOIN_ARMY;
+    }
 }
