@@ -15,6 +15,7 @@ public class Molotok
         throws GameActionException
     {
         super(rc);
+                
         this.setDestination(getLocation(Channel.rallyLoc));
         task = getNextTask();
         reached = false;

@@ -12,7 +12,6 @@ public abstract class Zdaniya
     public Zdaniya(RobotController rc)
     {
         super(rc);
-        mLocation = rc.getLocation();
 
         toEnemy = mLocation.directionTo(enemyHQ);
 
@@ -30,12 +29,6 @@ public abstract class Zdaniya
                 spawnDirs[i] = spawnDirs[i - 2].rotateRight();
             }
         }
-
-        for (int i = 0; i < 8; i++)
-        {
-            System.out.println("Direction: " + spawnDirs[i]);
-        }
-
     }
 
 

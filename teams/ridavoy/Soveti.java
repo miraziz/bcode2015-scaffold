@@ -21,6 +21,7 @@ public abstract class Soveti
     public Soveti(RobotController myRC)
     {
         rc = myRC;
+        mLocation = rc.getLocation();
         allyHQ = rc.senseHQLocation();
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
@@ -95,15 +96,11 @@ public abstract class Soveti
     protected void broadcastLocation(int channel, MapLocation loc)
         throws GameActionException
     {
-        rc.setIndicatorString(1, "Called with " + loc.x + ", " + loc.y);
         int x = (loc.x - mapOffsetX);
         int y = (loc.y - mapOffsetY);
 
         int broadcast = broadcastO * x + y;
         rc.broadcast(channel, broadcast);
-
-        MapLocation result = getLocation(channel);
-        rc.setIndicatorString(2, "Result with: " + result.x + ", " + result.y);
     }
 
 
@@ -122,8 +119,8 @@ public abstract class Soveti
         int num = rc.readBroadcast(channel);
         if (num > 0)
         {
-            int x = num / 300 + mapOffsetX;
-            int y = num % 300 + mapOffsetY;
+            int x = num / broadcastO + mapOffsetX;
+            int y = num % broadcastO + mapOffsetY;
             res = new MapLocation(x, y);
         }
 
