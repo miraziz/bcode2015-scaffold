@@ -9,6 +9,7 @@ public class Helipad
 {
 
     public Helipad(RobotController rc)
+        throws GameActionException
     {
         super(rc);
         // TODO Auto-generated constructor stub

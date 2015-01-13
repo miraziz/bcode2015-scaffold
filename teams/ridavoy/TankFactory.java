@@ -1,5 +1,6 @@
 package ridavoy;
 
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class TankFactory
@@ -7,6 +8,7 @@ public class TankFactory
 {
 
     public TankFactory(RobotController rc)
+        throws GameActionException
     {
         super(rc);
         // TODO Auto-generated constructor stub

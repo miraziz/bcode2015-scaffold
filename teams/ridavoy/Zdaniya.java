@@ -7,11 +7,14 @@ public abstract class Zdaniya
 {
     protected Direction[] spawnDirs;
     protected Direction   toEnemy;
+    protected int         pathId;
 
 
     public Zdaniya(RobotController rc)
+        throws GameActionException
     {
         super(rc);
+        pathId = rc.readBroadcast(Channel.buildPathCount);
 
         toEnemy = mLocation.directionTo(enemyHQ);
 

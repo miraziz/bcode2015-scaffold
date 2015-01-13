@@ -11,6 +11,8 @@ public class Molotok
     private MapLocation myBuildLoc;
 
 
+    // TODO If a building is destroyed, what happens?
+
     public Molotok(RobotController rc)
         throws GameActionException
     {
@@ -120,6 +122,10 @@ public class Molotok
                 incrementTask();
                 rc.build(dir, toBuild);
                 broadcastLocation(Channel.buildLoc, rc.getLocation().add(dir));
+                broadcastLocation(Channel.buildPath, rc.getLocation().add(dir));
+                rc.broadcast(
+                    rc.readBroadcast(Channel.buildPathCount),
+                    Channel.buildPathCount + 1);
                 return true;
             }
             else

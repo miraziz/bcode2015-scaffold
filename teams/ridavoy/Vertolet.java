@@ -27,7 +27,7 @@ public class Vertolet
         if (rc.isCoreReady())
         {
             RobotInfo[] nearby =
-                rc.senseNearbyRobots(rc.getType().attackRadiusSquared);
+                rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
             Decision decision = null;
             int enemyX = 0;
             int enemyY = 0;

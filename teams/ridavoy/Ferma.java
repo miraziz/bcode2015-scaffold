@@ -9,6 +9,7 @@ public class Ferma
 {
 
     public Ferma(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }

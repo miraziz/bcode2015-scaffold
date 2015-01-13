@@ -63,4 +63,8 @@ public class Channel
     static int buildLoc          = 37;
 
     static int miningTotal       = 200;
+
+    static int buildPathCount    = 299;
+    static int buildPath         = 300;
+
 }

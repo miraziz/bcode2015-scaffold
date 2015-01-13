@@ -10,6 +10,7 @@ public abstract class Proizvodstvennoye
 {
 
     public Proizvodstvennoye(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
