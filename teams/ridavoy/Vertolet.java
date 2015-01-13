@@ -41,6 +41,7 @@ public class Vertolet
             int myTeamsHealth = 0;
             int enemyTeamsHealth = 0;
             boolean inDanger = false;
+            boolean shouldRun = false;
             for (RobotInfo r : nearby)
             {
                 if (r.team == rc.getTeam().opponent())
@@ -48,13 +49,20 @@ public class Vertolet
 
                     if (isAttackingUnit(r.type))
                     {
-                        System.out.println("HERE!");
+                        // System.out.println("HERE!");
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
                         enemyCount++;
                         if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
                         {
+                            if (r.type == RobotType.BASHER
+                                || r.type == RobotType.SOLDIER
+                                || r.type == RobotType.MINER
+                                || r.type == RobotType.BEAVER)
+                            {
+                                shouldRun = true;
+                            }
                             inDanger = true;
                         }
                     }
@@ -79,6 +87,10 @@ public class Vertolet
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);
                 towardsEnemy = rc.getLocation().directionTo(enemyLoc);
                 if (myTeamsHealth < enemyTeamsHealth && inDanger)
+                {
+                    decision = Decision.RUN;
+                }
+                else if (shouldRun)
                 {
                     decision = Decision.RUN;
                 }

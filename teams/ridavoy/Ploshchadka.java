@@ -24,6 +24,9 @@ public class Ploshchadka
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.helipadCount,
+            rc.readBroadcast(Channels.helipadCount) + 1);
         spawnToEnemy(RobotType.DRONE);
     }
 

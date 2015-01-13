@@ -195,18 +195,17 @@ public abstract class Proletariat
         // if not in any danger
         if (rc.isCoreReady())
         {
-            if (rc.canMine() && rc.senseOre(rc.getLocation()) > 0)
+            double oreAmount = rc.senseOre(rc.getLocation());
+            if (rc.canMine() && oreAmount > 0)
             {
-                double oreCount = rc.getTeamOre();
                 rc.mine();
-                oreCount = rc.getTeamOre() - oreCount;
+                rc.setIndicatorString(0, "Just mined: " + oreAmount);
                 rc.broadcast(
                     Channels.miningTotal,
-                    (int)(rc.readBroadcast(Channels.miningTotal) + oreCount));
+                    (int)(rc.readBroadcast(Channels.miningTotal) + oreAmount));
             }
             else
             {
-
                 Direction bestDir = priorityDirection;
                 double bestScore = 0;
                 Direction dir = priorityDirection;

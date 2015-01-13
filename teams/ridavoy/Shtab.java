@@ -30,7 +30,12 @@ public class Shtab
         broadcastLocation(123, enemyHQ);
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.MINE);
@@ -52,6 +57,7 @@ public class Shtab
         {
             return;
         }
+        System.out.println("Running!");
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         for (int i = 0; i < tasksTaken; i++)
         {
@@ -102,8 +108,8 @@ public class Shtab
         throws GameActionException
     {
         super.run();
+        needMoreBuildings();
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
-
         if (rc.isCoreReady())
         {
             if (beaverCount < Constants.beaverLimit)
@@ -111,22 +117,12 @@ public class Shtab
                 this.spawnToEnemy(RobotType.BEAVER);
             }
         }
-        String str = "Tasks: ";
-        for (int i = 0; i < 6; i++)
-        {
-            str += rc.readBroadcast(Channels.beaverTask1 + i) + ", ";
-        }
-        rc.setIndicatorString(
-            0,
-            "Beaver count: " + rc.readBroadcast(Channels.beaverCount));
-        rc.setIndicatorString(
-            1,
-            "Tasks Taken: " + rc.readBroadcast(Channels.beaverTasksTaken));
-        rc.setIndicatorString(2, str);
-
         // do broadcast things with the counts so people know what to do
 
         rc.broadcast(Channels.beaverCount, 0);
+        rc.broadcast(Channels.helipadCount, 0);
+        rc.broadcast(Channels.minerFactoryCount, 0);
+        rc.broadcast(Channels.barracksCount, 0);
 
         sendBeaverTasks();
 
@@ -140,28 +136,33 @@ public class Shtab
 
     // returns a robottype that should be built next
     // or returns null if no building needs to be built.
-    private RobotType needMoreBuildings()
+    private void needMoreBuildings()
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
         buildCooldown++;
-        if (roundNum > 100 && roundNum % 5 == 0 && buildCooldown < 50)
+        rc.setIndicatorString(0, "round num: " + roundNum
+            + ", build cooldown: " + buildCooldown);
+        if (roundNum % 5 == 0 && buildCooldown > 10)
         {
+            buildCooldown = 0;
             int mined = rc.readBroadcast(Channels.miningTotal);
             rc.broadcast(Channels.miningTotal, 0);
             double mineRate = mined / 5;
             int barracksCount = rc.readBroadcast(Channels.barracksCount);
             int helipadCount = rc.readBroadcast(Channels.helipadCount);
             int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
+            rc.setIndicatorString(1, "helipad count: " + helipadCount);
             double spawnRate =
                 (Constants.barracksRate * barracksCount)
                     + (Constants.tankFactoryRate * tankFactoryCount)
                     + (Constants.helipadRate * helipadCount);
+            rc.setIndicatorString(2, "mineRate: " + mineRate + ", spawnRate: "
+                + spawnRate);
             if (mineRate >= spawnRate)
             {
                 tasks.add(BeaverTask.BUILD_HELIPAD);
             }
         }
-        return null;
     }
 }
