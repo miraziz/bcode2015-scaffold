@@ -1,4 +1,4 @@
-package ridavoy;
+package team025;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -245,28 +245,7 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
-        double totSupply = rc.getSupplyLevel();
+        // TODO Distribute to lowest ally
 
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-
-        double lowestSupply = totSupply;
-        MapLocation allyLoc = null;
-        for (RobotInfo teamMember : nearbyAllies)
-        {
-            if (teamMember.supplyLevel < lowestSupply)
-            {
-                lowestSupply = teamMember.supplyLevel;
-                allyLoc = teamMember.location;
-            }
-        }
-
-        if (dest != null)
-        {
-            int transferAmount = (int)((totSupply - lowestSupply) / 2.0);
-            rc.transferSupplies(transferAmount, allyLoc);
-        }
     }
 }

@@ -1,4 +1,4 @@
-package ridavoy;
+package team025;
 
 import java.util.LinkedList;
 import battlecode.common.*;
@@ -162,29 +162,4 @@ public class Shtab
         }
         return null;
     }
-
-
-    /**
-     * Evenly distributes all of Shtab's supply.
-     */
-    @Override
-    public void transferSupplies()
-        throws GameActionException
-    {
-        double totSupply = rc.getSupplyLevel();
-
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-        if (nearbyAllies.length > 0)
-        {
-            int unitSupply = (int)(totSupply / nearbyAllies.length);
-            for (RobotInfo robot : nearbyAllies)
-            {
-                rc.transferSupplies(unitSupply, robot.location);
-            }
-        }
-    }
-
 }

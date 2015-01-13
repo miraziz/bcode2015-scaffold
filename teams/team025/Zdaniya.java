@@ -1,4 +1,4 @@
-package ridavoy;
+package team025;
 
 import battlecode.common.*;
 
@@ -12,7 +12,6 @@ public abstract class Zdaniya
 {
     protected Direction[] spawnDirs;
     protected Direction   toEnemy;
-    protected int         pathId;
 
 
     /**
@@ -22,10 +21,8 @@ public abstract class Zdaniya
      * @param rc
      */
     public Zdaniya(RobotController rc)
-        throws GameActionException
     {
         super(rc);
-        pathId = rc.readBroadcast(Channels.buildPathCount);
 
         toEnemy = mLocation.directionTo(enemyHQ);
 
@@ -54,38 +51,7 @@ public abstract class Zdaniya
     public void transferSupplies()
         throws GameActionException
     {
-        double totSupply = rc.getSupplyLevel();
-
-        // Checks the broadcast channel to see if there is another building in
-        // the supply chain.
-        MapLocation supplyTo = getLocation(Channels.buildPath + pathId + 1);
-        if (supplyTo != null
-            && mLocation.distanceSquaredTo(supplyTo) <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED)
-        {
-            RobotInfo supplyee = rc.senseRobotAtLocation(supplyTo);
-            if (supplyee != null && supplyee.team == myTeam)
-            {
-                rc.transferSupplies(
-                    (int)(totSupply * Constants.SUPPLY_CHAIN_PERC),
-                    supplyTo);
-                totSupply *= (1 - Constants.SUPPLY_CHAIN_PERC);
-            }
-        }
-
-        // Evenly distributes most of the remaining supply
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-        if (nearbyAllies.length > 0)
-        {
-            int unitSupply =
-                (int)(totSupply * Constants.SUPPLY_CHAIN_PERC / nearbyAllies.length);
-            for (RobotInfo robot : nearbyAllies)
-            {
-                rc.transferSupplies(unitSupply, robot.location);
-            }
-        }
+        // TODO: Implement
     }
 
 

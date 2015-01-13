@@ -1,4 +1,4 @@
-package ridavoy;
+package team025;
 
 import battlecode.common.*;
 
@@ -33,8 +33,6 @@ public abstract class Soveti
     {
         rc = myRC;
         mLocation = rc.getLocation();
-        myTeam = rc.getTeam();
-        enemyTeam = myTeam.opponent();
         allyHQ = rc.senseHQLocation();
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
@@ -76,9 +74,8 @@ public abstract class Soveti
         if (rc.isWeaponReady())
         {
             RobotInfo[] nearbyEnemies =
-                rc.senseNearbyRobots(
-                    rc.getType().attackRadiusSquared,
-                    enemyTeam);
+                rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc
+                    .getTeam().opponent());
             RobotInfo target = null;
 
             if (nearbyEnemies.length > 0 && rc.isWeaponReady())
