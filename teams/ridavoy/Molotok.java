@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
+/**
+ * Beaver class.
+ * 
+ * @author Miraziz
+ */
 public class Molotok
     extends Proletariat
 {
@@ -18,7 +23,7 @@ public class Molotok
     {
         super(rc);
 
-        this.setDestination(getLocation(Channel.rallyLoc));
+        this.setDestination(getLocation(Channels.rallyLoc));
         task = getNextTask();
         reached = false;
     }
@@ -27,9 +32,9 @@ public class Molotok
     private BeaverTask getNextTask()
         throws GameActionException
     {
-        int tasksTaken = rc.readBroadcast(Channel.beaverTasksTaken);
-        int taskNum = rc.readBroadcast(Channel.beaverTask1 + tasksTaken);
-        BeaverTask myTask = Constants.getTask(taskNum);
+        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
+        int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
+        BeaverTask myTask = BeaverTask.getTask(taskNum);
 
         return myTask;
     }
@@ -39,16 +44,17 @@ public class Molotok
     public void run()
         throws GameActionException
     {
+        super.run();
 
         rc.broadcast(
-            Channel.beaverCount,
-            rc.readBroadcast(Channel.beaverCount) + 1);
+            Channels.beaverCount,
+            rc.readBroadcast(Channels.beaverCount) + 1);
 
         rc.setIndicatorString(1, "My task is: " + task);
         if (task == BeaverTask.JOIN_ARMY)
         {
             reached = false;
-            this.setDestination(getLocation(Channel.rallyLoc));
+            this.setDestination(getLocation(Channels.rallyLoc));
             this.bug();
             task = this.getNextTask();
         }
@@ -64,13 +70,13 @@ public class Molotok
             {
                 if (!reached)
                 {
-                    MapLocation goal = getLocation(Channel.buildLoc);
+                    MapLocation goal = getLocation(Channels.buildLoc);
                     this.setDestination(goal);
-                    if (rc.getLocation().distanceSquaredTo(goal) <= 2)
+                    if (mLocation.distanceSquaredTo(goal) <= 2)
                     {
                         reached = true;
                         myBuildLoc = goal;
-                        this.setDestination(getLocation(Channel.rallyLoc));
+                        this.setDestination(getLocation(Channels.rallyLoc));
                         steps = 0;
                     }
                 }
@@ -108,24 +114,36 @@ public class Molotok
         {
             int count = 0;
             Direction dir = facing;
-            double distance =
-                myBuildLoc.distanceSquaredTo(rc.getLocation().add(dir));
+
+            if (mLocation == null)
+            {
+                System.out.println("My location is null");
+            }
+            if (dir == null)
+            {
+                System.out.println("Direction is null");
+            }
+            if (myBuildLoc == null)
+            {
+                System.out.println("My build location is null");
+            }
+
+            double distance = myBuildLoc.distanceSquaredTo(mLocation.add(dir));
             while ((!rc.canBuild(dir, toBuild) || distance >= 15) && count < 8)
             {
                 dir = dir.rotateRight();
-                distance =
-                    myBuildLoc.distanceSquaredTo(rc.getLocation().add(dir));
+                distance = myBuildLoc.distanceSquaredTo(mLocation.add(dir));
                 count++;
             }
             if (count < 8)
             {
                 incrementTask();
                 rc.build(dir, toBuild);
-                broadcastLocation(Channel.buildLoc, rc.getLocation().add(dir));
-                broadcastLocation(Channel.buildPath, rc.getLocation().add(dir));
+                broadcastLocation(Channels.buildLoc, mLocation.add(dir));
+                broadcastLocation(Channels.buildPath, rc.getLocation().add(dir));
                 rc.broadcast(
-                    rc.readBroadcast(Channel.buildPathCount),
-                    Channel.buildPathCount + 1);
+                    rc.readBroadcast(Channels.buildPathCount),
+                    Channels.buildPathCount + 1);
                 return true;
             }
             else
@@ -168,12 +186,12 @@ public class Molotok
     private void incrementTask()
         throws GameActionException
     {
-        int tasksTaken = rc.readBroadcast(Channel.beaverTasksTaken);
-        int taskNum = rc.readBroadcast(Channel.beaverTask1 + tasksTaken);
-        BeaverTask myTask = Constants.getTask(taskNum);
+        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
+        int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
+        BeaverTask myTask = BeaverTask.getTask(taskNum);
         if (!(myTask == BeaverTask.MINE || myTask == BeaverTask.JOIN_ARMY))
         {
-            rc.broadcast(Channel.beaverTasksTaken, tasksTaken + 1);
+            rc.broadcast(Channels.beaverTasksTaken, tasksTaken + 1);
         }
     }
 }

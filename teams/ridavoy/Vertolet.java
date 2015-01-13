@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
+/**
+ * Drone class.
+ * 
+ * @author Miraziz
+ */
 public class Vertolet
     extends Proletariat
 {

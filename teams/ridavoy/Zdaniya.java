@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
+/**
+ * Building super class
+ * 
+ * @author Miraziz
+ */
 public abstract class Zdaniya
     extends Soveti
 {
@@ -10,6 +15,12 @@ public abstract class Zdaniya
     protected int         pathId;
 
 
+    /**
+     * Saves direction to enemy HQ and sets spawnDirs to be a radial pattern
+     * rotating away from the enemy HQ's direction.
+     * 
+     * @param rc
+     */
     public Zdaniya(RobotController rc)
         throws GameActionException
     {
@@ -47,6 +58,14 @@ public abstract class Zdaniya
     }
 
 
+    /**
+     * Spawns a <code>type</code> robot in the enemy HQ's direction.
+     * 
+     * @param type
+     *            Robot to spawn
+     * @return True if spawn was successful, false otherwise.
+     * @throws GameActionException
+     */
     boolean spawnToEnemy(RobotType type)
         throws GameActionException
     {
@@ -54,21 +73,28 @@ public abstract class Zdaniya
     }
 
 
+    /**
+     * Spawns a <code>type</code> robot in the direction <code>dir</code>.
+     * 
+     * @param dir
+     *            Direction to spawn to.
+     * @param type
+     *            Type of robot to spawn.
+     * @return True if spawn was successful, false otherwise.
+     * @throws GameActionException
+     */
     boolean spawn(Direction dir, RobotType type)
         throws GameActionException
     {
-        if (rc.hasSpawnRequirements(type))
+        if (rc.hasSpawnRequirements(type) && rc.isCoreReady())
         {
-            int count = 0;
-            while (!rc.canSpawn(dir, type) && count < 8)
+            for (int i = 0; i < spawnDirs.length; i++)
             {
-                dir = dir.rotateRight();
-                count++;
-            }
-            if (count < 8)
-            {
-                rc.spawn(dir, type);
-                return true;
+                if (rc.isCoreReady() && rc.canSpawn(spawnDirs[i], type))
+                {
+                    rc.spawn(spawnDirs[i], type);
+                    return true;
+                }
             }
         }
         return false;

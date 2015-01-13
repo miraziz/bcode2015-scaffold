@@ -2,6 +2,11 @@ package ridavoy;
 
 import battlecode.common.*;
 
+/**
+ * Supreme Soviet.
+ * 
+ * @author Miraziz
+ */
 public abstract class Soveti
 {
     protected RobotController rc;
@@ -18,6 +23,12 @@ public abstract class Soveti
     protected MapLocation[]   allyTowers;
 
 
+    /**
+     * Saves known locations of towers and HQs, initializes map broadcast
+     * parameters and determines this robot's current location.
+     * 
+     * @param myRC
+     */
     public Soveti(RobotController myRC)
     {
         rc = myRC;

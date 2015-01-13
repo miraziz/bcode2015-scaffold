@@ -4,8 +4,13 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
+/**
+ * Miner factory class.
+ * 
+ * @author Miraziz
+ */
 public class Ferma
-    extends Zdaniya
+    extends Proizvodstvennoye
 {
 
     public Ferma(RobotController rc)
@@ -21,14 +26,14 @@ public class Ferma
     {
         if (rc.isCoreReady())
         {
-            int minerCount = rc.readBroadcast(Channel.minerCount);
+            int minerCount = rc.readBroadcast(Channels.minerCount);
             rc.setIndicatorString(1, "Miner count: " + minerCount);
             if (minerCount < Constants.minerLimit)
             {
-                this.spawnToEnemy(RobotType.MINER);
+                spawnToEnemy(RobotType.MINER);
             }
         }
 
-        rc.broadcast(Channel.minerCount, 0);
+        rc.broadcast(Channels.minerCount, 0);
     }
 }
