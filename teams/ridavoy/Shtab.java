@@ -8,52 +8,48 @@ public class Shtab
 {
     MapLocation                    rallyLoc;
     private LinkedList<BeaverTask> tasks;
-    private boolean                needsToRun;
-    private boolean                attacking;
+    boolean                        attacking;
     private int                    buildCooldown;
+    private boolean                shouldRun;
 
 
     public Shtab(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        this.broadcastLocation(Channels.buildPath, allyHQ);
         rc.broadcast(Channels.buildPathCount, 1);
+        this.broadcastLocation(Channels.buildPath, allyHQ);
         this.pathId = 1;
         buildCooldown = 0;
 
         attacking = false;
+        shouldRun = false;
         rallyLoc = findRallyPoint();
 
         broadcastLocation(Channels.rallyLoc, rallyLoc);
         broadcastLocation(Channels.buildLoc, allyHQ);
-        broadcastLocation(123, enemyHQ);
         tasks = new LinkedList<BeaverTask>();
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.MINE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         sendBeaverTasks();
     }
 
 
     private void submitBeaverTask(BeaverTask task)
     {
-        tasks.add(task);
-        needsToRun = true;
+        tasks.addFirst(task);
+        shouldRun = true;
     }
 
 
     private void sendBeaverTasks()
         throws GameActionException
     {
-        if (!needsToRun)
+        if (!shouldRun)
         {
             return;
         }
-        System.out.println("Running!");
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         for (int i = 0; i < tasksTaken; i++)
         {
@@ -66,8 +62,7 @@ public class Shtab
             i++;
         }
         rc.broadcast(Channels.beaverTasksTaken, 0);
-        rc.setIndicatorString(2, "RAN THIS!");
-        needsToRun = false;
+
     }
 
 
@@ -129,6 +124,7 @@ public class Shtab
         rc.broadcast(Channels.barracksCount, 0);
 
         sendBeaverTasks();
+        shouldRun = false;
 
         if (!attacking && Clock.getRoundNum() > 1500)
         {
@@ -147,7 +143,7 @@ public class Shtab
         buildCooldown++;
         rc.setIndicatorString(0, "round num: " + roundNum
             + ", build cooldown: " + buildCooldown);
-        if (roundNum % 10 == 0 && buildCooldown > 10)
+        if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
         {
             buildCooldown = 0;
             int mined = rc.readBroadcast(Channels.miningTotal);
@@ -165,7 +161,7 @@ public class Shtab
                 + spawnRate);
             if (mineRate >= spawnRate)
             {
-                tasks.add(BeaverTask.BUILD_HELIPAD);
+                // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
             }
         }
     }

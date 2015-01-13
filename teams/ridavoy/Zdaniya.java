@@ -25,10 +25,12 @@ public abstract class Zdaniya
         throws GameActionException
     {
         super(rc);
-        pathId = rc.readBroadcast(Channels.buildPathCount);
 
+        pathId = rc.readBroadcast(Channels.buildPathCount) + 1;
+        rc.broadcast(Channels.buildPathCount, pathId);
+        broadcastLocation(Channels.buildPath + pathId, rc.getLocation());
         toEnemy = mLocation.directionTo(enemyHQ);
-
+        rc.setIndicatorString(1, "My ID: " + pathId);
         spawnDirs = new Direction[8];
         spawnDirs[0] = toEnemy;
         spawnDirs[1] = toEnemy.rotateRight();

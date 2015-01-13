@@ -138,12 +138,12 @@ public class Molotok
             if (count < 8)
             {
                 incrementTask();
-                rc.build(dir, toBuild);
-                broadcastLocation(Channels.buildLoc, mLocation.add(dir));
-                broadcastLocation(Channels.buildPath, rc.getLocation().add(dir));
                 rc.broadcast(
                     rc.readBroadcast(Channels.buildPathCount),
                     Channels.buildPathCount + 1);
+                rc.build(dir, toBuild);
+                broadcastLocation(Channels.buildLoc, mLocation.add(dir));
+                broadcastLocation(Channels.buildPath, rc.getLocation().add(dir));
                 return true;
             }
             else
