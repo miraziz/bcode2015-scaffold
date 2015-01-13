@@ -83,9 +83,10 @@ public abstract class Zdaniya
                 (int)(totSupply * Constants.SUPPLY_CHAIN_PERC / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
-                if (isAttackingUnit(robot.type))
+                if (isAttackingUnit(robot.type)
+                    && robot.type != RobotType.BEAVER)
                 {
-                    if (Clock.getBytecodesLeft() < 501)
+                    if (Clock.getBytecodesLeft() < 511)
                     {
                         return;
                     }
@@ -97,7 +98,7 @@ public abstract class Zdaniya
             {
                 if (!isAttackingUnit(robot.type))
                 {
-                    if (Clock.getBytecodesLeft() < 501)
+                    if (Clock.getBytecodesLeft() < 511)
                     {
                         return;
                     }

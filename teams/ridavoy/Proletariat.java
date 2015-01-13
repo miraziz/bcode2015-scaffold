@@ -248,22 +248,48 @@ public abstract class Proletariat
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
 
-        double lowestSupply = totSupply;
+        double beaverSupply = Math.min(200, totSupply);
+        MapLocation beaverLoc = null;
+
+        double attackSupply = totSupply;
         MapLocation allyLoc = null;
         for (RobotInfo teamMember : nearbyAllies)
         {
-            if (teamMember.supplyLevel < lowestSupply
+            double teamSupply = teamMember.supplyLevel;
+            if (teamMember.type == RobotType.BEAVER)
+            {
+                if (teamSupply < 200 && teamSupply < beaverSupply)
+                {
+                    beaverSupply = teamSupply;
+                    beaverLoc = teamMember.location;
+                }
+            }
+            else if (teamMember.supplyLevel < attackSupply
                 && isAttackingUnit(teamMember.type))
             {
-                lowestSupply = teamMember.supplyLevel;
+                attackSupply = teamMember.supplyLevel;
                 allyLoc = teamMember.location;
             }
         }
 
         if (allyLoc != null)
         {
-            int transferAmount = (int)((totSupply - lowestSupply) / 2.0);
+            int transferAmount = (int)((totSupply - attackSupply) / 2.0);
+            if (totSupply > 200)
+            {
+                transferAmount = (int)(totSupply - 200);
+            }
+
             rc.transferSupplies(transferAmount, allyLoc);
+        }
+
+        if (beaverLoc != null)
+        {
+            if (totSupply > beaverSupply)
+            {
+                int transferAmount = (int)((totSupply - beaverSupply) / 2.0);
+                rc.transferSupplies(transferAmount, beaverLoc);
+            }
         }
     }
 }
