@@ -25,7 +25,7 @@ public abstract class Zdaniya
         throws GameActionException
     {
         super(rc);
-        pathId = rc.readBroadcast(Channel.buildPathCount);
+        pathId = rc.readBroadcast(Channels.buildPathCount);
 
         toEnemy = mLocation.directionTo(enemyHQ);
 

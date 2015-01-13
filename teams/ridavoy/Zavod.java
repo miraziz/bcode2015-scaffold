@@ -12,6 +12,7 @@ public class Zavod
 {
 
     public Zavod(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
