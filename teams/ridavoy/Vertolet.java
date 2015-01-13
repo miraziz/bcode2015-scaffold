@@ -33,7 +33,6 @@ public class Vertolet
         {
             RobotInfo[] nearby =
                 rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
-            rc.setIndicatorString(2, "SIZE: " + nearby.length);
             Decision decision = null;
             int enemyX = 0;
             int enemyY = 0;
@@ -42,13 +41,14 @@ public class Vertolet
             int enemyTeamsHealth = 0;
             boolean inDanger = false;
             boolean shouldRun = false;
+
+            Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
             for (RobotInfo r : nearby)
             {
                 if (r.team == enemyTeam)
                 {
                     if (isAttackingUnit(r.type))
                     {
-                        // System.out.println("HERE!");
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
@@ -66,21 +66,21 @@ public class Vertolet
                         }
                     }
                 }
-                else
+                else if (r.team == rc.getTeam() && isAttackingUnit(r.type))
                 {
-                    if (isAttackingUnit(r.type))
+                    Direction dir = rc.getLocation().directionTo(r.location);
+                    if (dir == towardsEnemy || dir == towardsEnemy.rotateLeft()
+                        || dir == towardsEnemy.rotateLeft().rotateLeft()
+                        || dir == towardsEnemy.rotateRight()
+                        || dir == towardsEnemy.rotateRight().rotateRight())
                     {
                         myTeamsHealth += r.health;
                     }
                 }
             }
+            decision = Decision.ATTACK;
 
-            Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
-            if (enemyCount == 0)
-            {
-                decision = Decision.ATTACK;
-            }
-            else
+            if (enemyCount > 0)
             {
                 MapLocation enemyLoc =
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);

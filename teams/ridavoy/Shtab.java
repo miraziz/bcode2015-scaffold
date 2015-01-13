@@ -32,11 +32,7 @@ public class Shtab
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.MINE);
         sendBeaverTasks();
@@ -70,6 +66,7 @@ public class Shtab
             i++;
         }
         rc.broadcast(Channels.beaverTasksTaken, 0);
+        rc.setIndicatorString(2, "RAN THIS!");
         needsToRun = false;
     }
 
@@ -109,6 +106,13 @@ public class Shtab
     {
         super.run();
         needMoreBuildings();
+        String str = "tasks: ";
+        for (int i = 0; i < 10; i++)
+        {
+            str += rc.readBroadcast(Channels.beaverTask1 + i) + ", ";
+        }
+        rc.setIndicatorString(2, str);
+
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
         if (rc.isCoreReady())
         {
@@ -143,12 +147,12 @@ public class Shtab
         buildCooldown++;
         rc.setIndicatorString(0, "round num: " + roundNum
             + ", build cooldown: " + buildCooldown);
-        if (roundNum % 5 == 0 && buildCooldown > 10)
+        if (roundNum % 10 == 0 && buildCooldown > 10)
         {
             buildCooldown = 0;
             int mined = rc.readBroadcast(Channels.miningTotal);
             rc.broadcast(Channels.miningTotal, 0);
-            double mineRate = mined / 5;
+            double mineRate = mined / 10;
             int barracksCount = rc.readBroadcast(Channels.barracksCount);
             int helipadCount = rc.readBroadcast(Channels.helipadCount);
             int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
