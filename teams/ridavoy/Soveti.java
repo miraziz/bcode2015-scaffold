@@ -98,6 +98,11 @@ public abstract class Soveti
                     {
                         target = ri;
                     }
+                    if (ri.type == RobotType.HQ || ri.type == RobotType.TOWER)
+                    {
+                        target = ri;
+                        break;
+                    }
                 }
                 if (rc.canAttackLocation(target.location))
                 {

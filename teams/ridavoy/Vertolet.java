@@ -99,6 +99,10 @@ public class Vertolet
                     decision = Decision.RELAX;
                 }
             }
+            if (Clock.getRoundNum() > 1980)
+            {
+                decision = Decision.ATTACK;
+            }
             rc.setIndicatorString(0, "Enemy count: " + enemyCount);
             rc.setIndicatorString(1, "" + decision);
             if (decision != Decision.RUN && attack())
@@ -147,7 +151,7 @@ public class Vertolet
             {
                 return;
             }
-            if (decision != Decision.RELAX)
+            if (decision != Decision.RELAX && canMove(towardsEnemy))
             {
                 this.move(towardsEnemy);
             }
@@ -171,15 +175,18 @@ public class Vertolet
             return false;
         }
         MapLocation next = rc.getLocation().add(dir);
-        if (next.distanceSquaredTo(enemyHQ) < RobotType.HQ.attackRadiusSquared)
+        if (Clock.getRoundNum() < 1980)
         {
-            return false;
-        }
-        for (int i = 0; i < enemyTowers.length; ++i)
-        {
-            if (next.distanceSquaredTo(enemyTowers[i]) < RobotType.TOWER.attackRadiusSquared)
+            if (next.distanceSquaredTo(enemyHQ) < RobotType.HQ.attackRadiusSquared)
             {
                 return false;
+            }
+            for (int i = 0; i < enemyTowers.length; ++i)
+            {
+                if (next.distanceSquaredTo(enemyTowers[i]) < RobotType.TOWER.attackRadiusSquared)
+                {
+                    return false;
+                }
             }
         }
         return true;
