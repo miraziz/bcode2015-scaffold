@@ -12,7 +12,6 @@ import battlecode.common.*;
 public abstract class Proletariat
     extends Soveti
 {
-    protected boolean               reachedFarm;
     Direction                       priorityDirection;
 
     private MapLocation             dest;
@@ -32,8 +31,7 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
-        reachedFarm = true;
-        int choice = (int)(Math.random() * 4);
+        int choice = rc.readBroadcast(Channels.minerCount) % 4;
         if (choice == 1)
         {
             priorityDirection = Direction.NORTH;
@@ -193,20 +191,18 @@ public abstract class Proletariat
     protected void mine()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.minerCount,
-            rc.readBroadcast(Channels.minerCount) + 1);
+
         // if not in any danger
         if (rc.isCoreReady())
         {
-            if (rc.canMine() && rc.senseOre(mLocation) > 0)
+            double oreAmount = rc.senseOre(rc.getLocation());
+            if (rc.canMine() && oreAmount > 0)
             {
-                double oreCount = rc.getTeamOre();
                 rc.mine();
-                oreCount = rc.getTeamOre() - oreCount;
+                rc.setIndicatorString(0, "Just mined: " + oreAmount);
                 rc.broadcast(
                     Channels.miningTotal,
-                    (int)(rc.readBroadcast(Channels.miningTotal) + oreCount));
+                    (int)(rc.readBroadcast(Channels.miningTotal) + oreAmount));
             }
             else
             {

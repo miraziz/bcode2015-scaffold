@@ -15,7 +15,7 @@ public class Serp
         throws GameActionException
     {
         super(rc);
-        reachedFarm = false;
+
     }
 
 
@@ -26,6 +26,9 @@ public class Serp
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.minerCount,
+            rc.readBroadcast(Channels.minerCount) + 1);
         mine();
     }
 }

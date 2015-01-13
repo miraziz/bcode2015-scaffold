@@ -33,23 +33,38 @@ public class Vertolet
         {
             RobotInfo[] nearby =
                 rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+            rc.setIndicatorString(2, "SIZE: " + nearby.length);
             Decision decision = null;
             int enemyX = 0;
             int enemyY = 0;
             int enemyCount = 0;
             int myTeamsHealth = 0;
             int enemyTeamsHealth = 0;
+            boolean inDanger = false;
+            boolean shouldRun = false;
             for (RobotInfo r : nearby)
             {
-                if (r.team == enemyTeam)
+                if (r.team == rc.getTeam().opponent())
                 {
-                    RobotType type = r.type;
+
                     if (isAttackingUnit(r.type))
                     {
+                        // System.out.println("HERE!");
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
                         enemyCount++;
+                        if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
+                        {
+                            if (r.type == RobotType.BASHER
+                                || r.type == RobotType.SOLDIER
+                                || r.type == RobotType.MINER
+                                || r.type == RobotType.BEAVER)
+                            {
+                                shouldRun = true;
+                            }
+                            inDanger = true;
+                        }
                     }
                 }
                 else
@@ -60,6 +75,7 @@ public class Vertolet
                     }
                 }
             }
+
             Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
             if (enemyCount == 0)
             {
@@ -70,18 +86,28 @@ public class Vertolet
                 MapLocation enemyLoc =
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);
                 towardsEnemy = rc.getLocation().directionTo(enemyLoc);
-                if (myTeamsHealth < enemyTeamsHealth + 400)
+                if (myTeamsHealth < enemyTeamsHealth && inDanger)
                 {
                     decision = Decision.RUN;
                 }
-                else if (myTeamsHealth < enemyTeamsHealth)
+                else if (shouldRun)
                 {
-                    decision = Decision.ATTACK;
+                    decision = Decision.RUN;
+                }
+                else if (myTeamsHealth < enemyTeamsHealth * 2)
+                {
+                    decision = Decision.RELAX;
                 }
             }
-            if (attack())
+            rc.setIndicatorString(0, "Enemy count: " + enemyCount);
+            rc.setIndicatorString(1, "" + decision);
+            if (decision != Decision.RUN && attack())
             {
                 return;
+            }
+            if (decision == Decision.RUN)
+            {
+                towardsEnemy = towardsEnemy.opposite();
             }
             Direction right = towardsEnemy;
             Direction left = towardsEnemy;
