@@ -39,17 +39,22 @@ public class Vertolet
             int enemyCount = 0;
             int myTeamsHealth = 0;
             int enemyTeamsHealth = 0;
+            boolean inDanger = false;
             for (RobotInfo r : nearby)
             {
                 if (r.team == enemyTeam)
                 {
-                    RobotType type = r.type;
                     if (isAttackingUnit(r.type))
                     {
+                        System.out.println("HERE!");
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
                         enemyCount++;
+                        if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
+                        {
+                            inDanger = true;
+                        }
                     }
                 }
                 else
@@ -60,6 +65,7 @@ public class Vertolet
                     }
                 }
             }
+
             Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
             if (enemyCount == 0)
             {
@@ -70,15 +76,17 @@ public class Vertolet
                 MapLocation enemyLoc =
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);
                 towardsEnemy = rc.getLocation().directionTo(enemyLoc);
-                if (myTeamsHealth < enemyTeamsHealth + 400)
+                if (myTeamsHealth < enemyTeamsHealth && inDanger)
                 {
                     decision = Decision.RUN;
                 }
-                else if (myTeamsHealth < enemyTeamsHealth)
+                else if (myTeamsHealth < enemyTeamsHealth * 2)
                 {
-                    decision = Decision.ATTACK;
+                    decision = Decision.RELAX;
                 }
             }
+            rc.setIndicatorString(0, "Enemy count: " + enemyCount);
+            rc.setIndicatorString(1, "" + decision);
             if (attack())
             {
                 return;
