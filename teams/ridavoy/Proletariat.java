@@ -251,6 +251,8 @@ public abstract class Proletariat
         double beaverSupply = Math.min(200, totSupply);
         MapLocation beaverLoc = null;
 
+        // TODO If someone is dying, give away supply
+
         double attackSupply = totSupply;
         MapLocation allyLoc = null;
         for (RobotInfo teamMember : nearbyAllies)
@@ -275,7 +277,7 @@ public abstract class Proletariat
         if (allyLoc != null)
         {
             int transferAmount = (int)((totSupply - attackSupply) / 2.0);
-            if (totSupply > 200)
+            if (rc.getType() == RobotType.BEAVER && totSupply > 200)
             {
                 transferAmount = (int)(totSupply - 200);
             }
