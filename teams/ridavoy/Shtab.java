@@ -17,7 +17,9 @@ public class Shtab
         throws GameActionException
     {
         super(rc);
-
+        this.broadcastLocation(Channels.buildPath, allyHQ);
+        rc.broadcast(Channels.buildPathCount, 1);
+        this.pathId = 1;
         buildCooldown = 0;
 
         attacking = false;
