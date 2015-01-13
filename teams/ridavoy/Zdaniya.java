@@ -83,12 +83,26 @@ public abstract class Zdaniya
                 (int)(totSupply * Constants.SUPPLY_CHAIN_PERC / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
-                if (Clock.getBytecodesLeft() < 501)
+                if (isAttackingUnit(robot.type))
                 {
-                    return;
+                    if (Clock.getBytecodesLeft() < 501)
+                    {
+                        return;
+                    }
+                    rc.transferSupplies(unitSupply, robot.location);
                 }
-                rc.transferSupplies(unitSupply, robot.location);
+            }
 
+            for (RobotInfo robot : nearbyAllies)
+            {
+                if (!isAttackingUnit(robot.type))
+                {
+                    if (Clock.getBytecodesLeft() < 501)
+                    {
+                        return;
+                    }
+                    rc.transferSupplies(unitSupply, robot.location);
+                }
             }
         }
     }

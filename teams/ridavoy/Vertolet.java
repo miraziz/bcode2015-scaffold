@@ -44,16 +44,15 @@ public class Vertolet
             boolean shouldRun = false;
             for (RobotInfo r : nearby)
             {
-                if (r.team == rc.getTeam().opponent())
+                if (r.team == enemyTeam)
                 {
-
                     if (isAttackingUnit(r.type))
                     {
                         // System.out.println("HERE!");
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
-                        enemyCount++;
+                        ++enemyCount;
                         if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
                         {
                             if (r.type == RobotType.BASHER
@@ -86,11 +85,7 @@ public class Vertolet
                 MapLocation enemyLoc =
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);
                 towardsEnemy = rc.getLocation().directionTo(enemyLoc);
-                if (myTeamsHealth < enemyTeamsHealth && inDanger)
-                {
-                    decision = Decision.RUN;
-                }
-                else if (shouldRun)
+                if (shouldRun || (myTeamsHealth < enemyTeamsHealth && inDanger))
                 {
                     decision = Decision.RUN;
                 }
@@ -109,6 +104,7 @@ public class Vertolet
             {
                 towardsEnemy = towardsEnemy.opposite();
             }
+
             Direction right = towardsEnemy;
             Direction left = towardsEnemy;
             int count = 0;
@@ -158,7 +154,7 @@ public class Vertolet
         {
             return false;
         }
-        for (int i = 0; i < enemyTowers.length; i++)
+        for (int i = 0; i < enemyTowers.length; ++i)
         {
             if (next.distanceSquaredTo(enemyTowers[i]) < RobotType.TOWER.attackRadiusSquared)
             {
@@ -166,14 +162,5 @@ public class Vertolet
             }
         }
         return true;
-    }
-
-
-    private boolean isAttackingUnit(RobotType type)
-    {
-        return type == RobotType.DRONE || type == RobotType.BASHER
-            || type == RobotType.TANK || type == RobotType.SOLDIER
-            || type == RobotType.MINER || type == RobotType.BEAVER
-            || type == RobotType.COMMANDER;
     }
 }

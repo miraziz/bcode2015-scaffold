@@ -252,7 +252,8 @@ public abstract class Proletariat
         MapLocation allyLoc = null;
         for (RobotInfo teamMember : nearbyAllies)
         {
-            if (teamMember.supplyLevel < lowestSupply)
+            if (teamMember.supplyLevel < lowestSupply
+                && isAttackingUnit(teamMember.type))
             {
                 lowestSupply = teamMember.supplyLevel;
                 allyLoc = teamMember.location;

@@ -140,4 +140,13 @@ public abstract class Soveti
 
         return res;
     }
+
+
+    protected boolean isAttackingUnit(RobotType type)
+    {
+        return type == RobotType.DRONE || type == RobotType.BASHER
+            || type == RobotType.TANK || type == RobotType.SOLDIER
+            || type == RobotType.MINER || type == RobotType.BEAVER
+            || type == RobotType.COMMANDER;
+    }
 }
