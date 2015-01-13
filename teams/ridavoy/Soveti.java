@@ -1,6 +1,13 @@
 package ridavoy;
 
-import battlecode.common.*;
+import java.util.Random;
+import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
 
 /**
  * Supreme Soviet.
@@ -21,6 +28,7 @@ public abstract class Soveti
     protected MapLocation     enemyHQ;
     protected MapLocation[]   enemyTowers;
     protected MapLocation[]   allyTowers;
+    protected Random          rand;
 
 
     /**
@@ -39,6 +47,7 @@ public abstract class Soveti
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
+        rand = new Random(rc.getID());
 
         mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
         mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;

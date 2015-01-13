@@ -1,5 +1,6 @@
 package ridavoy;
 
+import java.util.Random;
 import battlecode.common.*;
 
 /**
@@ -10,6 +11,9 @@ import battlecode.common.*;
 public class Vertolet
     extends Proletariat
 {
+
+    private boolean turnDirection;
+
 
     private enum Decision
     {
@@ -23,6 +27,7 @@ public class Vertolet
         throws GameActionException
     {
         super(rc);
+        turnDirection = rand.nextBoolean();
     }
 
 
@@ -110,15 +115,31 @@ public class Vertolet
             int count = 0;
             while (!canMove(towardsEnemy) && count < 8)
             {
-                if (towardsEnemy == right)
+                if (turnDirection)
                 {
-                    left = left.rotateLeft();
-                    towardsEnemy = left;
+                    if (towardsEnemy == right)
+                    {
+                        left = left.rotateLeft();
+                        towardsEnemy = left;
+                    }
+                    else
+                    {
+                        right = right.rotateRight();
+                        towardsEnemy = right;
+                    }
                 }
                 else
                 {
-                    right = right.rotateRight();
-                    towardsEnemy = right;
+                    if (towardsEnemy == left)
+                    {
+                        right = right.rotateRight();
+                        towardsEnemy = right;
+                    }
+                    else
+                    {
+                        left = left.rotateLeft();
+                        towardsEnemy = left;
+                    }
                 }
                 count++;
             }
