@@ -33,6 +33,7 @@ public class Vertolet
         {
             RobotInfo[] nearby =
                 rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+            rc.setIndicatorString(2, "SIZE: " + nearby.length);
             Decision decision = null;
             int enemyX = 0;
             int enemyY = 0;
@@ -42,8 +43,9 @@ public class Vertolet
             boolean inDanger = false;
             for (RobotInfo r : nearby)
             {
-                if (r.team == enemyTeam)
+                if (r.team == rc.getTeam().opponent())
                 {
+
                     if (isAttackingUnit(r.type))
                     {
                         System.out.println("HERE!");
@@ -87,9 +89,13 @@ public class Vertolet
             }
             rc.setIndicatorString(0, "Enemy count: " + enemyCount);
             rc.setIndicatorString(1, "" + decision);
-            if (attack())
+            if (decision != Decision.RUN && attack())
             {
                 return;
+            }
+            if (decision == Decision.RUN)
+            {
+                towardsEnemy = towardsEnemy.opposite();
             }
             Direction right = towardsEnemy;
             Direction left = towardsEnemy;
