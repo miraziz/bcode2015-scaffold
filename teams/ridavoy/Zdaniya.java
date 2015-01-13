@@ -68,10 +68,10 @@ public abstract class Zdaniya
                 rc.transferSupplies(
                     (int)(totSupply * Constants.SUPPLY_CHAIN_PERC),
                     supplyTo);
-                totSupply *= (1 - Constants.SUPPLY_CHAIN_PERC);
             }
         }
 
+        totSupply = rc.getSupplyLevel();
         // Evenly distributes most of the remaining supply
         RobotInfo[] nearbyAllies =
             rc.senseNearbyRobots(
@@ -83,7 +83,12 @@ public abstract class Zdaniya
                 (int)(totSupply * Constants.SUPPLY_CHAIN_PERC / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
+                if (Clock.getBytecodesLeft() < 501)
+                {
+                    return;
+                }
                 rc.transferSupplies(unitSupply, robot.location);
+
             }
         }
     }

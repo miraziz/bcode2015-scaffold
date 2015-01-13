@@ -259,7 +259,7 @@ public abstract class Proletariat
             }
         }
 
-        if (dest != null)
+        if (allyLoc != null)
         {
             int transferAmount = (int)((totSupply - lowestSupply) / 2.0);
             rc.transferSupplies(transferAmount, allyLoc);
