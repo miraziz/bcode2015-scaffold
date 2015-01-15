@@ -65,7 +65,19 @@ public class Molotok
             if (rc.isCoreReady())
             {
                 int count = rc.readBroadcast(Channels.buildPathCount);
-                buildLoc = getLocation(count + Channels.buildPath);
+                if (count < rc.readBroadcast(Channels.buildPathLength))
+                {
+                    buildLoc = getLocation(count + Channels.buildPath);
+                }
+                else
+                {
+                    Direction dir = Direction.NORTH;
+                    while (rc.senseTerrainTile(rc.getLocation().add(dir)) != TerrainTile.NORMAL)
+                    {
+                        dir = dir.rotateRight();
+                    }
+                    buildLoc = rc.getLocation().add(dir);
+                }
                 this.setDestination(buildLoc);
                 rc.setIndicatorString(0, "My build loc: " + buildLoc);
                 if (!reached)

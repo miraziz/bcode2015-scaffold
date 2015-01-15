@@ -19,25 +19,34 @@ public class Shtab
         throws GameActionException
     {
         super(rc);
-        fillBuildingPath();
-        String str = "Path: ";
-        for (int i = 0; i < 16; i++)
+
+        // fillbuildingpath setup
+        rc.broadcast(Channels.buildPathCount, 0);
+        visited = new HashSet<MapLocation>();
+        queue = new ArrayDeque<MapLocation>();
+        queue.offer(allyHQ);
+
+        // Fills the path for where to build for beavers, raise or lower the
+        // loop to change the amount of turns wasted.
+        // It will be eventually completed in the run method regardless, so it
+        // does not matter
+        // We have 20 rounds free anyways if building a minerfactory first, so
+        // it's fine to make this run a while.
+        for (int i = 0; i < 600; i++)
         {
-            str += getLocation(Channels.buildPath + i);
+            fillBuildingPath();
         }
-        rc.setIndicatorString(2, str);
+
+        // builds minerfactory first
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.MINE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         sendBeaverTasks();
         this.pathId = 1;
@@ -47,68 +56,40 @@ public class Shtab
         shouldRun = false;
     }
 
+// RUNS ONE TIME
+// ------------------------------------------------------------------
+
+    private HashSet<MapLocation> visited;
+    ArrayDeque<MapLocation>      queue;
+    private int                  buildingCount;
+
 
     private void fillBuildingPath()
         throws GameActionException
     {
-        rc.broadcast(Channels.buildPathCount, 0);
-
-        int count = 0;
-        MapLocation[] allSquares =
-            MapLocation.getAllMapLocationsWithinRadiusSq(
-                rc.getLocation(),
-                rc.getType().sensorRadiusSquared);
-        HashSet<MapLocation> visited = new HashSet<MapLocation>();
-        ArrayDeque<MapLocation> queue = new ArrayDeque<MapLocation>();
-        queue.offer(allyHQ);
-        while (!queue.isEmpty())
+        if (queue.isEmpty())
+        {
+            return;
+        }
+        else
         {
             MapLocation cur = queue.poll();
             if (visited.contains(cur) || !rc.canSenseLocation(cur))
             {
-                continue;
+                return;
             }
             visited.add(cur);
             if (cur != allyHQ && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
             {
-                broadcastLocation(Channels.buildPath + count, cur);
-                count++;
+                broadcastLocation(Channels.buildPath + buildingCount, cur);
+                buildingCount++;
             }
             queue.offer(cur.add(Direction.NORTH_WEST));
             queue.offer(cur.add(Direction.NORTH_EAST));
             queue.offer(cur.add(Direction.SOUTH_EAST));
             queue.offer(cur.add(Direction.SOUTH_WEST));
         }
-    }
-
-
-    private void submitBeaverTask(BeaverTask task)
-    {
-        tasks.addFirst(task);
-        shouldRun = true;
-    }
-
-
-    private void sendBeaverTasks()
-        throws GameActionException
-    {
-        if (!shouldRun)
-        {
-            return;
-        }
-        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
-        for (int i = 0; i < tasksTaken; i++)
-        {
-            tasks.removeFirst();
-        }
-        int i = Channels.beaverTask1;
-        for (BeaverTask t : tasks)
-        {
-            rc.broadcast(i, t.value());
-            i++;
-        }
-        rc.broadcast(Channels.beaverTasksTaken, 0);
-
+        rc.broadcast(Channels.buildPathLength, buildingCount);
     }
 
 
@@ -141,13 +122,46 @@ public class Shtab
     }
 
 
+    // ---------------------------------------------------------------------
+    // Run from the run() function
+    // ---------------------------------------------------------------------
+
+    private void submitBeaverTask(BeaverTask task)
+    {
+        tasks.addFirst(task);
+        shouldRun = true;
+    }
+
+
+    private void sendBeaverTasks()
+        throws GameActionException
+    {
+        if (!shouldRun)
+        {
+            return;
+        }
+        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
+        for (int i = 0; i < tasksTaken; i++)
+        {
+            tasks.removeFirst();
+        }
+        int i = Channels.beaverTask1;
+        for (BeaverTask t : tasks)
+        {
+            rc.broadcast(i, t.value());
+            i++;
+        }
+        rc.broadcast(Channels.beaverTasksTaken, 0);
+
+    }
+
+
     @Override
     public void run()
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
         super.run();
-        needMoreBuildings();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
         if (rc.isCoreReady() && roundNum >= 20)
@@ -163,10 +177,14 @@ public class Shtab
         }
         // do broadcast things with the counts so people know what to do
 
+        fillBuildingPath();
+
+        needMoreBuildings();
         rc.broadcast(Channels.beaverCount, 0);
         rc.broadcast(Channels.helipadCount, 0);
         rc.broadcast(Channels.minerFactoryCount, 0);
         rc.broadcast(Channels.barracksCount, 0);
+        rc.broadcast(Channels.tankFactoryCount, 0);
 
         sendBeaverTasks();
         shouldRun = false;

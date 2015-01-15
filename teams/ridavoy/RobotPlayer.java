@@ -28,6 +28,14 @@ public class RobotPlayer
         {
             robot = new Kazarma(rc);
         }
+        else if (rc.getType() == RobotType.TANKFACTORY)
+        {
+            robot = new TankFactory(rc);
+        }
+        else if (rc.getType() == RobotType.TANK)
+        {
+            robot = new Tank(rc);
+        }
         else if (rc.getType() == RobotType.BEAVER)
         {
             robot = new Molotok(rc);

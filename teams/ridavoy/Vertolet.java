@@ -1,6 +1,5 @@
 package ridavoy;
 
-import java.util.Random;
 import battlecode.common.*;
 
 /**

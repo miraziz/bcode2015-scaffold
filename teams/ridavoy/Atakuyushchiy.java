@@ -26,7 +26,7 @@ public abstract class Atakuyushchiy
         throws GameActionException
     {
         super(rc);
-        broadcastScores();
+        // broadcastScores();
     }
 
 
