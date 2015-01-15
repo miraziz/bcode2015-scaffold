@@ -26,6 +26,7 @@ public class Serp
     public void run()
         throws GameActionException
     {
+        super.run();
         mine();
     }
 }

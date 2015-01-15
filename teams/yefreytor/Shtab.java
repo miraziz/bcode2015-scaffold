@@ -374,6 +374,10 @@ public class Shtab
             int unitSupply = (int)(totSupply / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
+                if (Clock.getBytecodesLeft() < 511)
+                {
+                    return;
+                }
                 rc.transferSupplies(unitSupply, robot.location);
             }
         }
