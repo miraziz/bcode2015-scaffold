@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.*;
 
@@ -28,6 +28,14 @@ public class RobotPlayer
         {
             robot = new Kazarma(rc);
         }
+        else if (rc.getType() == RobotType.TANKFACTORY)
+        {
+            robot = new Zavod(rc);
+        }
+        else if (rc.getType() == RobotType.TANK)
+        {
+            robot = new Tank(rc);
+        }
         else if (rc.getType() == RobotType.BEAVER)
         {
             robot = new Molotok(rc);
@@ -54,7 +62,7 @@ public class RobotPlayer
             try
             {
                 robot.run();
-                robot.transferSupplies();
+                // robot.transferSupplies();
             }
             catch (Exception e)
             {

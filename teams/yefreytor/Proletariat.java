@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,15 +12,13 @@ import battlecode.common.*;
 public abstract class Proletariat
     extends Soveti
 {
-    protected boolean               reachedFarm;
-    Direction                       priorityDirection;
 
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
-    private LinkedList<MapLocation> helper;           // using for
+    private LinkedList<MapLocation> helper; // using for
 // experimenting something, may be completely useless
-    private HashSet<MapLocation>    visited;          // only necessary for
+    private HashSet<MapLocation>    visited; // only necessary for
 // very specific cases i think.
 
 
@@ -32,24 +30,6 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
-        reachedFarm = true;
-        int choice = (int)(Math.random() * 4);
-        if (choice == 1)
-        {
-            priorityDirection = Direction.NORTH;
-        }
-        else if (choice == 2)
-        {
-            priorityDirection = Direction.EAST;
-        }
-        else if (choice == 3)
-        {
-            priorityDirection = Direction.SOUTH;
-        }
-        else
-        {
-            priorityDirection = Direction.WEST;
-        }
     }
 
 
@@ -126,7 +106,8 @@ public abstract class Proletariat
             }
             else
             {
-                if (isNormalTile(facing.rotateRight().rotateRight()))
+                if (isNormalTile(facing.rotateRight().rotateRight())
+                    || isOffMap(facing.rotateRight().rotateRight()))
                 {
                     rc.setIndicatorString(
                         2,
@@ -175,6 +156,17 @@ public abstract class Proletariat
     }
 
 
+    private boolean isOffMap(Direction dir)
+    {
+        MapLocation loc = mLocation.add(dir);
+        if (rc.senseTerrainTile(loc) == TerrainTile.OFF_MAP)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
     private boolean isNormalTile(Direction dir)
         throws GameActionException
     {
@@ -190,62 +182,63 @@ public abstract class Proletariat
     }
 
 
-    protected void mine()
-        throws GameActionException
-    {
-        rc.broadcast(
-            Channels.minerCount,
-            rc.readBroadcast(Channels.minerCount) + 1);
-        // if not in any danger
-        if (rc.isCoreReady())
-        {
-            if (rc.canMine() && rc.senseOre(mLocation) > 0)
-            {
-                double oreCount = rc.getTeamOre();
-                rc.mine();
-                oreCount = rc.getTeamOre() - oreCount;
-                rc.broadcast(
-                    Channels.miningTotal,
-                    (int)(rc.readBroadcast(Channels.miningTotal) + oreCount));
-            }
-            else
-            {
-                Direction bestDir = priorityDirection;
-                double bestScore = 0;
-                Direction dir = priorityDirection;
-                for (int i = 0; i < 8; i++)
-                {
-                    if (rc.canMove(dir))
-                    {
-                        double oreCount = rc.senseOre(mLocation.add(dir));
-                        if (oreCount > bestScore)
-                        {
-                            bestDir = dir;
-                            bestScore = oreCount;
-                        }
-                    }
-                    dir = dir.rotateRight();
-                }
-                if (bestScore == 0)
-                {
-                    this.setDestination(mLocation.add(priorityDirection));
-                    bug();
-                }
-                else
-                {
-                    this.priorityDirection = bestDir;
-                    move(bestDir);
-                }
-            }
-        }
-    }
-
-
     @Override
     public void transferSupplies()
         throws GameActionException
     {
-        // TODO Distribute to lowest ally
+        double totSupply = rc.getSupplyLevel();
 
+        RobotInfo[] nearbyAllies =
+            rc.senseNearbyRobots(
+                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
+                myTeam);
+
+        double beaverSupply = Math.min(200, totSupply);
+        MapLocation beaverLoc = null;
+
+        // TODO If someone is dying, give away supply
+
+        // TODO If someone is dying, give away supply
+
+        double attackSupply = totSupply;
+        MapLocation allyLoc = null;
+        for (RobotInfo teamMember : nearbyAllies)
+        {
+            double teamSupply = teamMember.supplyLevel;
+            if (teamMember.type == RobotType.BEAVER)
+            {
+                if (teamSupply < 200 && teamSupply < beaverSupply)
+                {
+                    beaverSupply = teamSupply;
+                    beaverLoc = teamMember.location;
+                }
+            }
+            else if (teamMember.supplyLevel < attackSupply
+                && isAttackingUnit(teamMember.type))
+            {
+                attackSupply = teamMember.supplyLevel;
+                allyLoc = teamMember.location;
+            }
+        }
+
+        if (allyLoc != null)
+        {
+            int transferAmount = (int)((totSupply - attackSupply) / 2.0);
+            if (rc.getType() == RobotType.BEAVER && totSupply > 200)
+            {
+                transferAmount = (int)(totSupply - 200);
+            }
+
+            rc.transferSupplies(transferAmount, allyLoc);
+        }
+
+        if (beaverLoc != null)
+        {
+            if (totSupply > beaverSupply)
+            {
+                int transferAmount = (int)((totSupply - beaverSupply) / 2.0);
+                rc.transferSupplies(transferAmount, beaverLoc);
+            }
+        }
     }
 }

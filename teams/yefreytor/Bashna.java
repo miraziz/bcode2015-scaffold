@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.*;
 
@@ -16,4 +16,5 @@ public class Bashna
     {
         super(rc);
     }
+
 }

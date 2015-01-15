@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -14,6 +14,7 @@ public class Ferma
 {
 
     public Ferma(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }

@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.*;
 
@@ -12,6 +12,7 @@ public abstract class Proizvodstvennoye
 {
 
     public Proizvodstvennoye(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }

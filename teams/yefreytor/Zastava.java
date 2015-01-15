@@ -1,24 +1,28 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
-import battlecode.common.RobotType;
 
-public class TankFactory
+/**
+ * Supply depot class.
+ * 
+ * @author Miraziz
+ */
+public class Zastava
     extends Proizvodstvennoye
 {
 
-    public TankFactory(RobotController rc)
+    public Zastava(RobotController rc)
         throws GameActionException
     {
         super(rc);
     }
 
 
+    @Override
     public void run()
-        throws GameActionException
     {
-        spawnToEnemy(RobotType.TANK);
+        // TODO: Do something
     }
 
 }

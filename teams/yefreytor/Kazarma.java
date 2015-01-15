@@ -1,17 +1,18 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.*;
 
 /**
- * Tank factory class.
+ * Barracks class.
  * 
  * @author Miraziz
  */
-public class Zavod
+public class Kazarma
     extends Proizvodstvennoye
 {
 
-    public Zavod(RobotController rc)
+    public Kazarma(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
@@ -21,8 +22,8 @@ public class Zavod
     public void run()
         throws GameActionException
     {
-        // TODO: Smarter factory
-        spawnToEnemy(RobotType.TANK);
+        // TODO smarter barracks
+        spawnToEnemy(RobotType.SOLDIER);
     }
 
 }

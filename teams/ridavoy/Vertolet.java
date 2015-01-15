@@ -11,9 +11,6 @@ public class Vertolet
     extends Proletariat
 {
 
-    private boolean turnDirection;
-
-
     private enum Decision
     {
         RELAX,
@@ -26,7 +23,6 @@ public class Vertolet
         throws GameActionException
     {
         super(rc);
-        turnDirection = rand.nextBoolean();
     }
 
 
@@ -36,113 +32,71 @@ public class Vertolet
         if (rc.isCoreReady())
         {
             RobotInfo[] nearby =
-                rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+                rc.senseNearbyRobots(rc.getType().attackRadiusSquared);
             Decision decision = null;
             int enemyX = 0;
             int enemyY = 0;
             int enemyCount = 0;
             int myTeamsHealth = 0;
             int enemyTeamsHealth = 0;
-            boolean inDanger = false;
-            boolean shouldRun = false;
-
-            Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
             for (RobotInfo r : nearby)
             {
                 if (r.team == enemyTeam)
                 {
+                    RobotType type = r.type;
                     if (isAttackingUnit(r.type))
                     {
                         enemyTeamsHealth += r.health;
                         enemyX += r.location.x;
                         enemyY += r.location.y;
-                        ++enemyCount;
-                        if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
-                        {
-                            if (r.type == RobotType.BASHER
-                                || r.type == RobotType.SOLDIER
-                                || r.type == RobotType.MINER
-                                || r.type == RobotType.BEAVER)
-                            {
-                                shouldRun = true;
-                            }
-                            inDanger = true;
-                        }
+                        enemyCount++;
                     }
                 }
-                else if (r.team == rc.getTeam() && isAttackingUnit(r.type))
+                else
                 {
-                    Direction dir = rc.getLocation().directionTo(r.location);
-                    if (dir == towardsEnemy || dir == towardsEnemy.rotateLeft()
-                        || dir == towardsEnemy.rotateLeft().rotateLeft()
-                        || dir == towardsEnemy.rotateRight()
-                        || dir == towardsEnemy.rotateRight().rotateRight())
+                    if (isAttackingUnit(r.type))
                     {
                         myTeamsHealth += r.health;
                     }
                 }
             }
-            decision = Decision.ATTACK;
-
-            if (enemyCount > 0)
+            Direction towardsEnemy = rc.getLocation().directionTo(enemyHQ);
+            if (enemyCount == 0)
+            {
+                decision = Decision.ATTACK;
+            }
+            else
             {
                 MapLocation enemyLoc =
                     new MapLocation(enemyX / enemyCount, enemyY / enemyCount);
                 towardsEnemy = rc.getLocation().directionTo(enemyLoc);
-                if (shouldRun || (myTeamsHealth < enemyTeamsHealth && inDanger))
+                if (myTeamsHealth < enemyTeamsHealth + 400)
                 {
                     decision = Decision.RUN;
                 }
-                else if (myTeamsHealth < enemyTeamsHealth * 2)
+                else if (myTeamsHealth < enemyTeamsHealth)
                 {
-                    decision = Decision.RELAX;
+                    decision = Decision.ATTACK;
                 }
             }
-            if (Clock.getRoundNum() > 1980)
-            {
-                decision = Decision.ATTACK;
-            }
-            rc.setIndicatorString(0, "Enemy count: " + enemyCount);
-            rc.setIndicatorString(1, "" + decision);
-            if (decision != Decision.RUN && attack())
+            if (attack())
             {
                 return;
             }
-            if (decision == Decision.RUN)
-            {
-                towardsEnemy = towardsEnemy.opposite();
-            }
-
             Direction right = towardsEnemy;
             Direction left = towardsEnemy;
             int count = 0;
             while (!canMove(towardsEnemy) && count < 8)
             {
-                if (turnDirection)
+                if (towardsEnemy == right)
                 {
-                    if (towardsEnemy == right)
-                    {
-                        left = left.rotateLeft();
-                        towardsEnemy = left;
-                    }
-                    else
-                    {
-                        right = right.rotateRight();
-                        towardsEnemy = right;
-                    }
+                    left = left.rotateLeft();
+                    towardsEnemy = left;
                 }
                 else
                 {
-                    if (towardsEnemy == left)
-                    {
-                        right = right.rotateRight();
-                        towardsEnemy = right;
-                    }
-                    else
-                    {
-                        left = left.rotateLeft();
-                        towardsEnemy = left;
-                    }
+                    right = right.rotateRight();
+                    towardsEnemy = right;
                 }
                 count++;
             }
@@ -150,7 +104,7 @@ public class Vertolet
             {
                 return;
             }
-            if (decision != Decision.RELAX && canMove(towardsEnemy))
+            if (decision != Decision.RELAX)
             {
                 this.move(towardsEnemy);
             }
@@ -174,20 +128,26 @@ public class Vertolet
             return false;
         }
         MapLocation next = rc.getLocation().add(dir);
-        if (Clock.getRoundNum() < 1980)
+        if (next.distanceSquaredTo(enemyHQ) < RobotType.HQ.attackRadiusSquared)
         {
-            if (next.distanceSquaredTo(enemyHQ) < RobotType.HQ.attackRadiusSquared)
+            return false;
+        }
+        for (int i = 0; i < enemyTowers.length; i++)
+        {
+            if (next.distanceSquaredTo(enemyTowers[i]) < RobotType.TOWER.attackRadiusSquared)
             {
                 return false;
             }
-            for (int i = 0; i < enemyTowers.length; ++i)
-            {
-                if (next.distanceSquaredTo(enemyTowers[i]) < RobotType.TOWER.attackRadiusSquared)
-                {
-                    return false;
-                }
-            }
         }
         return true;
+    }
+
+
+    private boolean isAttackingUnit(RobotType type)
+    {
+        return type == RobotType.DRONE || type == RobotType.BASHER
+            || type == RobotType.TANK || type == RobotType.SOLDIER
+            || type == RobotType.MINER || type == RobotType.BEAVER
+            || type == RobotType.COMMANDER;
     }
 }

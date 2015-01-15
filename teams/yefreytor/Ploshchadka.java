@@ -1,4 +1,4 @@
-package ridavoy;
+package yefreytor;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -14,6 +14,7 @@ public class Ploshchadka
 {
 
     public Ploshchadka(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
@@ -23,6 +24,9 @@ public class Ploshchadka
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.helipadCount,
+            rc.readBroadcast(Channels.helipadCount) + 1);
         spawnToEnemy(RobotType.DRONE);
     }
 

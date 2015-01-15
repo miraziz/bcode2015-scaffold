@@ -12,7 +12,6 @@ public class Kazarma
 {
 
     public Kazarma(RobotController rc)
-        throws GameActionException
     {
         super(rc);
     }
