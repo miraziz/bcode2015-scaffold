@@ -12,14 +12,13 @@ import battlecode.common.*;
 public abstract class Proletariat
     extends Soveti
 {
-    Direction                       priorityDirection;
 
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
-    private LinkedList<MapLocation> helper;           // using for
+    private LinkedList<MapLocation> helper; // using for
 // experimenting something, may be completely useless
-    private HashSet<MapLocation>    visited;          // only necessary for
+    private HashSet<MapLocation>    visited; // only necessary for
 // very specific cases i think.
 
 
@@ -31,23 +30,6 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
-        int choice = rc.readBroadcast(Channels.minerCount) % 4;
-        if (choice == 1)
-        {
-            priorityDirection = Direction.NORTH;
-        }
-        else if (choice == 2)
-        {
-            priorityDirection = Direction.EAST;
-        }
-        else if (choice == 3)
-        {
-            priorityDirection = Direction.SOUTH;
-        }
-        else
-        {
-            priorityDirection = Direction.WEST;
-        }
     }
 
 
@@ -124,7 +106,8 @@ public abstract class Proletariat
             }
             else
             {
-                if (isNormalTile(facing.rotateRight().rotateRight()))
+                if (isNormalTile(facing.rotateRight().rotateRight())
+                    || isOffMap(facing.rotateRight().rotateRight()))
                 {
                     rc.setIndicatorString(
                         2,
@@ -173,6 +156,17 @@ public abstract class Proletariat
     }
 
 
+    private boolean isOffMap(Direction dir)
+    {
+        MapLocation loc = mLocation.add(dir);
+        if (rc.senseTerrainTile(loc) == TerrainTile.OFF_MAP)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
     private boolean isNormalTile(Direction dir)
         throws GameActionException
     {
@@ -185,55 +179,6 @@ public abstract class Proletariat
             return false;
         }
         return true;
-    }
-
-
-    protected void mine()
-        throws GameActionException
-    {
-
-        // if not in any danger
-        if (rc.isCoreReady())
-        {
-            double oreAmount = rc.senseOre(rc.getLocation());
-            if (rc.canMine() && oreAmount > 0)
-            {
-                rc.mine();
-                rc.setIndicatorString(0, "Just mined: " + oreAmount);
-                rc.broadcast(
-                    Channels.miningTotal,
-                    (int)(rc.readBroadcast(Channels.miningTotal) + oreAmount));
-            }
-            else
-            {
-                Direction bestDir = priorityDirection;
-                double bestScore = 0;
-                Direction dir = priorityDirection;
-                for (int i = 0; i < 8; i++)
-                {
-                    if (rc.canMove(dir))
-                    {
-                        double oreCount = rc.senseOre(mLocation.add(dir));
-                        if (oreCount > bestScore)
-                        {
-                            bestDir = dir;
-                            bestScore = oreCount;
-                        }
-                    }
-                    dir = dir.rotateRight();
-                }
-                if (bestScore == 0)
-                {
-                    this.setDestination(mLocation.add(priorityDirection));
-                    bug();
-                }
-                else
-                {
-                    this.priorityDirection = bestDir;
-                    move(bestDir);
-                }
-            }
-        }
     }
 
 

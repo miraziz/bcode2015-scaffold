@@ -1,13 +1,7 @@
 package ridavoy;
 
 import java.util.Random;
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
+import battlecode.common.*;
 
 /**
  * Supreme Soviet.
@@ -162,5 +156,17 @@ public abstract class Soveti
             || type == RobotType.TANK || type == RobotType.SOLDIER
             || type == RobotType.MINER || type == RobotType.BEAVER
             || type == RobotType.COMMANDER;
+    }
+
+
+    protected Direction getRandomDirection()
+    {
+        Direction dir = Direction.NORTH;
+        int turns = rand.nextInt(8);
+        for (int i = 0; i < turns; i++)
+        {
+            dir = dir.rotateRight();
+        }
+        return dir;
     }
 }

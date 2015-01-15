@@ -1,5 +1,7 @@
 package ridavoy;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import battlecode.common.*;
 
@@ -17,22 +19,66 @@ public class Shtab
         throws GameActionException
     {
         super(rc);
-        rc.broadcast(Channels.buildPathCount, 1);
-        this.broadcastLocation(Channels.buildPath, allyHQ);
+        fillBuildingPath();
+        String str = "Path: ";
+        for (int i = 0; i < 16; i++)
+        {
+            str += getLocation(Channels.buildPath + i);
+        }
+        rc.setIndicatorString(2, str);
+        tasks = new LinkedList<BeaverTask>();
+        submitBeaverTask(BeaverTask.MINE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        sendBeaverTasks();
         this.pathId = 1;
         buildCooldown = 0;
 
         attacking = false;
         shouldRun = false;
-        rallyLoc = findRallyPoint();
+    }
 
-        broadcastLocation(Channels.rallyLoc, rallyLoc);
-        broadcastLocation(Channels.buildLoc, allyHQ);
-        tasks = new LinkedList<BeaverTask>();
-        submitBeaverTask(BeaverTask.MINE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        sendBeaverTasks();
+
+    private void fillBuildingPath()
+        throws GameActionException
+    {
+        rc.broadcast(Channels.buildPathCount, 0);
+
+        int count = 0;
+        MapLocation[] allSquares =
+            MapLocation.getAllMapLocationsWithinRadiusSq(
+                rc.getLocation(),
+                rc.getType().sensorRadiusSquared);
+        HashSet<MapLocation> visited = new HashSet<MapLocation>();
+        ArrayDeque<MapLocation> queue = new ArrayDeque<MapLocation>();
+        queue.offer(allyHQ);
+        while (!queue.isEmpty())
+        {
+            MapLocation cur = queue.poll();
+            if (visited.contains(cur) || !rc.canSenseLocation(cur))
+            {
+                continue;
+            }
+            visited.add(cur);
+            if (cur != allyHQ && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+            {
+                broadcastLocation(Channels.buildPath + count, cur);
+                count++;
+            }
+            queue.offer(cur.add(Direction.NORTH_WEST));
+            queue.offer(cur.add(Direction.NORTH_EAST));
+            queue.offer(cur.add(Direction.SOUTH_EAST));
+            queue.offer(cur.add(Direction.SOUTH_WEST));
+        }
     }
 
 
@@ -99,21 +145,20 @@ public class Shtab
     public void run()
         throws GameActionException
     {
+        int roundNum = Clock.getRoundNum();
         super.run();
         needMoreBuildings();
-        String str = "tasks: ";
-        for (int i = 0; i < 10; i++)
-        {
-            str += rc.readBroadcast(Channels.beaverTask1 + i) + ", ";
-        }
-        rc.setIndicatorString(2, str);
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
-        if (rc.isCoreReady())
+        if (rc.isCoreReady() && roundNum >= 20)
         {
             if (beaverCount < Constants.beaverLimit)
             {
-                this.spawnToEnemy(RobotType.BEAVER);
+                int buildCount = rc.readBroadcast(Channels.buildPathCount);
+                MapLocation loc = getLocation(Channels.buildPath + buildCount);
+                this.spawn(
+                    rc.getLocation().directionTo(loc).rotateRight(),
+                    RobotType.BEAVER);
             }
         }
         // do broadcast things with the counts so people know what to do
@@ -141,8 +186,6 @@ public class Shtab
     {
         int roundNum = Clock.getRoundNum();
         buildCooldown++;
-        rc.setIndicatorString(0, "round num: " + roundNum
-            + ", build cooldown: " + buildCooldown);
         if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
         {
             buildCooldown = 0;
@@ -152,7 +195,6 @@ public class Shtab
             int barracksCount = rc.readBroadcast(Channels.barracksCount);
             int helipadCount = rc.readBroadcast(Channels.helipadCount);
             int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
-            rc.setIndicatorString(1, "helipad count: " + helipadCount);
             double spawnRate =
                 (Constants.barracksRate * barracksCount)
                     + (Constants.tankFactoryRate * tankFactoryCount)

@@ -26,9 +26,6 @@ public abstract class Zdaniya
     {
         super(rc);
 
-        pathId = rc.readBroadcast(Channels.buildPathCount) + 1;
-        rc.broadcast(Channels.buildPathCount, pathId);
-        broadcastLocation(Channels.buildPath + pathId, rc.getLocation());
         toEnemy = mLocation.directionTo(enemyHQ);
         rc.setIndicatorString(1, "My ID: " + pathId);
         spawnDirs = new Direction[8];
@@ -92,6 +89,8 @@ public abstract class Zdaniya
                     {
                         return;
                     }
+                    rc.setIndicatorString(0, "Round: " + Clock.getRoundNum()
+                        + ", Location: " + robot.location);
                     rc.transferSupplies(unitSupply, robot.location);
                 }
             }
@@ -141,13 +140,26 @@ public abstract class Zdaniya
     {
         if (rc.hasSpawnRequirements(type) && rc.isCoreReady())
         {
-            for (int i = 0; i < spawnDirs.length; i++)
+            Direction right = dir;
+            Direction left = dir;
+            int count = 0;
+            while (!rc.canSpawn(dir, type))
             {
-                if (rc.isCoreReady() && rc.canSpawn(spawnDirs[i], type))
+                if (count % 2 == 0)
                 {
-                    rc.spawn(spawnDirs[i], type);
-                    return true;
+                    right = right.rotateRight();
+                    dir = right;
                 }
+                else
+                {
+                    left = left.rotateLeft();
+                    dir = left;
+                }
+                count++;
+            }
+            if (count < 8)
+            {
+                rc.spawn(dir, type);
             }
         }
         return false;

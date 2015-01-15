@@ -12,8 +12,7 @@ public class Molotok
 {
     private BeaverTask  task;
     private boolean     reached;
-    private int         steps;
-    private MapLocation myBuildLoc;
+    private MapLocation buildLoc;
 
 
     // TODO If a building is destroyed, what happens?
@@ -22,8 +21,6 @@ public class Molotok
         throws GameActionException
     {
         super(rc);
-
-        this.setDestination(getLocation(Channels.rallyLoc));
         task = getNextTask();
         reached = false;
     }
@@ -61,43 +58,76 @@ public class Molotok
         else if (task == BeaverTask.MINE)
         {
             reached = false;
-            mine();
             task = this.getNextTask();
         }
         else
         {
             if (rc.isCoreReady())
             {
+                int count = rc.readBroadcast(Channels.buildPathCount);
+                buildLoc = getLocation(count + Channels.buildPath);
+                this.setDestination(buildLoc);
+                rc.setIndicatorString(0, "My build loc: " + buildLoc);
                 if (!reached)
                 {
-                    MapLocation goal = getLocation(Channels.buildLoc);
-                    this.setDestination(goal);
-                    if (mLocation.distanceSquaredTo(goal) <= 2)
+                    rc.setIndicatorString(1, "HERE, trying to go to: "
+                        + buildLoc);
+                    if (rc.getLocation().x == buildLoc.x
+                        && rc.getLocation().y == buildLoc.y)
                     {
                         reached = true;
-                        myBuildLoc = goal;
-                        this.setDestination(getLocation(Channels.rallyLoc));
-                        steps = 0;
+                    }
+                    else if (rc.getLocation().distanceSquaredTo(buildLoc) <= 2)
+                    {
+                        reached = true;
+                    }
+                    else
+                    {
+                        moveTowardsFacing();
                     }
                 }
-                else
+                if (reached)
                 {
-                    if (steps >= 1)
+                    if (build())
                     {
-                        if (build())
-                        {
-                            steps = 0;
-                            task = getNextTask();
-                            reached = false;
-                            return;
-                        }
+                        rc.broadcast(Channels.buildPathCount, count + 1);
+                        task = getNextTask();
+                        reached = false;
                         return;
                     }
-                    steps++;
                 }
-                bug();
             }
         }
+    }
+
+
+    private void moveTowardsFacing()
+        throws GameActionException
+    {
+        facing = rc.getLocation().directionTo(buildLoc);
+        Direction dir = facing;
+        Direction left = dir.rotateRight();
+        Direction right = dir;
+        int count = 0;
+        while (!rc.canMove(dir) && count < 8)
+        {
+            if (count % 2 == 0)
+            {
+                left = left.rotateLeft();
+                dir = left;
+            }
+            else
+            {
+                right = right.rotateRight();
+                dir = right;
+            }
+            count++;
+        }
+        if (count < 8)
+        {
+            rc.move(dir);
+        }
+
     }
 
 
@@ -112,44 +142,16 @@ public class Molotok
         }
         if (rc.hasBuildRequirements(toBuild))
         {
-            int count = 0;
-            Direction dir = facing;
-
-            if (mLocation == null)
+            Direction dir = rc.getLocation().directionTo(buildLoc);
+            if (!rc.canBuild(dir, toBuild))
             {
-                System.out.println("My location is null");
-            }
-            if (dir == null)
-            {
-                System.out.println("Direction is null");
-            }
-            if (myBuildLoc == null)
-            {
-                System.out.println("My build location is null");
-            }
-
-            double distance = myBuildLoc.distanceSquaredTo(mLocation.add(dir));
-            while ((!rc.canBuild(dir, toBuild) || distance >= 15) && count < 8)
-            {
-                dir = dir.rotateRight();
-                distance = myBuildLoc.distanceSquaredTo(mLocation.add(dir));
-                count++;
-            }
-            if (count < 8)
-            {
-                incrementTask();
-                rc.broadcast(
-                    rc.readBroadcast(Channels.buildPathCount),
-                    Channels.buildPathCount + 1);
-                rc.build(dir, toBuild);
-                broadcastLocation(Channels.buildLoc, mLocation.add(dir));
-                broadcastLocation(Channels.buildPath, rc.getLocation().add(dir));
-                return true;
+                return false;
             }
             else
             {
-                this.setDestination(myBuildLoc);
-                bug();
+                incrementTask();
+                rc.build(dir, toBuild);
+                return true;
             }
         }
         return false;
