@@ -1,5 +1,6 @@
 package ridavoy;
 
+import java.util.Random;
 import battlecode.common.*;
 
 /**
@@ -21,6 +22,7 @@ public abstract class Soveti
     protected MapLocation     enemyHQ;
     protected MapLocation[]   enemyTowers;
     protected MapLocation[]   allyTowers;
+    protected Random          rand;
 
 
     /**
@@ -39,6 +41,7 @@ public abstract class Soveti
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
+        rand = new Random(rc.getID());
 
         mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
         mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
@@ -88,6 +91,11 @@ public abstract class Soveti
                     if (target == null || ri.health < target.health)
                     {
                         target = ri;
+                    }
+                    if (ri.type == RobotType.HQ || ri.type == RobotType.TOWER)
+                    {
+                        target = ri;
+                        break;
                     }
                 }
                 if (rc.canAttackLocation(target.location))
@@ -148,5 +156,17 @@ public abstract class Soveti
             || type == RobotType.TANK || type == RobotType.SOLDIER
             || type == RobotType.MINER || type == RobotType.BEAVER
             || type == RobotType.COMMANDER;
+    }
+
+
+    protected Direction getRandomDirection()
+    {
+        Direction dir = Direction.NORTH;
+        int turns = rand.nextInt(8);
+        for (int i = 0; i < turns; i++)
+        {
+            dir = dir.rotateRight();
+        }
+        return dir;
     }
 }

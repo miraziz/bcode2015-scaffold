@@ -12,14 +12,9 @@ public class Constants
 
     public static final double SUPPLY_CHAIN_PERC = 0.8;
 
-    // Rally points
-    public static int          bestFarmScore     = 3;
-    public static int          bestFarmX         = 4;
-    public static int          bestFarmY         = 5;
-
     // other constants
-    static int                 beaverLimit       = 2;
-    static int                 minerLimit        = 20;
+    static int                 beaverLimit       = 1;
+    static int                 minerLimit        = 25;
 
     // Production rates in ore/turn
     static double              barracksRate      = 125 / 30;

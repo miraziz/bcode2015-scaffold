@@ -1,29 +1,24 @@
-package team025;
+package ridavoy;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
-/**
- * Helipad class.
- * 
- * @author Miraziz
- */
-public class Ploshchadka
+public class TankFactory
     extends Proizvodstvennoye
 {
 
-    public Ploshchadka(RobotController rc)
+    public TankFactory(RobotController rc)
+        throws GameActionException
     {
         super(rc);
     }
 
 
-    @Override
     public void run()
         throws GameActionException
     {
-        spawnToEnemy(RobotType.DRONE);
+        spawnToEnemy(RobotType.TANK);
     }
 
 }
