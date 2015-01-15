@@ -1,14 +1,15 @@
 package ridavoy;
 
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import battlecode.common.*;
 
 public class Shtab
     extends Atakuyushchiy
 {
-    MapLocation                    rallyLoc;
     private LinkedList<BeaverTask> tasks;
     boolean                        attacking;
     private int                    buildCooldown;
@@ -26,18 +27,17 @@ public class Shtab
         queue = new ArrayDeque<MapLocation>();
         queue.offer(allyHQ);
 
-        // Fills the path for where to build for beavers, raise or lower the
-        // loop to change the amount of turns wasted.
-        // It will be eventually completed in the run method regardless, so it
-        // does not matter
-        // We have 20 rounds free anyways if building a minerfactory first, so
-        // it's fine to make this run a while.
+        analyzeTowers();
+
+        // fills path of where to build buildings, uses lots of bytecodes so
+        // split into the run method. Can reduce or raise here according to what
+        // we want
         for (int i = 0; i < 600; i++)
         {
             fillBuildingPath();
         }
 
-        // builds minerfactory first
+        // builds minerfactory first then others
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.MINE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -56,8 +56,169 @@ public class Shtab
         shouldRun = false;
     }
 
-// RUNS ONE TIME
+
+// Finds symmetry in map and ranks towers
 // ------------------------------------------------------------------
+
+    private class TowerRank
+    {
+        MapLocation loc;
+        int         score;
+
+
+        public TowerRank(MapLocation loc, int score)
+        {
+            this.loc = loc;
+            this.score = score;
+        }
+    }
+
+
+    private enum Symmetry
+    {
+        ROTATION,
+        X_REFLECTION,
+        Y_REFLECTION
+    }
+
+
+    private Symmetry findSymmetry()
+    {
+        MapLocation allyClosestTower = null;
+        MapLocation enemyClosestTower = null;
+        int dist = 5000;
+        for (MapLocation loc : allyTowers)
+        {
+            if (allyClosestTower == null)
+            {
+                allyClosestTower = loc;
+                dist = allyHQ.distanceSquaredTo(allyClosestTower);
+            }
+            else if (loc.distanceSquaredTo(allyHQ) < dist)
+            {
+                dist = loc.distanceSquaredTo(allyHQ);
+                allyClosestTower = loc;
+            }
+        }
+        for (MapLocation loc : enemyTowers)
+        {
+            if (loc.distanceSquaredTo(enemyHQ) == dist)
+            {
+                enemyClosestTower = loc;
+                break;
+            }
+        }
+        if (enemyClosestTower == null)
+        {
+            return Symmetry.ROTATION;
+        }
+        int allyXOffset = allyHQ.x - allyClosestTower.x;
+        int allyYOffset = allyHQ.y - allyClosestTower.y;
+        int enemyXOffset = enemyHQ.x - enemyClosestTower.x;
+        int enemyYOffset = enemyHQ.y - enemyClosestTower.y;
+        if (allyXOffset == enemyXOffset)
+        {
+            return Symmetry.X_REFLECTION;
+        }
+        else if (allyYOffset == enemyYOffset)
+        {
+            return Symmetry.Y_REFLECTION;
+        }
+        return Symmetry.ROTATION;
+    }
+
+
+    /**
+     * such a big method lol oops puts the towers in order based on their
+     * vulnerability, now in the enemytowers and mytowers, the towers are
+     * ordered from most vulnerable to least
+     */
+    private void analyzeTowers()
+    {
+        class TowerComparator
+            implements Comparator<TowerRank>
+        {
+
+            @Override
+            public int compare(TowerRank o1, TowerRank o2)
+            {
+                if (o1.score < o2.score)
+                {
+                    return -1;
+                }
+                else if (o1.score > o2.score)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+
+        }
+        PriorityQueue<TowerRank> myTowers =
+            new PriorityQueue<TowerRank>(new TowerComparator());
+        for (MapLocation towerLoc : this.allyTowers)
+        {
+            int droneVulnerabilityScore = 0;
+            int vulnerabilityScore = 100 + towerLoc.distanceSquaredTo(allyHQ);
+            MapLocation[] nearby =
+                MapLocation.getAllMapLocationsWithinRadiusSq(
+                    towerLoc,
+                    RobotType.TOWER.sensorRadiusSquared);
+            for (MapLocation loc : nearby)
+            {
+                if (rc.canSenseLocation(loc))
+                {
+                    TerrainTile tile = rc.senseTerrainTile(loc);
+
+                    if (tile == TerrainTile.OFF_MAP)
+                    {
+                        droneVulnerabilityScore += 12;
+                        vulnerabilityScore -= 8;
+                    }
+                    else if (tile == TerrainTile.VOID)
+                    {
+                        droneVulnerabilityScore += 6;
+                        vulnerabilityScore -= 4;
+                    }
+                }
+                RobotInfo[] allies = rc.senseNearbyRobots(25, myTeam);
+                for (RobotInfo ally : allies)
+                {
+                    if (ally.type == RobotType.HQ)
+                    {
+                        vulnerabilityScore -= 35;
+                    }
+                    else if (ally.type == RobotType.TOWER)
+                    {
+                        vulnerabilityScore -= 25;
+                    }
+                }
+            }
+            droneVulnerabilityScore += vulnerabilityScore;
+            myTowers.offer(new TowerRank(towerLoc, vulnerabilityScore));
+        }
+        Symmetry symmetry = findSymmetry();
+        int i = this.allyTowers.length - 1;
+        for (TowerRank t : myTowers)
+        {
+            this.allyTowers[i] = t.loc;
+            int x = allyTowers[i].x * -1;
+            int y = allyTowers[i].y * -1;
+            if (symmetry == Symmetry.X_REFLECTION)
+            {
+                x *= -1;
+            }
+            else if (symmetry == Symmetry.Y_REFLECTION)
+            {
+                y *= -1;
+            }
+            this.enemyTowers[i] = new MapLocation(x, y);
+            i--;
+        }
+
+    }
+
+    // -------------------------------------------------------------------------------
 
     private HashSet<MapLocation> visited;
     ArrayDeque<MapLocation>      queue;
@@ -93,6 +254,8 @@ public class Shtab
     }
 
 
+    // -----------------------------------------------------------------------
+
     private MapLocation findRallyPoint()
     {
         int xAvg = 0;
@@ -123,7 +286,7 @@ public class Shtab
 
 
     // ---------------------------------------------------------------------
-    // Run from the run() function
+    // BeaverTask stuff
     // ---------------------------------------------------------------------
 
     private void submitBeaverTask(BeaverTask task)
@@ -155,6 +318,67 @@ public class Shtab
 
     }
 
+
+    // ------------------------------------------------------------------------------
+
+    // submits a new building to be built based on mine income
+    // maybe just replace with tested timed building?
+    private void needMoreBuildings()
+        throws GameActionException
+    {
+        int roundNum = Clock.getRoundNum();
+        buildCooldown++;
+        if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
+        {
+            buildCooldown = 0;
+            int mined = rc.readBroadcast(Channels.miningTotal);
+            rc.broadcast(Channels.miningTotal, 0);
+            double mineRate = mined / 10;
+            int barracksCount = rc.readBroadcast(Channels.barracksCount);
+            int helipadCount = rc.readBroadcast(Channels.helipadCount);
+            int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
+            double spawnRate =
+                (Constants.barracksRate * barracksCount)
+                    + (Constants.tankFactoryRate * tankFactoryCount)
+                    + (Constants.helipadRate * helipadCount);
+            rc.setIndicatorString(2, "mineRate: " + mineRate + ", spawnRate: "
+                + spawnRate);
+            if (mineRate >= spawnRate)
+            {
+                // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+            }
+        }
+    }
+
+
+    // ---------------------------------------------------------------------
+
+    /**
+     * Evenly distributes all of Shtab's supply.
+     */
+    @Override
+    public void transferSupplies()
+        throws GameActionException
+    {
+        double totSupply = rc.getSupplyLevel();
+
+        RobotInfo[] nearbyAllies =
+            rc.senseNearbyRobots(
+                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
+                myTeam);
+        if (nearbyAllies.length > 0)
+        {
+            int unitSupply = (int)(totSupply / nearbyAllies.length);
+            for (RobotInfo robot : nearbyAllies)
+            {
+                rc.transferSupplies(unitSupply, robot.location);
+            }
+        }
+    }
+
+
+    // -----------------------------------------------------------------------
+    // run
 
     @Override
     public void run()
@@ -193,60 +417,6 @@ public class Shtab
         {
             broadcastLocation(Channels.rallyLoc, enemyHQ);
             attacking = true;
-        }
-    }
-
-
-    // returns a robottype that should be built next
-    // or returns null if no building needs to be built.
-    private void needMoreBuildings()
-        throws GameActionException
-    {
-        int roundNum = Clock.getRoundNum();
-        buildCooldown++;
-        if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
-        {
-            buildCooldown = 0;
-            int mined = rc.readBroadcast(Channels.miningTotal);
-            rc.broadcast(Channels.miningTotal, 0);
-            double mineRate = mined / 10;
-            int barracksCount = rc.readBroadcast(Channels.barracksCount);
-            int helipadCount = rc.readBroadcast(Channels.helipadCount);
-            int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
-            double spawnRate =
-                (Constants.barracksRate * barracksCount)
-                    + (Constants.tankFactoryRate * tankFactoryCount)
-                    + (Constants.helipadRate * helipadCount);
-            rc.setIndicatorString(2, "mineRate: " + mineRate + ", spawnRate: "
-                + spawnRate);
-            if (mineRate >= spawnRate)
-            {
-                // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-            }
-        }
-    }
-
-
-    /**
-     * Evenly distributes all of Shtab's supply.
-     */
-    @Override
-    public void transferSupplies()
-        throws GameActionException
-    {
-        double totSupply = rc.getSupplyLevel();
-
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-        if (nearbyAllies.length > 0)
-        {
-            int unitSupply = (int)(totSupply / nearbyAllies.length);
-            for (RobotInfo robot : nearbyAllies)
-            {
-                rc.transferSupplies(unitSupply, robot.location);
-            }
         }
     }
 
