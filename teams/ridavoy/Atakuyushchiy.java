@@ -1,11 +1,6 @@
 package ridavoy;
 
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.TerrainTile;
+import battlecode.common.*;
 
 /**
  * Attacking building class.

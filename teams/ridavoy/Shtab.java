@@ -32,7 +32,7 @@ public class Shtab
         // fills path of where to build buildings, uses lots of bytecodes so
         // split into the run method. Can reduce or raise here according to what
         // we want
-        for (int i = 0; i < 600; i++)
+        for (int i = 0; i < 100; i++)
         {
             fillBuildingPath();
         }
@@ -82,6 +82,9 @@ public class Shtab
     }
 
 
+    /**
+     * gets what type of symmetry is present on the map
+     */
     private Symmetry findSymmetry()
     {
         MapLocation allyClosestTower = null;
@@ -129,9 +132,9 @@ public class Shtab
 
 
     /**
-     * such a big method lol oops puts the towers in order based on their
+     * such a big method lol oops. puts the towers in order based on their
      * vulnerability, now in the enemytowers and mytowers, the towers are
-     * ordered from most vulnerable to least
+     * ordered from most vulnerable to least, but only in the HQ. Needs testing
      */
     private void analyzeTowers()
     {
