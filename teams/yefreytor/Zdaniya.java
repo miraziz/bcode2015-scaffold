@@ -54,7 +54,10 @@ public abstract class Zdaniya
         throws GameActionException
     {
         int totSupply = (int)rc.getSupplyLevel();
-
+        if (totSupply == 0)
+        {
+            return;
+        }
         // Checks the broadcast channel to see if there is another building in
         // the supply chain.
         MapLocation supplyTo = getLocation(Channels.buildPath + pathId + 1);

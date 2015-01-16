@@ -120,6 +120,7 @@ public abstract class Proletariat
         // not against a wall, check for a wall ahead, and move forward
         if (!onWall)
         {
+            facing = rc.getLocation().directionTo(dest);
             int count = 0;
             // there is a wall ahead, need to start bugging mode
             // need to handle if count is 8 afterwards. Means the robot is
