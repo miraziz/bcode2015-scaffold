@@ -29,6 +29,8 @@ public class Shtab
 
         analyzeTowers();
 
+        broadcastLocation(Channels.rallyLoc, this.findRallyPoint());
+
         // fills path of where to build buildings, uses lots of bytecodes so
         // split into the run method. Can reduce or raise here according to what
         // we want
@@ -46,7 +48,6 @@ public class Shtab
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         sendBeaverTasks();
         this.pathId = 1;
@@ -87,38 +88,41 @@ public class Shtab
      */
     private Symmetry findSymmetry()
     {
-        MapLocation allyClosestTower = null;
-        MapLocation enemyClosestTower = null;
+        MapLocation allyFurthestTower = null;
+        MapLocation enemyFurthestTower = null;
         int dist = 5000;
         for (MapLocation loc : allyTowers)
         {
-            if (allyClosestTower == null)
+            if (allyFurthestTower == null)
             {
-                allyClosestTower = loc;
-                dist = allyHQ.distanceSquaredTo(allyClosestTower);
+                allyFurthestTower = loc;
+                dist = allyHQ.distanceSquaredTo(allyFurthestTower);
             }
-            else if (loc.distanceSquaredTo(allyHQ) < dist)
+            else if (loc.distanceSquaredTo(allyHQ) > dist)
             {
                 dist = loc.distanceSquaredTo(allyHQ);
-                allyClosestTower = loc;
+                allyFurthestTower = loc;
             }
         }
         for (MapLocation loc : enemyTowers)
         {
             if (loc.distanceSquaredTo(enemyHQ) == dist)
             {
-                enemyClosestTower = loc;
+                enemyFurthestTower = loc;
                 break;
             }
         }
-        if (enemyClosestTower == null)
+        if (enemyFurthestTower == null)
         {
             return Symmetry.ROTATION;
         }
-        int allyXOffset = allyHQ.x - allyClosestTower.x;
-        int allyYOffset = allyHQ.y - allyClosestTower.y;
-        int enemyXOffset = enemyHQ.x - enemyClosestTower.x;
-        int enemyYOffset = enemyHQ.y - enemyClosestTower.y;
+        int allyXOffset = allyHQ.x - allyFurthestTower.x;
+        int allyYOffset = allyHQ.y - allyFurthestTower.y;
+        int enemyXOffset = enemyHQ.x - enemyFurthestTower.x;
+        int enemyYOffset = enemyHQ.y - enemyFurthestTower.y;
+
+        rc.setIndicatorString(2, "Ally X Offset: " + allyXOffset
+            + ", Enemy X Offset: " + enemyXOffset);
         if (allyXOffset == enemyXOffset)
         {
             return Symmetry.X_REFLECTION;
@@ -201,12 +205,17 @@ public class Shtab
             myTowers.offer(new TowerRank(towerLoc, vulnerabilityScore));
         }
         Symmetry symmetry = findSymmetry();
-        int i = this.allyTowers.length - 1;
-        for (TowerRank t : myTowers)
+        rc.setIndicatorString(0, "Symmetry: " + symmetry);
+        int i = 0;
+        String str = "enemyTowers in vulnerability order: ";
+        while (!myTowers.isEmpty())
         {
+            TowerRank t = myTowers.poll();
             this.allyTowers[i] = t.loc;
-            int x = allyTowers[i].x * -1;
-            int y = allyTowers[i].y * -1;
+            int xOffset = allyHQ.x - allyTowers[i].x;
+            int yOffset = allyHQ.y - allyTowers[i].y;
+            int x = xOffset;
+            int y = yOffset;
             if (symmetry == Symmetry.X_REFLECTION)
             {
                 x *= -1;
@@ -215,9 +224,11 @@ public class Shtab
             {
                 y *= -1;
             }
-            this.enemyTowers[i] = new MapLocation(x, y);
-            i--;
+            this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
+            str += enemyTowers[i].toString() + ", ";
+            i++;
         }
+        rc.setIndicatorString(1, str);
 
     }
 
@@ -344,8 +355,9 @@ public class Shtab
                 (Constants.barracksRate * barracksCount)
                     + (Constants.tankFactoryRate * tankFactoryCount)
                     + (Constants.helipadRate * helipadCount);
-            rc.setIndicatorString(2, "mineRate: " + mineRate + ", spawnRate: "
-                + spawnRate);
+            // rc.setIndicatorString(2, "mineRate: " + mineRate +
+// ", spawnRate: "
+            // + spawnRate);
             if (mineRate >= spawnRate)
             {
                 // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
