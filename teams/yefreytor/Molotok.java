@@ -10,13 +10,19 @@ import battlecode.common.*;
 public class Molotok
     extends Proletariat
 {
-    private BeaverTask  task;
+    private MolotokTask task;
     private boolean     reached;
     private MapLocation buildLoc;
 
 
     // TODO If a building is destroyed, what happens?
 
+    /**
+     * Sets a task.
+     * 
+     * @param rc
+     * @throws GameActionException
+     */
     public Molotok(RobotController rc)
         throws GameActionException
     {
@@ -26,17 +32,27 @@ public class Molotok
     }
 
 
-    private BeaverTask getNextTask()
+    /**
+     * Reads communications channels to determine what this Molotok's next task
+     * and returns it.
+     * 
+     * @return This molotok's next task.
+     * @throws GameActionException
+     */
+    private MolotokTask getNextTask()
         throws GameActionException
     {
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
-        BeaverTask myTask = BeaverTask.getTask(taskNum);
+        MolotokTask myTask = MolotokTask.getTask(taskNum);
 
         return myTask;
     }
 
 
+    /**
+     * Updates molotok count and works on this molotok's given task.
+     */
     @Override
     public void run()
         throws GameActionException
@@ -48,14 +64,14 @@ public class Molotok
             rc.readBroadcast(Channels.beaverCount) + 1);
 
         rc.setIndicatorString(1, "My task is: " + task);
-        if (task == BeaverTask.JOIN_ARMY)
+        if (task == MolotokTask.JOIN_ARMY)
         {
             reached = false;
             this.setDestination(getLocation(Channels.rallyLoc));
             this.bug();
             task = this.getNextTask();
         }
-        else if (task == BeaverTask.MINE)
+        else if (task == MolotokTask.MINE)
         {
             reached = false;
             task = this.getNextTask();
@@ -170,26 +186,26 @@ public class Molotok
     }
 
 
-    private RobotType getTaskBuildType(BeaverTask task)
+    private RobotType getTaskBuildType(MolotokTask task)
     {
         RobotType toBuild = null;
-        if (task == BeaverTask.BUILD_BARRACKS)
+        if (task == MolotokTask.BUILD_BARRACKS)
         {
             toBuild = RobotType.BARRACKS;
         }
-        else if (task == BeaverTask.BUILD_HELIPAD)
+        else if (task == MolotokTask.BUILD_HELIPAD)
         {
             toBuild = RobotType.HELIPAD;
         }
-        else if (task == BeaverTask.BUILD_MINERFACTORY)
+        else if (task == MolotokTask.BUILD_MINERFACTORY)
         {
             toBuild = RobotType.MINERFACTORY;
         }
-        else if (task == BeaverTask.BUILD_SUPPLYDEPOT)
+        else if (task == MolotokTask.BUILD_SUPPLYDEPOT)
         {
             toBuild = RobotType.SUPPLYDEPOT;
         }
-        else if (task == BeaverTask.BUILD_TANKFACTORY)
+        else if (task == MolotokTask.BUILD_TANKFACTORY)
         {
             toBuild = RobotType.TANKFACTORY;
         }
@@ -202,8 +218,8 @@ public class Molotok
     {
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
-        BeaverTask myTask = BeaverTask.getTask(taskNum);
-        if (!(myTask == BeaverTask.MINE || myTask == BeaverTask.JOIN_ARMY))
+        MolotokTask myTask = MolotokTask.getTask(taskNum);
+        if (!(myTask == MolotokTask.MINE || myTask == MolotokTask.JOIN_ARMY))
         {
             rc.broadcast(Channels.beaverTasksTaken, tasksTaken + 1);
         }

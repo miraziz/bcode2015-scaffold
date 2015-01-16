@@ -15,7 +15,7 @@ import battlecode.common.*;
 public class Shtab
     extends Atakuyushchiy
 {
-    private LinkedList<BeaverTask> tasks;
+    private LinkedList<MolotokTask> tasks;
     boolean                        attacking;
     private int                    buildCooldown;
     private boolean                shouldRun;
@@ -49,20 +49,20 @@ public class Shtab
         }
 
         // builds minerfactory first then others
-        tasks = new LinkedList<BeaverTask>();
-        submitBeaverTask(BeaverTask.MINE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        tasks = new LinkedList<MolotokTask>();
+        submitBeaverTask(MolotokTask.MINE);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_TANKFACTORY);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_TANKFACTORY);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(MolotokTask.BUILD_BARRACKS);
+        submitBeaverTask(MolotokTask.BUILD_BARRACKS);
+        submitBeaverTask(MolotokTask.BUILD_MINERFACTORY);
         sendBeaverTasks();
         this.pathId = 1;
         buildCooldown = 0;
@@ -317,7 +317,7 @@ public class Shtab
     // BeaverTask stuff
     // ---------------------------------------------------------------------
 
-    private void submitBeaverTask(BeaverTask task)
+    private void submitBeaverTask(MolotokTask task)
     {
         tasks.addFirst(task);
         shouldRun = true;
@@ -337,7 +337,7 @@ public class Shtab
             tasks.removeFirst();
         }
         int i = Channels.beaverTask1;
-        for (BeaverTask t : tasks)
+        for (MolotokTask t : tasks)
         {
             rc.broadcast(i, t.value());
             i++;

@@ -1,11 +1,11 @@
 package yefreytor;
 
 /**
- * Enum class for different beaver tasks.
+ * Enum class for different molotok tasks.
  * 
  * @author Amit Bachchan
  */
-public enum BeaverTask
+public enum MolotokTask
 {
     BUILD_BARRACKS(0),
     BUILD_MINERFACTORY(1),
@@ -16,10 +16,10 @@ public enum BeaverTask
     JOIN_ARMY(6);
 
     private int                 value;
-    private static BeaverTask[] vals = BeaverTask.values();
+    private static MolotokTask[] vals = MolotokTask.values();
 
 
-    BeaverTask(int id)
+    MolotokTask(int id)
     {
         value = id;
     }
@@ -31,7 +31,7 @@ public enum BeaverTask
     }
 
 
-    public static BeaverTask getTask(int val)
+    public static MolotokTask getTask(int val)
     {
         return vals[val];
     }
