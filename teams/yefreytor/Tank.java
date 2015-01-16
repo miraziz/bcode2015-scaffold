@@ -18,4 +18,10 @@ public class Tank
         super(rc);
     }
 
+
+    public void run()
+        throws GameActionException
+    {
+        super.run();
+    }
 }

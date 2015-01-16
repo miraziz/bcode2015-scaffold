@@ -23,7 +23,5 @@ public class Prizyvnik
         throws GameActionException
     {
         super.run();
-        this.setDestination(getLocation(Channels.rallyLoc));
-        bug();
     }
 }

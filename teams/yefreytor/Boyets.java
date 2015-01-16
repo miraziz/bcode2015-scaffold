@@ -32,6 +32,7 @@ public class Boyets
         throws GameActionException
     {
         super.run();
+        this.setDestination(getLocation(Channels.rallyLoc));
         if (!attack())
         {
             bug();

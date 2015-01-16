@@ -172,8 +172,8 @@ public abstract class Proletariat
     {
         MapLocation loc = mLocation.add(dir);
         if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
-            || visited.contains(loc) // comment this line to not have any
-            // effects from the hashtable/linked list
+        // || visited.contains(loc) // comment this line to not have any
+        // effects from the hashtable/linked list
             || rc.senseRobotAtLocation(loc) != null)
         {
             return false;
