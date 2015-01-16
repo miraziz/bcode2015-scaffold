@@ -73,6 +73,7 @@ public class Molotok
         }
         else if (task == MolotokTask.MINE)
         {
+            // TODO Doesn't mine?
             reached = false;
             task = this.getNextTask();
         }
@@ -87,15 +88,18 @@ public class Molotok
                 }
                 else
                 {
+                    // TODO Why does this happen? If the build path is complete,
+// build anywhere instantly?
                     Direction dir = Direction.NORTH;
-                    while (rc.senseTerrainTile(rc.getLocation().add(dir)) != TerrainTile.NORMAL)
+                    while (rc.senseTerrainTile(mLocation.add(dir)) != TerrainTile.NORMAL)
                     {
                         dir = dir.rotateRight();
                     }
-                    buildLoc = rc.getLocation().add(dir);
+                    buildLoc = mLocation.add(dir);
                 }
                 this.setDestination(buildLoc);
                 rc.setIndicatorString(0, "My build loc: " + buildLoc);
+
                 if (!reached)
                 {
                     rc.setIndicatorString(1, "HERE, trying to go to: "
@@ -114,6 +118,7 @@ public class Molotok
                         moveTowardsFacing();
                     }
                 }
+
                 if (reached)
                 {
                     if (build())
@@ -129,53 +134,41 @@ public class Molotok
     }
 
 
+    /**
+     * Moves to the closest direction facing the destination if possible,
+     * otherwise does nothing.
+     * 
+     * @throws GameActionException
+     */
     private void moveTowardsFacing()
         throws GameActionException
     {
-        facing = rc.getLocation().directionTo(buildLoc);
-        Direction dir = facing;
-        Direction left = dir.rotateRight();
-        Direction right = dir;
-        int count = 0;
-        while (!rc.canMove(dir) && count < 8)
-        {
-            if (count % 2 == 0)
-            {
-                left = left.rotateLeft();
-                dir = left;
-            }
-            else
-            {
-                right = right.rotateRight();
-                dir = right;
-            }
-            count++;
-        }
-        if (count < 8)
+        facing = mLocation.directionTo(buildLoc);
+        // TODO Only move forward or sideways to goal, don't turn back?
+        Direction dir = getFreeStrafeDirection(facing);
+        if (dir != null)
         {
             rc.move(dir);
         }
-
     }
 
 
+    /**
+     * Gets the next task and attempts to build the given structure.
+     * 
+     * @return True if the robot is now building, false otherwise.
+     * @throws GameActionException
+     */
     private boolean build()
         throws GameActionException
     {
         task = getNextTask();
         RobotType toBuild = getTaskBuildType(task);
-        if (toBuild == null)
+
+        if (toBuild != null && rc.hasBuildRequirements(toBuild))
         {
-            return false;
-        }
-        if (rc.hasBuildRequirements(toBuild))
-        {
-            Direction dir = rc.getLocation().directionTo(buildLoc);
-            if (!rc.canBuild(dir, toBuild))
-            {
-                return false;
-            }
-            else
+            Direction dir = mLocation.directionTo(buildLoc);
+            if (rc.canBuild(dir, toBuild))
             {
                 incrementTask();
                 rc.build(dir, toBuild);
@@ -186,6 +179,14 @@ public class Molotok
     }
 
 
+    /**
+     * Returns a task's corresponding structure.
+     * 
+     * @param task
+     *            The task needing translation.
+     * @return The task's structure or null if there is no corresponding
+     *         structure.
+     */
     private RobotType getTaskBuildType(MolotokTask task)
     {
         RobotType toBuild = null;
@@ -213,9 +214,15 @@ public class Molotok
     }
 
 
+    /**
+     * Claims a task and updates the communications channels.
+     * 
+     * @throws GameActionException
+     */
     private void incrementTask()
         throws GameActionException
     {
+        // TODO What happens when a unit dies?
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
         MolotokTask myTask = MolotokTask.getTask(taskNum);

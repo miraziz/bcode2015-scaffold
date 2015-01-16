@@ -36,6 +36,8 @@ public class Boyets
     {
         super.run();
 
+        // TODO Stop them from moving when they're in a clump to avoid wasting
+// supply
         this.setDestination(getLocation(Channels.rallyLoc));
         rc.setIndicatorString(1, "Boyets run method");
         rc.setIndicatorString(0, "Traveling to: "
