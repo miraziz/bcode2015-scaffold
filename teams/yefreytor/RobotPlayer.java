@@ -62,7 +62,7 @@ public class RobotPlayer
             try
             {
                 robot.run();
-                // robot.transferSupplies();
+                 robot.transferSupplies();
             }
             catch (Exception e)
             {
