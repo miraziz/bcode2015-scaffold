@@ -121,6 +121,16 @@ public abstract class Proletariat
         if (!onWall)
         {
             facing = rc.getLocation().directionTo(dest);
+            if (rc.getLocation().distanceSquaredTo(dest) <= 35
+                && Clock.getRoundNum() < 1500) // TODO switch to constant to
+                                               // know when attacking
+            {
+                if (!rc.canMove(facing) && !rc.canMove(facing.rotateRight())
+                    && !rc.canMove(facing.rotateLeft()))
+                {
+                    return false;
+                }
+            }
             int count = 0;
             // there is a wall ahead, need to start bugging mode
             // need to handle if count is 8 afterwards. Means the robot is
@@ -137,10 +147,6 @@ public abstract class Proletariat
                 if (!helper.isEmpty())
                 {
                     visited.remove(helper.removeFirst());
-                }
-                else
-                {
-
                 }
             }
         }
@@ -238,7 +244,6 @@ public abstract class Proletariat
             {
                 rc.transferSupplies(transferAmount, allyLoc);
             }
-
         }
 
         if (beaverLoc != null)
