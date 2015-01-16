@@ -43,10 +43,10 @@ public class Shtab
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.MINE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         sendBeaverTasks();

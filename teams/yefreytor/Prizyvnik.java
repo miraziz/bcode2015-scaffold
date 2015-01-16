@@ -17,4 +17,13 @@ public class Prizyvnik
     {
         super(rc);
     }
+
+
+    public void run()
+        throws GameActionException
+    {
+        super.run();
+        this.setDestination(getLocation(Channels.rallyLoc));
+        bug();
+    }
 }
