@@ -55,63 +55,67 @@ public abstract class Zdaniya
     {
         int totSupply = (int)rc.getSupplyLevel();
 
-        // Checks the broadcast channel to see if there is another building in
-        // the supply chain.
-        MapLocation supplyTo = getLocation(Channels.buildPath + pathId + 1);
-        if (supplyTo != null
-            && mLocation.distanceSquaredTo(supplyTo) <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED)
+        if (totSupply > 0)
         {
-            RobotInfo supplyee = rc.senseRobotAtLocation(supplyTo);
-            if (supplyee != null && supplyee.team == myTeam)
+            // Checks the broadcast channel to see if there is another building
+// in
+            // the supply chain.
+            MapLocation supplyTo = getLocation(Channels.buildPath + pathId + 1);
+            if (supplyTo != null
+                && mLocation.distanceSquaredTo(supplyTo) <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED)
             {
-                rc.transferSupplies(totSupply, supplyTo);
-                return;
+                RobotInfo supplyee = rc.senseRobotAtLocation(supplyTo);
+                if (supplyee != null && supplyee.team == myTeam)
+                {
+                    rc.transferSupplies(totSupply, supplyTo);
+                    return;
+                }
             }
-        }
 
-        // TODO Improve distribution to give out all supply faster. Include
+            // TODO Improve distribution to give out all supply faster. Include
 // supply divided by min(num of nearby mobile units, number of remaining bytes
 // codes / 511)
-        // TODO ake 511 a constant variable
+            // TODO ake 511 a constant variable
 
-        // Evenly distributes most of the remaining supply
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-        int unitNum = nearbyAllies.length;
-        if (unitNum > 0)
-        {
-            int unitSupply = totSupply / unitNum;
-            for (RobotInfo robot : nearbyAllies)
+            // Evenly distributes most of the remaining supply
+            RobotInfo[] nearbyAllies =
+                rc.senseNearbyRobots(
+                    GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
+                    myTeam);
+            int unitNum = nearbyAllies.length;
+            if (unitNum > 0)
             {
-                // TODO Improve beaver restrictions
-                if (isAttackingUnit(robot.type)
-                    && robot.type != RobotType.BEAVER)
+                int unitSupply = totSupply / unitNum;
+                for (RobotInfo robot : nearbyAllies)
                 {
-                    if (Clock.getBytecodesLeft() < 511)
+                    // TODO Improve beaver restrictions
+                    if (isAttackingUnit(robot.type)
+                        && robot.type != RobotType.BEAVER)
                     {
-                        return;
+                        if (Clock.getBytecodesLeft() < 511)
+                        {
+                            return;
+                        }
+                        rc.transferSupplies(unitSupply, robot.location);
+                        totSupply -= unitSupply;
                     }
-                    rc.transferSupplies(unitSupply, robot.location);
-                    totSupply -= unitSupply;
+                    else
+                    {
+                        unitSupply = totSupply / unitNum;
+                    }
+                    unitNum--;
                 }
-                else
-                {
-                    unitSupply = totSupply / unitNum;
-                }
-                unitNum--;
-            }
 
-            for (RobotInfo robot : nearbyAllies)
-            {
-                if (!isAttackingUnit(robot.type))
+                for (RobotInfo robot : nearbyAllies)
                 {
-                    if (Clock.getBytecodesLeft() < 511)
+                    if (!isAttackingUnit(robot.type))
                     {
-                        return;
+                        if (Clock.getBytecodesLeft() < 511)
+                        {
+                            return;
+                        }
+                        rc.transferSupplies(unitSupply, robot.location);
                     }
-                    rc.transferSupplies(unitSupply, robot.location);
                 }
             }
         }
