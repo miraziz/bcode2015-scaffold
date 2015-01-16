@@ -1,5 +1,10 @@
 package yefreytor;
 
+/**
+ * Enum class for different beaver tasks.
+ * 
+ * @author Amit Bachchan
+ */
 public enum BeaverTask
 {
     BUILD_BARRACKS(0),

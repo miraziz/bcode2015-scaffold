@@ -7,7 +7,7 @@ import battlecode.common.RobotType;
 /**
  * Miner factory class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Ferma
     extends Proizvodstvennoye
@@ -20,6 +20,9 @@ public class Ferma
     }
 
 
+    /**
+     * Create a miner whenever possible until a certain limit is reached.
+     */
     @Override
     public void run()
         throws GameActionException

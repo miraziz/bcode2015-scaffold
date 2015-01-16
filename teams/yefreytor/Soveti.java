@@ -6,7 +6,7 @@ import battlecode.common.*;
 /**
  * Supreme Soviet.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public abstract class Soveti
 {
@@ -34,14 +34,17 @@ public abstract class Soveti
     public Soveti(RobotController myRC)
     {
         rc = myRC;
+        rand = new Random(rc.getID());
+
         mLocation = rc.getLocation();
+
         myTeam = rc.getTeam();
         enemyTeam = myTeam.opponent();
+
         allyHQ = rc.senseHQLocation();
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
-        rand = new Random(rc.getID());
 
         mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
         mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
@@ -82,8 +85,8 @@ public abstract class Soveti
                 rc.senseNearbyRobots(
                     rc.getType().attackRadiusSquared,
                     enemyTeam);
-            RobotInfo target = null;
 
+            RobotInfo target = null;
             if (nearbyEnemies.length > 0 && rc.isWeaponReady())
             {
                 for (RobotInfo ri : nearbyEnemies)
@@ -92,6 +95,9 @@ public abstract class Soveti
                     {
                         target = ri;
                     }
+
+                    // TODO Probably not a good idea to only target the
+// strongest unit in the area
                     if (ri.type == RobotType.HQ || ri.type == RobotType.TOWER)
                     {
                         target = ri;
@@ -150,6 +156,13 @@ public abstract class Soveti
     }
 
 
+    /**
+     * Returns true if the given type is a mobile robot capable of attacking.
+     * 
+     * @param type
+     *            Specified robot type.
+     * @return True if an attacking unit, false otherwise.
+     */
     protected boolean isAttackingUnit(RobotType type)
     {
         return type == RobotType.DRONE || type == RobotType.BASHER
@@ -159,14 +172,13 @@ public abstract class Soveti
     }
 
 
+    /**
+     * Returns a random direction.
+     * 
+     * @return a random direction.
+     */
     protected Direction getRandomDirection()
     {
-        Direction dir = Direction.NORTH;
-        int turns = rand.nextInt(8);
-        for (int i = 0; i < turns; i++)
-        {
-            dir = dir.rotateRight();
-        }
-        return dir;
+        return Direction.values()[rand.nextInt(8)];
     }
 }

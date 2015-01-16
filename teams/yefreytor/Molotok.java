@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Beaver class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Molotok
     extends Proletariat

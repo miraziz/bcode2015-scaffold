@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Building super class
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public abstract class Zdaniya
     extends Soveti
@@ -53,7 +53,7 @@ public abstract class Zdaniya
     public void transferSupplies()
         throws GameActionException
     {
-        double totSupply = rc.getSupplyLevel();
+        int totSupply = (int)rc.getSupplyLevel();
 
         // Checks the broadcast channel to see if there is another building in
         // the supply chain.
@@ -64,24 +64,28 @@ public abstract class Zdaniya
             RobotInfo supplyee = rc.senseRobotAtLocation(supplyTo);
             if (supplyee != null && supplyee.team == myTeam)
             {
-                rc.transferSupplies(
-                    (int)(totSupply * Constants.SUPPLY_CHAIN_PERC),
-                    supplyTo);
+                rc.transferSupplies(totSupply, supplyTo);
+                return;
             }
         }
 
-        totSupply = rc.getSupplyLevel();
+        // TODO Improve distribution to give out all supply faster. Include
+// supply divided by min(num of nearby mobile units, number of remaining bytes
+// codes / 511)
+        // TODO ake 511 a constant variable
+
         // Evenly distributes most of the remaining supply
         RobotInfo[] nearbyAllies =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
-        if (nearbyAllies.length > 0)
+        int unitNum = nearbyAllies.length;
+        if (unitNum > 0)
         {
-            int unitSupply =
-                (int)(totSupply * Constants.SUPPLY_CHAIN_PERC / nearbyAllies.length);
+            int unitSupply = totSupply / unitNum;
             for (RobotInfo robot : nearbyAllies)
             {
+                // TODO Improve beaver restrictions
                 if (isAttackingUnit(robot.type)
                     && robot.type != RobotType.BEAVER)
                 {
@@ -89,10 +93,14 @@ public abstract class Zdaniya
                     {
                         return;
                     }
-                    rc.setIndicatorString(0, "Round: " + Clock.getRoundNum()
-                        + ", Location: " + robot.location);
                     rc.transferSupplies(unitSupply, robot.location);
+                    totSupply -= unitSupply;
                 }
+                else
+                {
+                    unitSupply = totSupply / unitNum;
+                }
+                unitNum--;
             }
 
             for (RobotInfo robot : nearbyAllies)
@@ -121,7 +129,7 @@ public abstract class Zdaniya
     boolean spawnToEnemy(RobotType type)
         throws GameActionException
     {
-        return spawn(rc.getLocation().directionTo(this.enemyHQ), type);
+        return spawn(toEnemy, type);
     }
 
 

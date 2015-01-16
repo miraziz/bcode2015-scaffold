@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Tower class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Bashna
     extends Atakuyushchiy

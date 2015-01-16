@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Attacking building class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public abstract class Atakuyushchiy
     extends Zdaniya

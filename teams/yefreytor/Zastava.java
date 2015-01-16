@@ -6,7 +6,7 @@ import battlecode.common.RobotController;
 /**
  * Supply depot class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Zastava
     extends Proizvodstvennoye

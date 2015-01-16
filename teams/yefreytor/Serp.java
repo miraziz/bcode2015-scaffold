@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Miner class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Serp
     extends Proletariat

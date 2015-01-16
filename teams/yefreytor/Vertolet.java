@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Drone class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Vertolet
     extends Proletariat

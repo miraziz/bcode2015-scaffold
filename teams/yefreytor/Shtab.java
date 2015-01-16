@@ -7,6 +7,11 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 import battlecode.common.*;
 
+/**
+ * HQ class.
+ * 
+ * @author Amit Bachchan
+ */
 public class Shtab
     extends Atakuyushchiy
 {
@@ -20,6 +25,8 @@ public class Shtab
         throws GameActionException
     {
         super(rc);
+
+        // TODO Set miner limits based on map size
 
         // fillbuildingpath setup
         rc.broadcast(Channels.buildPathCount, 0);
