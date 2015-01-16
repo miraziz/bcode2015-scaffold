@@ -120,6 +120,17 @@ public abstract class Proletariat
         // not against a wall, check for a wall ahead, and move forward
         if (!onWall)
         {
+            facing = rc.getLocation().directionTo(dest);
+            if (rc.getLocation().distanceSquaredTo(dest) <= 35
+                && Clock.getRoundNum() < 1500) // TODO switch to constant to
+                                               // know when attacking
+            {
+                if (!rc.canMove(facing) && !rc.canMove(facing.rotateRight())
+                    && !rc.canMove(facing.rotateLeft()))
+                {
+                    return false;
+                }
+            }
             int count = 0;
             // there is a wall ahead, need to start bugging mode
             // need to handle if count is 8 afterwards. Means the robot is
@@ -136,10 +147,6 @@ public abstract class Proletariat
                 if (!helper.isEmpty())
                 {
                     visited.remove(helper.removeFirst());
-                }
-                else
-                {
-
                 }
             }
         }
@@ -172,8 +179,8 @@ public abstract class Proletariat
     {
         MapLocation loc = mLocation.add(dir);
         if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
-            || visited.contains(loc) // comment this line to not have any
-            // effects from the hashtable/linked list
+        // || visited.contains(loc) // comment this line to not have any
+        // effects from the hashtable/linked list
             || rc.senseRobotAtLocation(loc) != null)
         {
             return false;
@@ -187,6 +194,11 @@ public abstract class Proletariat
         throws GameActionException
     {
         double totSupply = rc.getSupplyLevel();
+
+        if (totSupply == 0)
+        {
+            return;
+        }
 
         RobotInfo[] nearbyAllies =
             rc.senseNearbyRobots(
@@ -228,8 +240,10 @@ public abstract class Proletariat
             {
                 transferAmount = (int)(totSupply - 200);
             }
-
-            rc.transferSupplies(transferAmount, allyLoc);
+            if (transferAmount != 0 && rc.canSenseLocation(allyLoc))
+            {
+                rc.transferSupplies(transferAmount, allyLoc);
+            }
         }
 
         if (beaverLoc != null)

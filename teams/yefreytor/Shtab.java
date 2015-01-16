@@ -19,12 +19,14 @@ public class Shtab
     boolean                        attacking;
     private int                    buildCooldown;
     private boolean                shouldRun;
+    HashSet<MapLocation>           destroyedTowers;
 
 
     public Shtab(RobotController rc)
         throws GameActionException
     {
         super(rc);
+        destroyedTowers = new HashSet<MapLocation>();
 
         // TODO Set miner limits based on map size
 
@@ -50,7 +52,12 @@ public class Shtab
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.MINE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
@@ -383,7 +390,10 @@ public class Shtab
         throws GameActionException
     {
         double totSupply = rc.getSupplyLevel();
-
+        if (totSupply == 0)
+        {
+            return;
+        }
         RobotInfo[] nearbyAllies =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
@@ -441,8 +451,33 @@ public class Shtab
 
         if (!attacking && Clock.getRoundNum() > 1500)
         {
-            broadcastLocation(Channels.rallyLoc, enemyHQ);
+
+            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
+            if (enemyTowers.length > 0)
+            {
+                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
+            }
             attacking = true;
+        }
+        if (attacking)
+        {
+            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
+            // TODO Make units broadcast the most recently destroyed tower as
+            // they deal the final blow to it, to move on to the next tower.
+            MapLocation destroyed = getLocation(Channels.destroyedTower);
+            if (destroyed != null)
+            {
+                this.destroyedTowers.add(destroyed);
+                rc.broadcast(Channels.destroyedTower, 0);
+            }
+            for (int i = 0; i < this.enemyTowers.length; i++)
+            {
+                if (!this.destroyedTowers.contains(enemyTowers[i]))
+                {
+                    broadcastLocation(Channels.rallyLoc, enemyTowers[i]);
+                }
+            }
+
         }
     }
 

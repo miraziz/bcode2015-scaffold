@@ -54,7 +54,6 @@ public abstract class Zdaniya
         throws GameActionException
     {
         int totSupply = (int)rc.getSupplyLevel();
-
         if (totSupply > 0)
         {
             // Checks the broadcast channel to see if there is another building

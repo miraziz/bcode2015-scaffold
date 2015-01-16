@@ -106,6 +106,13 @@ public abstract class Soveti
                 }
                 if (rc.canAttackLocation(target.location))
                 {
+                    if (target.type == RobotType.TOWER
+                        && target.health <= rc.getType().attackPower)
+                    {
+                        broadcastLocation(
+                            Channels.destroyedTower,
+                            target.location);
+                    }
                     rc.attackLocation(target.location);
                     return true;
                 }

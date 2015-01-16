@@ -8,14 +8,14 @@ package yefreytor;
 public class Constants
 {
     // TODO: If tower goes down, update some channel through HQ and have every
-// unit update their tower
+    // unit update their tower
 
     // other constants
-    static int                 beaverLimit       = 2;
-    static int                 minerLimit        = 25;
+    static int    beaverLimit     = 2;
+    static int    minerLimit      = 30;
 
     // Production rates in ore/turn
-    static double              barracksRate      = 125 / 30;
-    static double              tankFactoryRate   = 125 / 30;
-    static double              helipadRate       = 125 / 30;
+    static double barracksRate    = 125 / 30;
+    static double tankFactoryRate = 125 / 30;
+    static double helipadRate     = 125 / 30;
 }
