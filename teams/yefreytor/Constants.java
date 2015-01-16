@@ -11,7 +11,7 @@ public class Constants
 // unit update their tower
 
     // other constants
-    static int                 beaverLimit       = 1;
+    static int                 beaverLimit       = 2;
     static int                 minerLimit        = 25;
 
     // Production rates in ore/turn
