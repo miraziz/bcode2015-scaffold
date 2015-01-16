@@ -21,9 +21,13 @@ public class Channels
     static int helipadCount      = 12;
     static int tankFactoryCount  = 13;
 
+    // location of most recently destroyed tower
+    static int destroyedTower    = 20;
+
     // commands
     static int beaverTasksTaken  = 49;
-    static int beaverTask1       = 50; // channels 50-? are tasks needed to be
+    static int beaverTask1       = 50; // channels 50-? are tasks needed to
+// be
                                         // done in order
 
     static int rallyLoc          = 36;

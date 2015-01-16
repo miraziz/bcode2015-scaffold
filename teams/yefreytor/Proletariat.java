@@ -189,6 +189,11 @@ public abstract class Proletariat
     {
         double totSupply = rc.getSupplyLevel();
 
+        if (totSupply == 0)
+        {
+            return;
+        }
+
         RobotInfo[] nearbyAllies =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
@@ -229,8 +234,11 @@ public abstract class Proletariat
             {
                 transferAmount = (int)(totSupply - 200);
             }
+            if (transferAmount != 0 && rc.canSenseLocation(allyLoc))
+            {
+                rc.transferSupplies(transferAmount, allyLoc);
+            }
 
-            rc.transferSupplies(transferAmount, allyLoc);
         }
 
         if (beaverLoc != null)
