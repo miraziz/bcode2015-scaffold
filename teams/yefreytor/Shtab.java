@@ -16,10 +16,10 @@ public class Shtab
     extends Atakuyushchiy
 {
     private LinkedList<MolotokTask> tasks;
-    boolean                        attacking;
-    private int                    buildCooldown;
-    private boolean                shouldRun;
-    HashSet<MapLocation>           destroyedTowers;
+    boolean                         attacking;
+    private int                     buildCooldown;
+    private boolean                 shouldRun;
+    HashSet<MapLocation>            destroyedTowers;
 
 
     public Shtab(RobotController rc)
@@ -149,6 +149,27 @@ public class Shtab
     }
 
 
+    private class TowerComparator
+        implements Comparator<TowerRank>
+    {
+
+        @Override
+        public int compare(TowerRank o1, TowerRank o2)
+        {
+            if (o1.score < o2.score)
+            {
+                return -1;
+            }
+            else if (o1.score > o2.score)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
+    }
+
+
     /**
      * such a big method lol oops. puts the towers in order based on their
      * vulnerability, now in the enemytowers and mytowers, the towers are
@@ -156,27 +177,9 @@ public class Shtab
      */
     private void analyzeTowers()
     {
-        class TowerComparator
-            implements Comparator<TowerRank>
-        {
 
-            @Override
-            public int compare(TowerRank o1, TowerRank o2)
-            {
-                if (o1.score < o2.score)
-                {
-                    return -1;
-                }
-                else if (o1.score > o2.score)
-                {
-                    return 1;
-                }
-                return 0;
-            }
-
-        }
         PriorityQueue<TowerRank> myTowers =
-            new PriorityQueue<TowerRank>(new TowerComparator());
+            new PriorityQueue<TowerRank>(11, new TowerComparator());
         for (MapLocation towerLoc : this.allyTowers)
         {
             int droneVulnerabilityScore = 0;

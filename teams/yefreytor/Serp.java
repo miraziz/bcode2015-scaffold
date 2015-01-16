@@ -25,41 +25,52 @@ public class Serp
 
 
     /**
-     * Mines.
+     * Runs away if enemies are nearby, then tries to mine.
      */
     @Override
     public void run()
         throws GameActionException
     {
+        super.run();
+
         rc.broadcast(
             Channels.minerCount,
             rc.readBroadcast(Channels.minerCount) + 1);
         if (rc.isCoreReady())
         {
             runAway();
-        }
-        if (rc.isCoreReady())
-        {
-            mine();
-        }
 
+            // TODO Should it try to mine if it's running?
+            if (rc.isCoreReady())
+            {
+                mine();
+            }
+        }
     }
 
 
-    private void runAway()
+    /**
+     * Runs in the opposite direction of the average location of enemy units
+     * within attacking distance.
+     * 
+     * @return True if this serp moved away, false otherwise.
+     * @throws GameActionException
+     */
+    private boolean runAway()
         throws GameActionException
     {
         RobotInfo[] enemies =
-            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
+            rc.senseNearbyRobots(mType.sensorRadiusSquared, enemyTeam);
         if (enemies.length == 0)
         {
-            return;
+            return false;
         }
+
         int avgX = 0;
         int avgY = 0;
         for (RobotInfo enemy : enemies)
         {
-            if (enemy.location.distanceSquaredTo(rc.getLocation()) <= enemy.type.attackRadiusSquared)
+            if (enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
             {
                 avgX += enemy.location.x;
                 avgY += enemy.location.y;
@@ -67,48 +78,51 @@ public class Serp
         }
         avgX /= enemies.length;
         avgY /= enemies.length;
+
         Direction dir =
-            rc.getLocation().directionTo(new MapLocation(avgX, avgY))
-                .opposite();
-        Direction left = dir;
-        Direction right = dir;
-        int count = 0;
-        while (!rc.canMove(dir) && count < 8)
-        {
-            if (count % 2 == 0)
-            {
-                left = left.rotateLeft();
-                dir = left;
-            }
-            else
-            {
-                right = right.rotateRight();
-                dir = right;
-            }
-            count++;
-        }
-        if (count < 5)
+            mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
+
+        dir = getFreeStrafeDirection(dir);
+        if (dir != null)
         {
             rc.move(dir);
+            return true;
         }
-
+        return false;
     }
 
 
-    protected void mine()
+    /**
+     * Attempts to mine the current location. If location is mined out, attempts
+     * to move to richest adjacent cell. If all adjacent cells are mined out,
+     * moves in a random direction. Otherwise, does nothing.
+     * 
+     * @return True if this serp moved or mined, false otherwise.
+     * @throws GameActionException
+     */
+    protected boolean mine()
         throws GameActionException
     {
+        if (!rc.isCoreReady())
+        {
+            return false;
+        }
 
-        if (rc.senseOre(rc.getLocation()) >= 1 && rc.canMine())
+        // TODO Use constant to determine if worth mining?
+        if (rc.senseOre(mLocation) >= 1)
         {
             rc.mine();
+            return true;
         }
         else
         {
+            // TODO use array
             Direction left = myDirection.opposite().rotateRight();
             Direction right = myDirection.opposite();
+
             Direction best = null;
             double topScore = 0;
+
             Direction cur;
             for (int i = 0; i < 8; i++)
             {
@@ -122,9 +136,10 @@ public class Serp
                     right = right.rotateRight();
                     cur = right;
                 }
-                if (rc.canSenseLocation(rc.getLocation().add(cur)))
+
+                if (rc.canSenseLocation(mLocation.add(cur)))
                 {
-                    double ore = rc.senseOre(rc.getLocation().add(cur));
+                    double ore = rc.senseOre(mLocation.add(cur));
                     if (ore > 1 && ore > topScore && rc.canMove(cur))
                     {
                         topScore = ore;
@@ -135,9 +150,11 @@ public class Serp
             if (best != null)
             {
                 rc.move(best);
+                return true;
             }
             else
             {
+                // TODO use array
                 int count = 0;
                 while (!rc.canMove(myDirection) && count < 8)
                 {
@@ -154,9 +171,10 @@ public class Serp
                 if (count < 8)
                 {
                     rc.move(myDirection);
+                    return true;
                 }
             }
-
         }
+        return false;
     }
 }

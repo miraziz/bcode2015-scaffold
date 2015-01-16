@@ -16,6 +16,7 @@ public abstract class Soveti
     protected int             mapOffsetY;
     protected int             broadcastO;
 
+    protected RobotType       mType;
     protected Team            myTeam;
     protected Team            enemyTeam;
     protected MapLocation     allyHQ;
@@ -37,6 +38,7 @@ public abstract class Soveti
         rand = new Random(rc.getID());
 
         mLocation = rc.getLocation();
+        mType = rc.getType();
 
         myTeam = rc.getTeam();
         enemyTeam = myTeam.opponent();
@@ -187,83 +189,5 @@ public abstract class Soveti
     protected Direction getRandomDirection()
     {
         return Direction.values()[rand.nextInt(8)];
-    }
-
-
-    /**
-     * Returns the closest free direction at most 1 turn away from dir.
-     * 
-     * @param dir
-     *            Goal direction.
-     * @return The best direction or null otherwise.
-     */
-    protected Direction getFreeForwardDirection(Direction dir)
-    {
-        return getFreeDirection(dir, 3);
-    }
-
-
-    /**
-     * Returns the closest free direction at most 2 turns away from dir.
-     * 
-     * @param dir
-     *            Goal direction.
-     * @return The best direction or null otherwise.
-     */
-    protected Direction getFreeStrafeDirection(Direction dir)
-    {
-        return getFreeDirection(dir, 5);
-    }
-
-
-    /**
-     * Returns the closest free direction to dir.
-     * 
-     * @param dir
-     *            Goal direction.
-     * @return The best direction or null otherwise.
-     */
-    protected Direction getFreeDirection(Direction dir)
-    {
-        return getFreeDirection(dir, 8);
-    }
-
-
-    /**
-     * Returns the closest free direction to dir at most (turns / 2) turns away.
-     * 
-     * @param dir
-     *            Goal direction.
-     * @param turns
-     *            Possible number of directions that can be returned.
-     * @return The best free direction or null otherwise.
-     */
-    protected Direction getFreeDirection(Direction dir, int turns)
-    {
-        Direction left = dir;
-        Direction right = dir;
-        int count = 0;
-        while (!rc.canMove(dir) && count < turns)
-        {
-            if (count % 2 == 0)
-            {
-                left = left.rotateLeft();
-                dir = left;
-            }
-            else
-            {
-                right = right.rotateRight();
-                dir = right;
-            }
-            count++;
-        }
-        if (count < turns)
-        {
-            return dir;
-        }
-        else
-        {
-            return null;
-        }
     }
 }

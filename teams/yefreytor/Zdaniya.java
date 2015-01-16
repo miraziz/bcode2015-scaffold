@@ -16,8 +16,7 @@ public abstract class Zdaniya
 
 
     /**
-     * Saves direction to enemy HQ and sets spawnDirs to be a radial pattern
-     * rotating away from the enemy HQ's direction.
+     * Saves direction to enemy HQ.
      * 
      * @param rc
      */
@@ -27,21 +26,6 @@ public abstract class Zdaniya
         super(rc);
 
         toEnemy = mLocation.directionTo(enemyHQ);
-        rc.setIndicatorString(1, "My ID: " + pathId);
-        spawnDirs = new Direction[8];
-        spawnDirs[0] = toEnemy;
-        spawnDirs[1] = toEnemy.rotateRight();
-        for (int i = 2; i < 8; i++)
-        {
-            if (i % 2 == 0)
-            {
-                spawnDirs[i] = spawnDirs[i - 2].rotateLeft();
-            }
-            else
-            {
-                spawnDirs[i] = spawnDirs[i - 2].rotateRight();
-            }
-        }
     }
 
 

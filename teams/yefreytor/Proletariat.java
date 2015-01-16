@@ -56,6 +56,7 @@ public abstract class Proletariat
         if ((loc != null) && (dest == null || !dest.equals(loc)))
         {
             dest = loc;
+            // TODO How does facing work? Does the robot face wherever it moved?
             facing = mLocation.directionTo(dest);
             visited.clear();
             return true;
@@ -98,6 +99,7 @@ public abstract class Proletariat
         // if we are already attached and traveling along a wall
         if (onWall)
         {
+            // TODO THIS IS MADNESS
             // there is a wall ahead of us, sets onWall to false, so that the
             // next code will run
             if (!isNormalTile(facing))
@@ -117,6 +119,7 @@ public abstract class Proletariat
                 }
             }
         }
+
         // not against a wall, check for a wall ahead, and move forward
         if (!onWall)
         {
@@ -163,6 +166,14 @@ public abstract class Proletariat
     }
 
 
+    /**
+     * Checks whether the location in the given direction is outside the
+     * boundaries of the map.
+     * 
+     * @param dir
+     *            The direction to check.
+     * @return True if the location is off the map, false otherwise.
+     */
     private boolean isOffMap(Direction dir)
     {
         MapLocation loc = mLocation.add(dir);
@@ -174,6 +185,16 @@ public abstract class Proletariat
     }
 
 
+    /**
+     * Checks whether the location in the given direction is a normal tile with
+     * no robots on it.
+     * 
+     * @param dir
+     *            The direction to check.
+     * @return True if there location is a normal tile with no other robots on
+     *         it, false otherwise.
+     * @throws GameActionException
+     */
     private boolean isNormalTile(Direction dir)
         throws GameActionException
     {
@@ -194,7 +215,6 @@ public abstract class Proletariat
         throws GameActionException
     {
         double totSupply = rc.getSupplyLevel();
-
         if (totSupply == 0)
         {
             return;
@@ -205,10 +225,10 @@ public abstract class Proletariat
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
 
+        // TODO FIX SUPPLY TRANSFER FOR BEAVERS
+
         double beaverSupply = Math.min(200, totSupply);
         MapLocation beaverLoc = null;
-
-        // TODO If someone is dying, give away supply
 
         // TODO If someone is dying, give away supply
 
@@ -253,6 +273,85 @@ public abstract class Proletariat
                 int transferAmount = (int)((totSupply - beaverSupply) / 2.0);
                 rc.transferSupplies(transferAmount, beaverLoc);
             }
+        }
+    }
+
+
+    /**
+     * Returns the closest free direction at most 1 turn away from dir.
+     * 
+     * @param dir
+     *            Goal direction.
+     * @return The best direction or null otherwise.
+     */
+    protected Direction getFreeForwardDirection(Direction dir)
+    {
+        return getFreeDirection(dir, 3);
+    }
+
+
+    /**
+     * Returns the closest free direction at most 2 turns away from dir.
+     * 
+     * @param dir
+     *            Goal direction.
+     * @return The best direction or null otherwise.
+     */
+    protected Direction getFreeStrafeDirection(Direction dir)
+    {
+        return getFreeDirection(dir, 5);
+    }
+
+
+    /**
+     * Returns the closest free direction to dir.
+     * 
+     * @param dir
+     *            Goal direction.
+     * @return The best direction or null otherwise.
+     */
+    protected Direction getFreeDirection(Direction dir)
+    {
+        return getFreeDirection(dir, 8);
+    }
+
+
+    /**
+     * Returns the closest free direction to dir at most (turns / 2) turns away.
+     * 
+     * @param dir
+     *            Goal direction.
+     * @param turns
+     *            Possible number of directions that can be returned.
+     * @return The best free direction or null otherwise.
+     */
+    protected Direction getFreeDirection(Direction dir, int turns)
+    {
+        // TODO Make an array
+        Direction left = dir;
+        Direction right = dir;
+        int count = 0;
+        while (!rc.canMove(dir) && count < turns)
+        {
+            if (count % 2 == 0)
+            {
+                left = left.rotateLeft();
+                dir = left;
+            }
+            else
+            {
+                right = right.rotateRight();
+                dir = right;
+            }
+            count++;
+        }
+        if (count < turns)
+        {
+            return dir;
+        }
+        else
+        {
+            return null;
         }
     }
 }
