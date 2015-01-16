@@ -3,14 +3,12 @@ package yefreytor;
 /**
  * Constants for the game.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Constants
 {
     // TODO: If tower goes down, update some channel through HQ and have every
 // unit update their tower
-
-    public static final double SUPPLY_CHAIN_PERC = 0.8;
 
     // other constants
     static int                 beaverLimit       = 1;

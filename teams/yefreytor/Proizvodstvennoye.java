@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Production building class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public abstract class Proizvodstvennoye
     extends Zdaniya

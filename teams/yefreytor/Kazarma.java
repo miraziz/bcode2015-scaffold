@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Barracks class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Kazarma
     extends Proizvodstvennoye
@@ -18,6 +18,9 @@ public class Kazarma
     }
 
 
+    /**
+     * Builds a soldier whenever possible.
+     */
     @Override
     public void run()
         throws GameActionException

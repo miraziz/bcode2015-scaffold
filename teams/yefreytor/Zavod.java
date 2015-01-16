@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * Tank factory class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Zavod
     extends Proizvodstvennoye

@@ -3,7 +3,7 @@ package yefreytor;
 /**
  * Constants used for channel communication.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Channels
 {

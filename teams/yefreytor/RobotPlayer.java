@@ -2,6 +2,11 @@ package yefreytor;
 
 import battlecode.common.*;
 
+/**
+ * Main robot class file. Assigns the robot type and runs the robot.
+ * 
+ * @author Amit Bachchan
+ */
 public class RobotPlayer
 {
     public static void run(RobotController rc)
@@ -62,7 +67,7 @@ public class RobotPlayer
             try
             {
                 robot.run();
-                 robot.transferSupplies();
+                robot.transferSupplies();
             }
             catch (Exception e)
             {

@@ -7,7 +7,7 @@ import battlecode.common.*;
 /**
  * Mobile units class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public abstract class Proletariat
     extends Soveti

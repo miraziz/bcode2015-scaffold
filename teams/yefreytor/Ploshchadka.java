@@ -7,7 +7,7 @@ import battlecode.common.RobotType;
 /**
  * Helipad class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Ploshchadka
     extends Proizvodstvennoye
@@ -20,6 +20,9 @@ public class Ploshchadka
     }
 
 
+    /**
+     * Builds a drone whenever possible.
+     */
     @Override
     public void run()
         throws GameActionException

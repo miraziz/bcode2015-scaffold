@@ -6,7 +6,7 @@ import battlecode.common.RobotController;
 /**
  * Fighter (mobile) class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Boyets
     extends Proletariat
@@ -27,11 +27,15 @@ public class Boyets
     }
 
 
+    /**
+     * Attacks if possible, or bugs otherwise.
+     */
     @Override
     public void run()
         throws GameActionException
     {
         super.run();
+        rc.setIndicatorString(1, "Boyets run method");
         if (!attack())
         {
             bug();

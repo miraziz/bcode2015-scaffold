@@ -6,7 +6,7 @@ import battlecode.common.RobotController;
 /**
  * Soldier class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Prizyvnik
     extends Boyets

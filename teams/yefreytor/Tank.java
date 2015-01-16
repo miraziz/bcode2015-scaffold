@@ -6,7 +6,7 @@ import battlecode.common.RobotController;
 /**
  * Tank class.
  * 
- * @author Miraziz
+ * @author Amit Bachchan
  */
 public class Tank
     extends Boyets
