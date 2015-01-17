@@ -28,44 +28,20 @@ public class Prizyvnik
         rc.broadcast(
             Channels.soldierCount,
             rc.readBroadcast(Channels.soldierCount) + 1);
-        Decision decision = makeDecision();
-        if (!rc.isCoreReady())
-        {
-            return;
-        }
-        rc.setIndicatorString(1, "My Decision: " + decision);
-        if (decision == Decision.RUN)
-        {
-            Direction dir = towardsEnemy.opposite();
-            if (rc.canMove(dir))
-            {
-                rc.move(dir);
-            }
-            else if (rc.canMove(dir.rotateLeft()))
-            {
-                rc.move(dir.rotateLeft());
-            }
-            else if (rc.canMove(dir.rotateRight()))
-            {
-                rc.move(dir.rotateRight());
-            }
-            else
-            {
-                attack();
-            }
-        }
-        else if (decision == Decision.ATTACK)
-        {
-            if (!attack())
-            {
-                this.setDestination(enemyHQ);
-                bug();
-            }
-        }
-        else
-        {
-            attack();
-        }
+        super.run();
+        /*
+         * Decision decision = makeDecision(); if (!rc.isCoreReady()) { return;
+         * } rc.setIndicatorString(0, "Traveling to: " +
+         * getLocation(Channels.rallyLoc)); rc.setIndicatorString(1,
+         * "My Decision: " + decision); if (decision == Decision.RUN) {
+         * Direction dir = towardsEnemy.opposite(); if (rc.canMove(dir)) {
+         * rc.move(dir); } else if (rc.canMove(dir.rotateLeft())) {
+         * rc.move(dir.rotateLeft()); } else if (rc.canMove(dir.rotateRight()))
+         * { rc.move(dir.rotateRight()); } else { attack(); } } else if
+         * (decision == Decision.ATTACK) { if (!attack()) {
+         * this.setDestination(getLocation(Channels.rallyLoc)); bug(); } } else
+         * { attack(); }
+         */
     }
 
 

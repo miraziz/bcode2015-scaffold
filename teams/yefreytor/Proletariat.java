@@ -140,10 +140,9 @@ public abstract class Proletariat
             }
             else
             {
-                if (isNormalTile(turn(facing)) || isOffMap(turn(facing)))
+                if (isNormalTile(facing.rotateRight()))
                 {
                     onWall = false;
-                    facing = mLocation.directionTo(dest);
                 }
             }
         }
@@ -151,16 +150,7 @@ public abstract class Proletariat
         if (!onWall)
         {
             facing = rc.getLocation().directionTo(dest);
-            if (rc.getLocation().distanceSquaredTo(dest) <= 35
-                && Clock.getRoundNum() < 1500) // TODO switch to constant to
-                                               // know when attacking
-            {
-                if (!rc.canMove(facing) && !rc.canMove(facing.rotateRight())
-                    && !rc.canMove(facing.rotateLeft()))
-                {
-                    // return false;
-                }
-            }
+
             int count = 0;
             // there is a wall ahead, need to start bugging mode
             // need to handle if count is 8 afterwards. Means the robot is
@@ -189,24 +179,14 @@ public abstract class Proletariat
         }
         if (move(facing))
         {
-            visited.add(mLocation);
-            helper.addLast(mLocation);
+            // visited.add(mLocation);
+            // helper.addLast(mLocation);
             return true;
         }
         else
         {
             return false;
         }
-    }
-
-
-    private Direction turn(Direction dir)
-    {
-        if (this.turnRight)
-        {
-            return dir.rotateRight().rotateRight();
-        }
-        return dir.rotateLeft().rotateLeft();
     }
 
 
