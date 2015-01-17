@@ -18,6 +18,9 @@ public class AerospaceLab
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.aerospaceCount,
+            rc.readBroadcast(Channels.aerospaceCount) + 1);
         this.spawnToEnemy(RobotType.LAUNCHER);
     }
 

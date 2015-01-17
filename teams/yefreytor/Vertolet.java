@@ -18,6 +18,7 @@ public class Vertolet
         throws GameActionException
     {
         super(rc);
+
         turnDirection = rand.nextBoolean();
     }
 
@@ -25,6 +26,10 @@ public class Vertolet
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.droneCount,
+            rc.readBroadcast(Channels.droneCount) + 1);
+
         if (rc.isCoreReady())
         {
             RobotInfo[] nearby =

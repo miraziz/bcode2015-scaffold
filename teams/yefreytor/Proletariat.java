@@ -20,12 +20,13 @@ public abstract class Proletariat
         RUN
     }
 
+    private boolean                 turnRight;
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
-    private LinkedList<MapLocation> helper; // using for
+    private LinkedList<MapLocation> helper;   // using for
 // experimenting something, may be completely useless
-    private HashSet<MapLocation>    visited; // only necessary for
+    private HashSet<MapLocation>    visited;  // only necessary for
 // very specific cases i think.
 
 
@@ -37,6 +38,7 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
+        turnRight = rand.nextBoolean();
     }
 
 
@@ -138,12 +140,8 @@ public abstract class Proletariat
             }
             else
             {
-                if (isNormalTile(facing.rotateRight().rotateRight())
-                    || isOffMap(facing.rotateRight().rotateRight()))
+                if (isNormalTile(turn(facing)) || isOffMap(turn(facing)))
                 {
-                    rc.setIndicatorString(
-                        2,
-                        "switched onwall off at: " + Clock.getRoundNum());
                     onWall = false;
                     facing = mLocation.directionTo(dest);
                 }
@@ -160,7 +158,7 @@ public abstract class Proletariat
                 if (!rc.canMove(facing) && !rc.canMove(facing.rotateRight())
                     && !rc.canMove(facing.rotateLeft()))
                 {
-                    return false;
+                    // return false;
                 }
             }
             int count = 0;
@@ -171,7 +169,14 @@ public abstract class Proletariat
             while (!isNormalTile(facing) && count < 8)
             {
                 count++;
-                facing = facing.rotateLeft();
+                if (turnRight)
+                {
+                    facing = facing.rotateLeft();
+                }
+                else
+                {
+                    facing = facing.rotateRight();
+                }
                 onWall = true;
             }
             if (count == 8)
@@ -192,6 +197,16 @@ public abstract class Proletariat
         {
             return false;
         }
+    }
+
+
+    private Direction turn(Direction dir)
+    {
+        if (this.turnRight)
+        {
+            return dir.rotateRight().rotateRight();
+        }
+        return dir.rotateLeft().rotateLeft();
     }
 
 

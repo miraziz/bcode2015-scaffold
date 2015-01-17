@@ -20,6 +20,7 @@ public class Channels
     static int minerFactoryCount     = 11;
     static int helipadCount          = 12;
     static int tankFactoryCount      = 13;
+    static int aerospaceCount        = 14;
 
     // Enemy Info
     static int destroyedTower        = 20;

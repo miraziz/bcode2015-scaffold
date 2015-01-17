@@ -19,6 +19,8 @@ public class Constants
     static int    droneLimit      = 1;
 
     static int    tankCost        = RobotType.TANK.oreCost;
+    static int    launcherCost    = RobotType.LAUNCHER.oreCost;
+    static int    soldierCost     = RobotType.SOLDIER.oreCost;
 
     // Production rates in ore/turn
     static double barracksRate    = 125 / 30;

@@ -39,7 +39,7 @@ public class Shtab
 
         analyzeTowers();
 
-        defaultRallyLoc = findRallyPoint();
+        defaultRallyLoc = enemyHQ;// findRallyPoint();
         broadcastLocation(Channels.rallyLoc, defaultRallyLoc);
 
         // fills path of where to build buildings, uses lots of bytecodes so
@@ -139,8 +139,6 @@ public class Shtab
         int enemyXOffset = enemyHQ.x - enemyFurthestTower.x;
         int enemyYOffset = enemyHQ.y - enemyFurthestTower.y;
 
-        rc.setIndicatorString(2, "Ally X Offset: " + allyXOffset
-            + ", Enemy X Offset: " + enemyXOffset);
         if (allyXOffset == enemyXOffset)
         {
             return Symmetry.X_REFLECTION;
@@ -223,7 +221,7 @@ public class Shtab
             myTowers.offer(new TowerRank(towerLoc, vulnerabilityScore));
         }
         Symmetry symmetry = findSymmetry();
-        rc.setIndicatorString(0, "Symmetry: " + symmetry);
+
         int i = 0;
         String str = "enemyTowers in vulnerability order: ";
         while (!myTowers.isEmpty())
@@ -246,7 +244,6 @@ public class Shtab
             str += enemyTowers[i].toString() + ", ";
             i++;
         }
-        rc.setIndicatorString(1, str);
 
     }
 
@@ -361,57 +358,41 @@ public class Shtab
         int roundNum = Clock.getRoundNum();
         buildCooldown++;
         double myOre = rc.getTeamOre();
+
         int barracksCount = rc.readBroadcast(Channels.barracksCount);
         int helipadCount = rc.readBroadcast(Channels.helipadCount);
         int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
-        if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
-        {
-            buildCooldown = 0;
-            int mined = rc.readBroadcast(Channels.miningTotal);
-            rc.broadcast(Channels.miningTotal, 0);
-            double mineRate = mined / 10;
+        int aerospaceCount = rc.readBroadcast(Channels.aerospaceCount);
 
-            double spawnRate =
-                (Constants.barracksRate * barracksCount)
-                    + (Constants.tankFactoryRate * tankFactoryCount)
-                    + (Constants.helipadRate * helipadCount);
-            // rc.setIndicatorString(2, "mineRate: " + mineRate +
-// ", spawnRate: "
-            // + spawnRate);
-            if (mineRate >= spawnRate)
-            {
-                // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-            }
-        }
-        if (roundNum > 500 && roundNum % 100 == 0 && tankFactoryCount < 3
-            && rc.getTeamOre() > 600)
-        {
-            submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        }
-        // spawning stuff
         int soldierCount = rc.readBroadcast(Channels.soldierCount);
         int basherCount = rc.readBroadcast(Channels.basherCount);
         int tankCount = rc.readBroadcast(Channels.tankCount);
         int droneCount = rc.readBroadcast(Channels.droneCount);
+
+        rc.setIndicatorString(0, "Drone count: " + droneCount);
+
         rc.broadcast(Channels.shouldSpawnBasher, 0);
-        rc.broadcast(Channels.shouldSpawnSoldier, 0);
+        rc.broadcast(Channels.shouldSpawnSoldier, 1);
         rc.broadcast(Channels.shouldSpawnDrone, 0);
         if (droneCount == 0)
         {
             rc.broadcast(Channels.shouldSpawnDrone, 1);
         }
-        rc.setIndicatorString(0, "My ore: " + myOre + ", tankFactoryCount: "
-            + (tankFactoryCount * Constants.tankCost));
-        if (// soldierCount < Constants.soldierLimit &&
-        myOre > tankFactoryCount * Constants.tankCost)
+        if (myOre > aerospaceCount * Constants.launcherCost
+            + Constants.soldierCost)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
         }
-        else if (myOre > tankFactoryCount * Constants.tankCost)
-        {
-            rc.broadcast(Channels.shouldSpawnBasher, 1);
-        }
 
+        rc.broadcast(Channels.beaverCount, 0);
+        rc.broadcast(Channels.helipadCount, 0);
+        rc.broadcast(Channels.minerFactoryCount, 0);
+        rc.broadcast(Channels.barracksCount, 0);
+        rc.broadcast(Channels.tankFactoryCount, 0);
+        rc.broadcast(Channels.soldierCount, 0);
+        rc.broadcast(Channels.basherCount, 0);
+        rc.broadcast(Channels.tankCount, 0);
+        rc.broadcast(Channels.droneCount, 0);
     }
 
 
@@ -459,9 +440,12 @@ public class Shtab
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
-        defaultRallyLoc = getLocation(Channels.rallyLoc);
-        rc.broadcast(Channels.highestEnemyHealth, 0);
-        broadcastLocation(Channels.rallyLoc, defaultRallyLoc);
+        /*
+         * defaultRallyLoc = getLocation(Channels.rallyLoc);
+         * rc.broadcast(Channels.highestEnemyHealth, 0);
+         * broadcastLocation(Channels.rallyLoc, defaultRallyLoc);
+         */
+
         super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
@@ -481,21 +465,12 @@ public class Shtab
         fillBuildingPath();
 
         manageSpawnsAndBuildings();
-        rc.broadcast(Channels.beaverCount, 0);
-        rc.broadcast(Channels.helipadCount, 0);
-        rc.broadcast(Channels.minerFactoryCount, 0);
-        rc.broadcast(Channels.barracksCount, 0);
-        rc.broadcast(Channels.tankFactoryCount, 0);
-        rc.broadcast(Channels.soldierCount, 0);
-        rc.broadcast(Channels.basherCount, 0);
-        rc.broadcast(Channels.tankCount, 0);
-        rc.broadcast(Channels.droneCount, 0);
+
         sendBeaverTasks();
         shouldRun = false;
 
         if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
-
             broadcastLocation(Channels.rallyLoc, this.enemyHQ);
             if (enemyTowers.length > 0)
             {
@@ -503,6 +478,7 @@ public class Shtab
             }
             attacking = true;
         }
+
         if (attacking)
         {
             broadcastLocation(Channels.rallyLoc, this.enemyHQ);

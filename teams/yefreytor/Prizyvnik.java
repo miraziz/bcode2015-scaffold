@@ -33,6 +33,7 @@ public class Prizyvnik
         {
             return;
         }
+        rc.setIndicatorString(1, "My Decision: " + decision);
         if (decision == Decision.RUN)
         {
             Direction dir = towardsEnemy.opposite();
@@ -57,7 +58,7 @@ public class Prizyvnik
         {
             if (!attack())
             {
-                this.setDestination(getLocation(Channels.rallyLoc));
+                this.setDestination(enemyHQ);
                 bug();
             }
         }
@@ -112,9 +113,9 @@ public class Prizyvnik
         for (int i = 0; i < len; i++)
         {
             RobotInfo r = nearby.pollFirst();
-            if (isAttackingUnit(r.type)
-                && inLine(towardsEnemy, rc.getLocation()
-                    .directionTo(r.location)))
+            if (isAttackingUnit(r.type))
+            // && inLine(towardsEnemy, rc.getLocation()
+            // .directionTo(r.location)))
             {
                 myTeamsHealth += r.health;
             }
