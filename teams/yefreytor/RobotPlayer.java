@@ -25,6 +25,14 @@ public class RobotPlayer
         {
             robot = new AerospaceLab(rc);
         }
+        else if (rc.getType() == RobotType.LAUNCHER)
+        {
+            robot = new Launcher(rc);
+        }
+        else if (rc.getType() == RobotType.MISSILE)
+        {
+            robot = new Missile(rc);
+        }
         else if (rc.getType() == RobotType.SUPPLYDEPOT)
         {
             robot = new Zastava(rc);

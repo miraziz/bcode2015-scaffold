@@ -29,6 +29,7 @@ public class Channels
     // unit controls
     static int shouldSpawnSoldier    = 25;
     static int shouldSpawnBasher     = 26;
+    static int shouldSpawnDrone      = 27;
 
     // commands
     static int beaverTasksTaken      = 49;

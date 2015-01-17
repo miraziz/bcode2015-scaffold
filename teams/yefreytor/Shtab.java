@@ -56,12 +56,17 @@ public class Shtab
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+
         sendBeaverTasks();
         this.pathId = 1;
         buildCooldown = 0;
@@ -387,8 +392,14 @@ public class Shtab
         int soldierCount = rc.readBroadcast(Channels.soldierCount);
         int basherCount = rc.readBroadcast(Channels.basherCount);
         int tankCount = rc.readBroadcast(Channels.tankCount);
+        int droneCount = rc.readBroadcast(Channels.droneCount);
         rc.broadcast(Channels.shouldSpawnBasher, 0);
         rc.broadcast(Channels.shouldSpawnSoldier, 0);
+        rc.broadcast(Channels.shouldSpawnDrone, 0);
+        if (droneCount == 0)
+        {
+            rc.broadcast(Channels.shouldSpawnDrone, 1);
+        }
         rc.setIndicatorString(0, "My ore: " + myOre + ", tankFactoryCount: "
             + (tankFactoryCount * Constants.tankCost));
         if (// soldierCount < Constants.soldierLimit &&
@@ -478,6 +489,7 @@ public class Shtab
         rc.broadcast(Channels.soldierCount, 0);
         rc.broadcast(Channels.basherCount, 0);
         rc.broadcast(Channels.tankCount, 0);
+        rc.broadcast(Channels.droneCount, 0);
         sendBeaverTasks();
         shouldRun = false;
 

@@ -22,7 +22,6 @@ public class Zavod
     public void run()
         throws GameActionException
     {
-        // TODO: Smarter factory
         rc.broadcast(
             Channels.tankFactoryCount,
             rc.readBroadcast(Channels.tankFactoryCount) + 1);
