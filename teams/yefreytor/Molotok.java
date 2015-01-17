@@ -193,6 +193,10 @@ public class Molotok
         {
             toBuild = RobotType.TANKFACTORY;
         }
+        else if (task == BeaverTask.BUILD_AEROSPACE)
+        {
+            toBuild = RobotType.AEROSPACELAB;
+        }
         return toBuild;
     }
 

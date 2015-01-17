@@ -13,6 +13,13 @@ public abstract class Proletariat
     extends Soveti
 {
 
+    protected enum Decision
+    {
+        RELAX,
+        ATTACK,
+        RUN
+    }
+
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
@@ -53,7 +60,9 @@ public abstract class Proletariat
      */
     protected boolean setDestination(MapLocation loc)
     {
-        if ((loc != null) && (dest == null || !dest.equals(loc)))
+        if ((loc != null)
+            && (dest == null || !dest.equals(loc) || dest
+                .distanceSquaredTo(loc) < 10))
         {
             dest = loc;
             facing = mLocation.directionTo(dest);
@@ -73,6 +82,29 @@ public abstract class Proletariat
     {
         if (rc.isCoreReady() && rc.canMove(dir))
         {
+            MapLocation moveLoc = rc.getLocation().add(dir);
+            if (Clock.getRoundNum() < Constants.attackRound)
+            {
+                if (Clock.getRoundNum() < Constants.attackRound + 300)
+                {
+                    int distance = moveLoc.distanceSquaredTo(enemyHQ);
+                    if (enemyTowers.length >= 5)
+                    {
+                        distance -= 11;
+                    }
+                    if (distance <= RobotType.HQ.attackRadiusSquared + 2)
+                    {
+                        return false;
+                    }
+                }
+                for (MapLocation r : enemyTowers)
+                {
+                    if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
+                    {
+                        return false;
+                    }
+                }
+            }
             rc.move(dir);
             return true;
         }

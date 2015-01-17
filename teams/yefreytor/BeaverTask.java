@@ -13,7 +13,8 @@ public enum BeaverTask
     BUILD_SUPPLYDEPOT(3),
     BUILD_HELIPAD(4),
     MINE(5),
-    JOIN_ARMY(6);
+    JOIN_ARMY(6),
+    BUILD_AEROSPACE(7);
 
     private int                 value;
     private static BeaverTask[] vals = BeaverTask.values();

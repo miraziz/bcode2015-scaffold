@@ -23,6 +23,9 @@ public class Zavod
         throws GameActionException
     {
         // TODO: Smarter factory
+        rc.broadcast(
+            Channels.tankFactoryCount,
+            rc.readBroadcast(Channels.tankFactoryCount) + 1);
         spawnToEnemy(RobotType.TANK);
     }
 

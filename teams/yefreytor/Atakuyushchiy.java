@@ -65,7 +65,7 @@ public abstract class Atakuyushchiy
             rc.broadcast(Channels.highestEnemyHealth, enemyHealth);
             avgX /= nearby.length;
             avgY /= nearby.length;
-            broadcastLocation(Channels.rallyLoc, rc.getLocation());
+            broadcastLocation(Channels.rallyLoc, new MapLocation(avgX, avgY));
         }
     }
 }

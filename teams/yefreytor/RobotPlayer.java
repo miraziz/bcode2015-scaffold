@@ -21,6 +21,10 @@ public class RobotPlayer
         {
             robot = new Bashna(rc);
         }
+        else if (rc.getType() == RobotType.AEROSPACELAB)
+        {
+            robot = new AerospaceLab(rc);
+        }
         else if (rc.getType() == RobotType.SUPPLYDEPOT)
         {
             robot = new Zastava(rc);

@@ -1,5 +1,6 @@
 package yefreytor;
 
+import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
@@ -31,7 +32,7 @@ public class Ferma
         {
             int minerCount = rc.readBroadcast(Channels.minerCount);
             rc.setIndicatorString(1, "Miner count: " + minerCount);
-            if (minerCount < Constants.minerLimit)
+            if (minerCount < Constants.minerLimit && Clock.getRoundNum() < 1250)
             {
                 spawnToEnemy(RobotType.MINER);
             }

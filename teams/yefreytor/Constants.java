@@ -15,6 +15,7 @@ public class Constants
     // other constants
     static int    beaverLimit     = 2;
     static int    minerLimit      = 30;
+    static int    soldierLimit    = 12;
 
     static int    tankCost        = RobotType.TANK.oreCost;
 
@@ -22,4 +23,6 @@ public class Constants
     static double barracksRate    = 125 / 30;
     static double tankFactoryRate = 125 / 30;
     static double helipadRate     = 125 / 30;
+
+    static int    attackRound     = 1500;
 }

@@ -14,14 +14,6 @@ public class Vertolet
     private boolean turnDirection;
 
 
-    private enum Decision
-    {
-        RELAX,
-        ATTACK,
-        RUN
-    }
-
-
     public Vertolet(RobotController rc)
         throws GameActionException
     {

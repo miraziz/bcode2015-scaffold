@@ -56,13 +56,10 @@ public class Shtab
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
         sendBeaverTasks();
@@ -345,7 +342,6 @@ public class Shtab
             i++;
         }
         rc.broadcast(Channels.beaverTasksTaken, 0);
-
     }
 
 
@@ -382,13 +378,21 @@ public class Shtab
                 // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
             }
         }
+        if (roundNum > 500 && roundNum % 100 == 0 && tankFactoryCount < 3
+            && rc.getTeamOre() > 600)
+        {
+            submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        }
         // spawning stuff
         int soldierCount = rc.readBroadcast(Channels.soldierCount);
         int basherCount = rc.readBroadcast(Channels.basherCount);
         int tankCount = rc.readBroadcast(Channels.tankCount);
         rc.broadcast(Channels.shouldSpawnBasher, 0);
         rc.broadcast(Channels.shouldSpawnSoldier, 0);
-        if (soldierCount < 30 && myOre > tankFactoryCount * Constants.tankCost)
+        rc.setIndicatorString(0, "My ore: " + myOre + ", tankFactoryCount: "
+            + (tankFactoryCount * Constants.tankCost));
+        if (// soldierCount < Constants.soldierLimit &&
+        myOre > tankFactoryCount * Constants.tankCost)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
         }
@@ -423,7 +427,7 @@ public class Shtab
             int unitSupply = (int)(totSupply / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
-                if (Clock.getBytecodesLeft() < 511)
+                if (Clock.getBytecodesLeft() < 550)
                 {
                     return;
                 }
@@ -477,7 +481,7 @@ public class Shtab
         sendBeaverTasks();
         shouldRun = false;
 
-        if (!attacking && Clock.getRoundNum() > 1500)
+        if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
 
             broadcastLocation(Channels.rallyLoc, this.enemyHQ);
