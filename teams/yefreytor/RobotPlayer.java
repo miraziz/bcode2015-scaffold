@@ -61,6 +61,10 @@ public class RobotPlayer
         {
             robot = new Vertolet(rc);
         }
+        else if (rc.getType() == RobotType.BASHER)
+        {
+            robot = new Basher(rc);
+        }
 
         while (true)
         {

@@ -20,6 +20,7 @@ public class Shtab
     private int                    buildCooldown;
     private boolean                shouldRun;
     HashSet<MapLocation>           destroyedTowers;
+    MapLocation                    defaultRallyLoc;
 
 
     public Shtab(RobotController rc)
@@ -38,7 +39,8 @@ public class Shtab
 
         analyzeTowers();
 
-        broadcastLocation(Channels.rallyLoc, this.findRallyPoint());
+        defaultRallyLoc = findRallyPoint();
+        broadcastLocation(Channels.rallyLoc, defaultRallyLoc);
 
         // fills path of where to build buildings, uses lots of bytecodes so
         // split into the run method. Can reduce or raise here according to what
@@ -351,20 +353,23 @@ public class Shtab
 
     // submits a new building to be built based on mine income
     // maybe just replace with tested timed building?
-    private void needMoreBuildings()
+    private void manageSpawnsAndBuildings()
         throws GameActionException
     {
+        // building stuff
         int roundNum = Clock.getRoundNum();
         buildCooldown++;
+        double myOre = rc.getTeamOre();
+        int barracksCount = rc.readBroadcast(Channels.barracksCount);
+        int helipadCount = rc.readBroadcast(Channels.helipadCount);
+        int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
         if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
         {
             buildCooldown = 0;
             int mined = rc.readBroadcast(Channels.miningTotal);
             rc.broadcast(Channels.miningTotal, 0);
             double mineRate = mined / 10;
-            int barracksCount = rc.readBroadcast(Channels.barracksCount);
-            int helipadCount = rc.readBroadcast(Channels.helipadCount);
-            int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
+
             double spawnRate =
                 (Constants.barracksRate * barracksCount)
                     + (Constants.tankFactoryRate * tankFactoryCount)
@@ -377,6 +382,21 @@ public class Shtab
                 // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
             }
         }
+        // spawning stuff
+        int soldierCount = rc.readBroadcast(Channels.soldierCount);
+        int basherCount = rc.readBroadcast(Channels.basherCount);
+        int tankCount = rc.readBroadcast(Channels.tankCount);
+        rc.broadcast(Channels.shouldSpawnBasher, 0);
+        rc.broadcast(Channels.shouldSpawnSoldier, 0);
+        if (soldierCount < 30 && myOre > tankFactoryCount * Constants.tankCost)
+        {
+            rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        }
+        else if (myOre > tankFactoryCount * Constants.tankCost)
+        {
+            rc.broadcast(Channels.shouldSpawnBasher, 1);
+        }
+
     }
 
 
@@ -407,7 +427,10 @@ public class Shtab
                 {
                     return;
                 }
-                rc.transferSupplies(unitSupply, robot.location);
+                if (unitSupply != 0 && rc.canSenseLocation(robot.location))
+                {
+                    rc.transferSupplies(unitSupply, robot.location);
+                }
             }
         }
     }
@@ -421,6 +444,9 @@ public class Shtab
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
+        defaultRallyLoc = getLocation(Channels.rallyLoc);
+        rc.broadcast(Channels.highestEnemyHealth, 0);
+        broadcastLocation(Channels.rallyLoc, defaultRallyLoc);
         super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
@@ -439,13 +465,15 @@ public class Shtab
 
         fillBuildingPath();
 
-        needMoreBuildings();
+        manageSpawnsAndBuildings();
         rc.broadcast(Channels.beaverCount, 0);
         rc.broadcast(Channels.helipadCount, 0);
         rc.broadcast(Channels.minerFactoryCount, 0);
         rc.broadcast(Channels.barracksCount, 0);
         rc.broadcast(Channels.tankFactoryCount, 0);
-
+        rc.broadcast(Channels.soldierCount, 0);
+        rc.broadcast(Channels.basherCount, 0);
+        rc.broadcast(Channels.tankCount, 0);
         sendBeaverTasks();
         shouldRun = false;
 

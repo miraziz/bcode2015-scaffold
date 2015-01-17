@@ -1,5 +1,7 @@
 package yefreytor;
 
+import battlecode.common.RobotType;
+
 /**
  * Constants for the game.
  * 
@@ -13,6 +15,8 @@ public class Constants
     // other constants
     static int    beaverLimit     = 2;
     static int    minerLimit      = 30;
+
+    static int    tankCost        = RobotType.TANK.oreCost;
 
     // Production rates in ore/turn
     static double barracksRate    = 125 / 30;

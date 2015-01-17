@@ -26,7 +26,14 @@ public class Kazarma
         throws GameActionException
     {
         // TODO smarter barracks
-        spawnToEnemy(RobotType.SOLDIER);
+        if (rc.readBroadcast(Channels.shouldSpawnSoldier) == 1)
+        {
+            spawnToEnemy(RobotType.SOLDIER);
+        }
+        else if (rc.readBroadcast(Channels.shouldSpawnBasher) == 1)
+        {
+            spawnToEnemy(RobotType.BASHER);
+        }
     }
 
 }
