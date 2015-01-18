@@ -15,27 +15,39 @@ public class RobotPlayer
         Soveti robot = null;
         if (rc.getType() == RobotType.HQ)
         {
-            robot = new Shtab(rc);
+            robot = new HQ(rc);
         }
         else if (rc.getType() == RobotType.TOWER)
         {
-            robot = new Bashna(rc);
+            robot = new Tower(rc);
+        }
+        else if (rc.getType() == RobotType.AEROSPACELAB)
+        {
+            robot = new AerospaceLab(rc);
+        }
+        else if (rc.getType() == RobotType.LAUNCHER)
+        {
+            robot = new Launcher(rc);
+        }
+        else if (rc.getType() == RobotType.MISSILE)
+        {
+            robot = new Missile(rc);
         }
         else if (rc.getType() == RobotType.SUPPLYDEPOT)
         {
-            robot = new Zastava(rc);
+            robot = new SupplyDepot(rc);
         }
         else if (rc.getType() == RobotType.MINERFACTORY)
         {
-            robot = new Ferma(rc);
+            robot = new MinerFactory(rc);
         }
         else if (rc.getType() == RobotType.BARRACKS)
         {
-            robot = new Kazarma(rc);
+            robot = new Barracks(rc);
         }
         else if (rc.getType() == RobotType.TANKFACTORY)
         {
-            robot = new Zavod(rc);
+            robot = new TankFactory(rc);
         }
         else if (rc.getType() == RobotType.TANK)
         {
@@ -43,23 +55,27 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.BEAVER)
         {
-            robot = new Molotok(rc);
+            robot = new Beaver(rc);
         }
         else if (rc.getType() == RobotType.MINER)
         {
-            robot = new Serp(rc);
+            robot = new Miner(rc);
         }
         else if (rc.getType() == RobotType.SOLDIER)
         {
-            robot = new Prizyvnik(rc);
+            robot = new Soldier(rc);
         }
         else if (rc.getType() == RobotType.HELIPAD)
         {
-            robot = new Ploshchadka(rc);
+            robot = new Helipad(rc);
         }
         else if (rc.getType() == RobotType.DRONE)
         {
-            robot = new Vertolet(rc);
+            robot = new Drone(rc);
+        }
+        else if (rc.getType() == RobotType.BASHER)
+        {
+            robot = new Basher(rc);
         }
 
         while (true)

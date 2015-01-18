@@ -3,16 +3,11 @@ package yefreytor;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
-/**
- * Soldier class.
- * 
- * @author Amit Bachchan
- */
-public class Prizyvnik
-    extends Boyets
+public class Basher
+    extends Fighter
 {
 
-    public Prizyvnik(RobotController rc)
+    public Basher(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -22,6 +17,10 @@ public class Prizyvnik
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.basherCount,
+            rc.readBroadcast(Channels.basherCount) + 1);
         super.run();
     }
+
 }

@@ -7,11 +7,11 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public abstract class Proizvodstvennoye
-    extends Zdaniya
+public abstract class ProductionBuilding
+    extends Building
 {
 
-    public Proizvodstvennoye(RobotController rc)
+    public ProductionBuilding(RobotController rc)
         throws GameActionException
     {
         super(rc);

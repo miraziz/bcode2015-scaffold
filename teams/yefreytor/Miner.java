@@ -7,7 +7,7 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Serp
+public class Miner
     extends Proletariat
 {
 
@@ -15,7 +15,7 @@ public class Serp
     private boolean   turnRight;
 
 
-    public Serp(RobotController rc)
+    public Miner(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -36,6 +36,7 @@ public class Serp
         rc.broadcast(
             Channels.minerCount,
             rc.readBroadcast(Channels.minerCount) + 1);
+        findDefenseSpot();
         if (rc.isCoreReady())
         {
             // TODO Don't go back in the direction of the enemy. Have some
@@ -180,5 +181,39 @@ public class Serp
             }
         }
         return false;
+    }
+
+
+    public void findDefenseSpot()
+        throws GameActionException
+    {
+        RobotInfo[] nearby =
+            rc.senseNearbyRobots(
+                rc.getType().sensorRadiusSquared,
+                this.enemyTeam);
+        if (nearby.length == 0)
+        {
+            return;
+        }
+        int enemyHealth = 0;
+        int avgX = 0;
+        int avgY = 0;
+        for (RobotInfo r : nearby)
+        {
+            if (r.type == RobotType.HQ || r.type == RobotType.TOWER)
+            {
+                continue;
+            }
+            enemyHealth += r.health;
+            avgX += r.location.x;
+            avgY += r.location.y;
+        }
+        if (rc.readBroadcast(Channels.highestEnemyHealth) < enemyHealth)
+        {
+            rc.broadcast(Channels.highestEnemyHealth, enemyHealth);
+            avgX /= nearby.length;
+            avgY /= nearby.length;
+            broadcastLocation(Channels.rallyLoc, new MapLocation(avgX, avgY));
+        }
     }
 }

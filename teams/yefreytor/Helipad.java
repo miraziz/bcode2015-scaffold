@@ -9,11 +9,11 @@ import battlecode.common.RobotType;
  * 
  * @author Amit Bachchan
  */
-public class Ploshchadka
-    extends Proizvodstvennoye
+public class Helipad
+    extends ProductionBuilding
 {
 
-    public Ploshchadka(RobotController rc)
+    public Helipad(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -30,7 +30,12 @@ public class Ploshchadka
         rc.broadcast(
             Channels.helipadCount,
             rc.readBroadcast(Channels.helipadCount) + 1);
-        spawnToEnemy(RobotType.DRONE);
+        int shouldSpawnDrone = rc.readBroadcast(Channels.shouldSpawnDrone);
+        rc.setIndicatorString(0, "Should spawn drone: " + shouldSpawnDrone);
+        if (shouldSpawnDrone == 1)
+        {
+            spawnToEnemy(RobotType.DRONE);
+        }
     }
 
 }

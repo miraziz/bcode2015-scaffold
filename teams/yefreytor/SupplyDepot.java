@@ -8,11 +8,11 @@ import battlecode.common.RobotController;
  * 
  * @author Amit Bachchan
  */
-public class Zastava
-    extends Proizvodstvennoye
+public class SupplyDepot
+    extends ProductionBuilding
 {
 
-    public Zastava(RobotController rc)
+    public SupplyDepot(RobotController rc)
         throws GameActionException
     {
         super(rc);

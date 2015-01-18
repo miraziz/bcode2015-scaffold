@@ -7,25 +7,18 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Vertolet
+public class Drone
     extends Proletariat
 {
 
     private boolean turnDirection;
 
 
-    private enum Decision
-    {
-        RELAX,
-        ATTACK,
-        RUN
-    }
-
-
-    public Vertolet(RobotController rc)
+    public Drone(RobotController rc)
         throws GameActionException
     {
         super(rc);
+
         turnDirection = rand.nextBoolean();
     }
 
@@ -33,6 +26,10 @@ public class Vertolet
     public void run()
         throws GameActionException
     {
+        rc.broadcast(
+            Channels.droneCount,
+            rc.readBroadcast(Channels.droneCount) + 1);
+
         if (rc.isCoreReady())
         {
             RobotInfo[] nearby =

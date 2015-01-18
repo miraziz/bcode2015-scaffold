@@ -3,16 +3,11 @@ package yefreytor;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
-/**
- * Tank class.
- * 
- * @author Amit Bachchan
- */
-public class Tank
-    extends Fighter
+public class Launcher
+    extends Proletariat
 {
 
-    public Tank(RobotController rc)
+    public Launcher(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -20,8 +15,8 @@ public class Tank
 
 
     public void run()
-        throws GameActionException
     {
-        super.run();
+
     }
+
 }

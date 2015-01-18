@@ -13,12 +13,20 @@ public abstract class Proletariat
     extends Soveti
 {
 
+    protected enum Decision
+    {
+        RELAX,
+        ATTACK,
+        RUN
+    }
+
+    private boolean                 turnRight;
     private MapLocation             dest;
     private Boolean                 onWall;
     protected Direction             facing;
-    private LinkedList<MapLocation> helper; // using for
+    private LinkedList<MapLocation> helper;   // using for
 // experimenting something, may be completely useless
-    private HashSet<MapLocation>    visited; // only necessary for
+    private HashSet<MapLocation>    visited;  // only necessary for
 // very specific cases i think.
 
 
@@ -30,6 +38,7 @@ public abstract class Proletariat
         helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
+        turnRight = rand.nextBoolean();
     }
 
 
@@ -53,7 +62,9 @@ public abstract class Proletariat
      */
     protected boolean setDestination(MapLocation loc)
     {
-        if ((loc != null) && (dest == null || !dest.equals(loc)))
+        if ((loc != null)
+            && (dest == null || !dest.equals(loc) || dest
+                .distanceSquaredTo(loc) < 10))
         {
             dest = loc;
             // TODO How does facing work? Does the robot face wherever it moved?
@@ -74,6 +85,29 @@ public abstract class Proletariat
     {
         if (rc.isCoreReady() && rc.canMove(dir))
         {
+            MapLocation moveLoc = rc.getLocation().add(dir);
+            if (Clock.getRoundNum() < Constants.attackRound)
+            {
+                if (Clock.getRoundNum() < Constants.attackRound + 300)
+                {
+                    int distance = moveLoc.distanceSquaredTo(enemyHQ);
+                    if (enemyTowers.length >= 5)
+                    {
+                        distance -= 11;
+                    }
+                    if (distance <= RobotType.HQ.attackRadiusSquared + 2)
+                    {
+                        return false;
+                    }
+                }
+                for (MapLocation r : enemyTowers)
+                {
+                    if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
+                    {
+                        return false;
+                    }
+                }
+            }
             rc.move(dir);
             return true;
         }
@@ -108,14 +142,9 @@ public abstract class Proletariat
             }
             else
             {
-                if (isNormalTile(facing.rotateRight().rotateRight())
-                    || isOffMap(facing.rotateRight().rotateRight()))
+                if (isNormalTile(facing.rotateRight()))
                 {
-                    rc.setIndicatorString(
-                        2,
-                        "switched onwall off at: " + Clock.getRoundNum());
                     onWall = false;
-                    facing = mLocation.directionTo(dest);
                 }
             }
         }
@@ -124,16 +153,7 @@ public abstract class Proletariat
         if (!onWall)
         {
             facing = rc.getLocation().directionTo(dest);
-            if (rc.getLocation().distanceSquaredTo(dest) <= 35
-                && Clock.getRoundNum() < 1500) // TODO switch to constant to
-                                               // know when attacking
-            {
-                if (!rc.canMove(facing) && !rc.canMove(facing.rotateRight())
-                    && !rc.canMove(facing.rotateLeft()))
-                {
-                    return false;
-                }
-            }
+
             int count = 0;
             // there is a wall ahead, need to start bugging mode
             // need to handle if count is 8 afterwards. Means the robot is
@@ -142,7 +162,14 @@ public abstract class Proletariat
             while (!isNormalTile(facing) && count < 8)
             {
                 count++;
-                facing = facing.rotateLeft();
+                if (turnRight)
+                {
+                    facing = facing.rotateLeft();
+                }
+                else
+                {
+                    facing = facing.rotateRight();
+                }
                 onWall = true;
             }
             if (count == 8)
@@ -155,8 +182,8 @@ public abstract class Proletariat
         }
         if (move(facing))
         {
-            visited.add(mLocation);
-            helper.addLast(mLocation);
+            // visited.add(mLocation);
+            // helper.addLast(mLocation);
             return true;
         }
         else

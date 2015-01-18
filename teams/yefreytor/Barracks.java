@@ -7,11 +7,11 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Kazarma
-    extends Proizvodstvennoye
+public class Barracks
+    extends ProductionBuilding
 {
 
-    public Kazarma(RobotController rc)
+    public Barracks(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -26,7 +26,14 @@ public class Kazarma
         throws GameActionException
     {
         // TODO smarter barracks
-        spawnToEnemy(RobotType.SOLDIER);
+        if (rc.readBroadcast(Channels.shouldSpawnSoldier) == 1)
+        {
+            spawnToEnemy(RobotType.SOLDIER);
+        }
+        else if (rc.readBroadcast(Channels.shouldSpawnBasher) == 1)
+        {
+            spawnToEnemy(RobotType.BASHER);
+        }
     }
 
 }

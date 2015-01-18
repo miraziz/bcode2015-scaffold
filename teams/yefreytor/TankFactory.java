@@ -7,11 +7,11 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Zavod
-    extends Proizvodstvennoye
+public class TankFactory
+    extends ProductionBuilding
 {
 
-    public Zavod(RobotController rc)
+    public TankFactory(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -22,7 +22,9 @@ public class Zavod
     public void run()
         throws GameActionException
     {
-        // TODO: Smarter factory
+        rc.broadcast(
+            Channels.tankFactoryCount,
+            rc.readBroadcast(Channels.tankFactoryCount) + 1);
         spawnToEnemy(RobotType.TANK);
     }
 

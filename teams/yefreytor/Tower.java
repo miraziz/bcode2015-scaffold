@@ -7,13 +7,13 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Bashna
-    extends Atakuyushchiy
+public class Tower
+    extends AttackBuilding
 {
     private int vulnChannel;
 
 
-    public Bashna(RobotController rc)
+    public Tower(RobotController rc)
         throws GameActionException
     {
         super(rc);

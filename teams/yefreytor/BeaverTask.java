@@ -5,21 +5,22 @@ package yefreytor;
  * 
  * @author Amit Bachchan
  */
-public enum MolotokTask
+public enum BeaverTask
 {
     BUILD_BARRACKS(0),
     BUILD_MINERFACTORY(1),
     BUILD_TANKFACTORY(2),
     BUILD_SUPPLYDEPOT(3),
     BUILD_HELIPAD(4),
-    MINE(5),
-    JOIN_ARMY(6);
+    BUILD_AEROSPACE(5),
+    MINE(6),
+    JOIN_ARMY(7);
 
     private int                 value;
-    private static MolotokTask[] vals = MolotokTask.values();
+    private static BeaverTask[] vals = BeaverTask.values();
 
 
-    MolotokTask(int id)
+    BeaverTask(int id)
     {
         value = id;
     }
@@ -31,7 +32,7 @@ public enum MolotokTask
     }
 
 
-    public static MolotokTask getTask(int val)
+    public static BeaverTask getTask(int val)
     {
         return vals[val];
     }

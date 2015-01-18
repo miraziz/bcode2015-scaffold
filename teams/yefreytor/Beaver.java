@@ -7,10 +7,10 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Molotok
+public class Beaver
     extends Proletariat
 {
-    private MolotokTask task;
+    private BeaverTask task;
     private boolean     reached;
     private MapLocation buildLoc;
 
@@ -23,7 +23,7 @@ public class Molotok
      * @param rc
      * @throws GameActionException
      */
-    public Molotok(RobotController rc)
+    public Beaver(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -39,12 +39,12 @@ public class Molotok
      * @return This molotok's next task.
      * @throws GameActionException
      */
-    private MolotokTask getNextTask()
+    private BeaverTask getNextTask()
         throws GameActionException
     {
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
-        MolotokTask myTask = MolotokTask.getTask(taskNum);
+        BeaverTask myTask = BeaverTask.getTask(taskNum);
 
         return myTask;
     }
@@ -64,14 +64,14 @@ public class Molotok
             rc.readBroadcast(Channels.beaverCount) + 1);
 
         rc.setIndicatorString(1, "My task is: " + task);
-        if (task == MolotokTask.JOIN_ARMY)
+        if (task == BeaverTask.JOIN_ARMY)
         {
             reached = false;
             this.setDestination(getLocation(Channels.rallyLoc));
             this.bug();
             task = this.getNextTask();
         }
-        else if (task == MolotokTask.MINE)
+        else if (task == BeaverTask.MINE)
         {
             // TODO Doesn't mine?
             reached = false;
@@ -187,28 +187,32 @@ public class Molotok
      * @return The task's structure or null if there is no corresponding
      *         structure.
      */
-    private RobotType getTaskBuildType(MolotokTask task)
+    private RobotType getTaskBuildType(BeaverTask task)
     {
         RobotType toBuild = null;
-        if (task == MolotokTask.BUILD_BARRACKS)
+        if (task == BeaverTask.BUILD_BARRACKS)
         {
             toBuild = RobotType.BARRACKS;
         }
-        else if (task == MolotokTask.BUILD_HELIPAD)
+        else if (task == BeaverTask.BUILD_HELIPAD)
         {
             toBuild = RobotType.HELIPAD;
         }
-        else if (task == MolotokTask.BUILD_MINERFACTORY)
+        else if (task == BeaverTask.BUILD_MINERFACTORY)
         {
             toBuild = RobotType.MINERFACTORY;
         }
-        else if (task == MolotokTask.BUILD_SUPPLYDEPOT)
+        else if (task == BeaverTask.BUILD_SUPPLYDEPOT)
         {
             toBuild = RobotType.SUPPLYDEPOT;
         }
-        else if (task == MolotokTask.BUILD_TANKFACTORY)
+        else if (task == BeaverTask.BUILD_TANKFACTORY)
         {
             toBuild = RobotType.TANKFACTORY;
+        }
+        else if (task == BeaverTask.BUILD_AEROSPACE)
+        {
+            toBuild = RobotType.AEROSPACELAB;
         }
         return toBuild;
     }
@@ -225,8 +229,8 @@ public class Molotok
         // TODO What happens when a unit dies?
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
-        MolotokTask myTask = MolotokTask.getTask(taskNum);
-        if (!(myTask == MolotokTask.MINE || myTask == MolotokTask.JOIN_ARMY))
+        BeaverTask myTask = BeaverTask.getTask(taskNum);
+        if (!(myTask == BeaverTask.MINE || myTask == BeaverTask.JOIN_ARMY))
         {
             rc.broadcast(Channels.beaverTasksTaken, tasksTaken + 1);
         }

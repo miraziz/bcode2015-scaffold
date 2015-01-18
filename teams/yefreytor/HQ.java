@@ -11,21 +11,22 @@ import battlecode.common.*;
  * 
  * @author Amit Bachchan
  */
-public class Shtab
-    extends Atakuyushchiy
+public class HQ
+    extends AttackBuilding
 {
-    private LinkedList<MolotokTask> tasks;
-    boolean                         attacking;
-    private int                     buildCooldown;
-    private boolean                 shouldRun;
-    HashSet<MapLocation>            destroyedTowers;
+    private LinkedList<BeaverTask> tasks;
+    boolean                        attacking;
+    private int                    buildCooldown;
+    private boolean                shouldRun;
+    HashSet<MapLocation>           destroyedTowers;
+    MapLocation                    defaultRallyLoc;
 
-    private boolean[][]             visited;
-    ArrayDeque<MapLocation>         queue;
-    private int                     buildingCount;
+    private boolean[][]            visited;
+    ArrayDeque<MapLocation>        queue;
+    private int                    buildingCount;
 
 
-    public Shtab(RobotController rc)
+    public HQ(RobotController rc)
         throws GameActionException
     {
         super(rc);
@@ -40,21 +41,23 @@ public class Shtab
 
         // TODO Uh.........
         // builds minerfactory first then others
-        tasks = new LinkedList<MolotokTask>();
-        submitMolotokTask(MolotokTask.MINE);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_TANKFACTORY);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_TANKFACTORY);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitMolotokTask(MolotokTask.BUILD_BARRACKS);
-        submitMolotokTask(MolotokTask.BUILD_BARRACKS);
-        submitMolotokTask(MolotokTask.BUILD_MINERFACTORY);
-        sendMolotokTasks();
+        tasks = new LinkedList<BeaverTask>();
+        submitBeaverTask(BeaverTask.MINE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+
+        sendBeaverTasks();
         this.pathId = 1;
         buildCooldown = 0;
 
@@ -103,19 +106,13 @@ public class Shtab
         }
         // do broadcast things with the counts so people know what to do
 
-        needMoreBuildings();
-        rc.broadcast(Channels.beaverCount, 0);
-        rc.broadcast(Channels.helipadCount, 0);
-        rc.broadcast(Channels.minerFactoryCount, 0);
-        rc.broadcast(Channels.barracksCount, 0);
-        rc.broadcast(Channels.tankFactoryCount, 0);
+        manageSpawnsAndBuildings();
 
-        sendMolotokTasks();
+        sendBeaverTasks();
         shouldRun = false;
 
-        if (!attacking && Clock.getRoundNum() > 1500)
+        if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
-
             broadcastLocation(Channels.rallyLoc, this.enemyHQ);
             if (enemyTowers.length > 0)
             {
@@ -123,6 +120,7 @@ public class Shtab
             }
             attacking = true;
         }
+
         if (attacking)
         {
             broadcastLocation(Channels.rallyLoc, this.enemyHQ);
@@ -141,8 +139,9 @@ public class Shtab
                     broadcastLocation(Channels.rallyLoc, enemyTowers[i]);
                 }
             }
-
         }
+
+        fillBuildingPath();
     }
 
 
@@ -256,7 +255,7 @@ public class Shtab
 
         System.out.println("Towers analyzed");
         Symmetry symmetry = findSymmetry();
-        rc.setIndicatorString(0, "Symmetry: " + symmetry);
+
         int i = 0;
         String str = "enemyTowers in vulnerability order: ";
         while (!myTowers.isEmpty())
@@ -279,7 +278,6 @@ public class Shtab
             str += enemyTowers[i].toString() + ", ";
             i++;
         }
-        rc.setIndicatorString(1, str);
 
         System.out.println("Symmetry detected");
     }
@@ -371,14 +369,14 @@ public class Shtab
     // BeaverTask stuff
     // ---------------------------------------------------------------------
 
-    private void submitMolotokTask(MolotokTask task)
+    private void submitBeaverTask(BeaverTask task)
     {
         tasks.addFirst(task);
         shouldRun = true;
     }
 
 
-    private void sendMolotokTasks()
+    private void sendBeaverTasks()
         throws GameActionException
     {
         if (!shouldRun)
@@ -391,13 +389,12 @@ public class Shtab
             tasks.removeFirst();
         }
         int i = Channels.beaverTask1;
-        for (MolotokTask t : tasks)
+        for (BeaverTask t : tasks)
         {
             rc.broadcast(i, t.value());
             i++;
         }
         rc.broadcast(Channels.beaverTasksTaken, 0);
-
     }
 
 
@@ -405,32 +402,48 @@ public class Shtab
 
     // submits a new building to be built based on mine income
     // maybe just replace with tested timed building?
-    private void needMoreBuildings()
+    private void manageSpawnsAndBuildings()
         throws GameActionException
     {
+        // building stuff
         int roundNum = Clock.getRoundNum();
         buildCooldown++;
-        if (roundNum > 100 && roundNum % 10 == 0 && buildCooldown > 10)
+        double myOre = rc.getTeamOre();
+
+        int barracksCount = rc.readBroadcast(Channels.barracksCount);
+        int helipadCount = rc.readBroadcast(Channels.helipadCount);
+        int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
+        int aerospaceCount = rc.readBroadcast(Channels.aerospaceCount);
+
+        int soldierCount = rc.readBroadcast(Channels.soldierCount);
+        int basherCount = rc.readBroadcast(Channels.basherCount);
+        int tankCount = rc.readBroadcast(Channels.tankCount);
+        int droneCount = rc.readBroadcast(Channels.droneCount);
+
+        rc.setIndicatorString(0, "Drone count: " + droneCount);
+
+        rc.broadcast(Channels.shouldSpawnBasher, 0);
+        rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        rc.broadcast(Channels.shouldSpawnDrone, 0);
+        if (droneCount == 0)
         {
-            buildCooldown = 0;
-            int mined = rc.readBroadcast(Channels.miningTotal);
-            rc.broadcast(Channels.miningTotal, 0);
-            double mineRate = mined / 10;
-            int barracksCount = rc.readBroadcast(Channels.barracksCount);
-            int helipadCount = rc.readBroadcast(Channels.helipadCount);
-            int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
-            double spawnRate =
-                (Constants.barracksRate * barracksCount)
-                    + (Constants.tankFactoryRate * tankFactoryCount)
-                    + (Constants.helipadRate * helipadCount);
-            // rc.setIndicatorString(2, "mineRate: " + mineRate +
-// ", spawnRate: "
-            // + spawnRate);
-            if (mineRate >= spawnRate)
-            {
-                // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-            }
+            rc.broadcast(Channels.shouldSpawnDrone, 1);
         }
+        if (myOre > aerospaceCount * Constants.launcherCost
+            + Constants.soldierCost)
+        {
+            rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        }
+
+        rc.broadcast(Channels.beaverCount, 0);
+        rc.broadcast(Channels.helipadCount, 0);
+        rc.broadcast(Channels.minerFactoryCount, 0);
+        rc.broadcast(Channels.barracksCount, 0);
+        rc.broadcast(Channels.tankFactoryCount, 0);
+        rc.broadcast(Channels.soldierCount, 0);
+        rc.broadcast(Channels.basherCount, 0);
+        rc.broadcast(Channels.tankCount, 0);
+        rc.broadcast(Channels.droneCount, 0);
     }
 
 
@@ -457,11 +470,14 @@ public class Shtab
             int unitSupply = (int)(totSupply / nearbyAllies.length);
             for (RobotInfo robot : nearbyAllies)
             {
-                if (Clock.getBytecodesLeft() < 511)
+                if (Clock.getBytecodesLeft() < 550)
                 {
                     return;
                 }
-                rc.transferSupplies(unitSupply, robot.location);
+                if (unitSupply != 0 && rc.canSenseLocation(robot.location))
+                {
+                    rc.transferSupplies(unitSupply, robot.location);
+                }
             }
         }
     }

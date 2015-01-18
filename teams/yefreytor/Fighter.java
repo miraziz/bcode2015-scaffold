@@ -8,7 +8,7 @@ import battlecode.common.RobotController;
  * 
  * @author Amit Bachchan
  */
-public class Boyets
+public class Fighter
     extends Proletariat
 {
 
@@ -18,7 +18,7 @@ public class Boyets
      * @param rc
      * @throws GameActionException
      */
-    public Boyets(RobotController rc)
+    public Fighter(RobotController rc)
         throws GameActionException
     {
         super(rc);
