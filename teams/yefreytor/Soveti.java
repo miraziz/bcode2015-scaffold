@@ -183,6 +183,13 @@ public abstract class Soveti
     }
 
 
+    protected boolean isSupplyingUnit(RobotType type)
+    {
+        return type == RobotType.SOLDIER || type == RobotType.TANK
+            || type == RobotType.MINER || type == RobotType.LAUNCHER;
+    }
+
+
     /**
      * Returns a random direction.
      * 
@@ -192,4 +199,5 @@ public abstract class Soveti
     {
         return Direction.values()[rand.nextInt(8)];
     }
+
 }

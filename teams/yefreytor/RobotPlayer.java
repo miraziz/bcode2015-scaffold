@@ -71,7 +71,8 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.DRONE)
         {
-            robot = new Drone(rc);
+            // robot = new Drone(rc);
+            robot = new SupplyDrone(rc);
         }
         else if (rc.getType() == RobotType.BASHER)
         {

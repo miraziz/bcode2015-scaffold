@@ -50,6 +50,7 @@ public abstract class Proletariat
         throws GameActionException
     {
         mLocation = rc.getLocation();
+        this.manageSupply();
     }
 
 
@@ -241,66 +242,29 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
-        double totSupply = rc.getSupplyLevel();
-        if (totSupply == 0)
-        {
-            return;
-        }
-
-        RobotInfo[] nearbyAllies =
-            rc.senseNearbyRobots(
-                GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
-                myTeam);
-
-        // TODO FIX SUPPLY TRANSFER FOR BEAVERS
-
-        double beaverSupply = Math.min(200, totSupply);
-        MapLocation beaverLoc = null;
-
-        // TODO If someone is dying, give away supply
-
-        double attackSupply = totSupply;
-        MapLocation allyLoc = null;
-        for (RobotInfo teamMember : nearbyAllies)
-        {
-            double teamSupply = teamMember.supplyLevel;
-            if (teamMember.type == RobotType.BEAVER)
-            {
-                if (teamSupply < 200 && teamSupply < beaverSupply)
-                {
-                    beaverSupply = teamSupply;
-                    beaverLoc = teamMember.location;
-                }
-            }
-            else if (teamMember.supplyLevel < attackSupply
-                && isAttackingUnit(teamMember.type))
-            {
-                attackSupply = teamMember.supplyLevel;
-                allyLoc = teamMember.location;
-            }
-        }
-
-        if (allyLoc != null)
-        {
-            int transferAmount = (int)((totSupply - attackSupply) / 2.0);
-            if (rc.getType() == RobotType.BEAVER && totSupply > 200)
-            {
-                transferAmount = (int)(totSupply - 200);
-            }
-            if (transferAmount != 0 && rc.canSenseLocation(allyLoc))
-            {
-                rc.transferSupplies(transferAmount, allyLoc);
-            }
-        }
-
-        if (beaverLoc != null)
-        {
-            if (totSupply > beaverSupply)
-            {
-                int transferAmount = (int)((totSupply - beaverSupply) / 2.0);
-                rc.transferSupplies(transferAmount, beaverLoc);
-            }
-        }
+        /*
+         * double totSupply = rc.getSupplyLevel(); if (totSupply == 0) { return;
+         * } RobotInfo[] nearbyAllies = rc.senseNearbyRobots(
+         * GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, myTeam); // TODO FIX
+         * SUPPLY TRANSFER FOR BEAVERS double beaverSupply = Math.min(200,
+         * totSupply); MapLocation beaverLoc = null; // TODO If someone is
+         * dying, give away supply double attackSupply = totSupply; MapLocation
+         * allyLoc = null; for (RobotInfo teamMember : nearbyAllies) { double
+         * teamSupply = teamMember.supplyLevel; if (teamMember.type ==
+         * RobotType.BEAVER) { if (teamSupply < 200 && teamSupply <
+         * beaverSupply) { beaverSupply = teamSupply; beaverLoc =
+         * teamMember.location; } } else if (teamMember.supplyLevel <
+         * attackSupply && isAttackingUnit(teamMember.type)) { attackSupply =
+         * teamMember.supplyLevel; allyLoc = teamMember.location; } } if
+         * (allyLoc != null) { int transferAmount = (int)((totSupply -
+         * attackSupply) / 2.0); if (rc.getType() == RobotType.BEAVER &&
+         * totSupply > 200) { transferAmount = (int)(totSupply - 200); } if
+         * (transferAmount != 0 && rc.canSenseLocation(allyLoc)) {
+         * rc.transferSupplies(transferAmount, allyLoc); } } if (beaverLoc !=
+         * null) { if (totSupply > beaverSupply) { int transferAmount =
+         * (int)((totSupply - beaverSupply) / 2.0);
+         * rc.transferSupplies(transferAmount, beaverLoc); } }
+         */
     }
 
 
@@ -379,6 +343,35 @@ public abstract class Proletariat
         else
         {
             return null;
+        }
+    }
+
+
+    protected void manageSupply()
+        throws GameActionException
+    {
+        if (rc.getSupplyLevel() < 300)
+        {
+            int distance = rc.getLocation().distanceSquaredTo(allyHQ);
+            int supplyPriority = 1;
+
+            if (rc.getType() == RobotType.TANK)
+            {
+                supplyPriority = 3;
+            }
+            else if (rc.getType() == RobotType.SOLDIER)
+            {
+                supplyPriority = 2;
+            }
+
+            int curPriority = rc.readBroadcast(Channels.supplyPriority);
+            if (supplyPriority > curPriority
+                || (distance > rc.readBroadcast(Channels.supplyDistance) && supplyPriority == curPriority))
+            {
+                rc.broadcast(Channels.supplyPriority, supplyPriority);
+                rc.broadcast(Channels.supplyDistance, distance);
+                broadcastLocation(Channels.supplyLoc, rc.getLocation());
+            }
         }
     }
 }

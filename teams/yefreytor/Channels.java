@@ -32,6 +32,11 @@ public class Channels
     static int shouldSpawnBasher     = 26;
     static int shouldSpawnDrone      = 27;
 
+    // supply stuff
+    static int supplyLoc             = 30;
+    static int supplyPriority        = 31;
+    static int supplyDistance        = 32;
+
     // commands
     static int beaverTasksTaken      = 49;
     static int beaverTask1           = 50; // channels 50-? are tasks needed to

@@ -46,13 +46,12 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
@@ -420,8 +419,6 @@ public class HQ
         int tankCount = rc.readBroadcast(Channels.tankCount);
         int droneCount = rc.readBroadcast(Channels.droneCount);
 
-        rc.setIndicatorString(0, "Drone count: " + droneCount);
-
         rc.broadcast(Channels.shouldSpawnBasher, 0);
         rc.broadcast(Channels.shouldSpawnSoldier, 1);
         rc.broadcast(Channels.shouldSpawnDrone, 0);
@@ -456,29 +453,31 @@ public class HQ
     public void transferSupplies()
         throws GameActionException
     {
-        double totSupply = rc.getSupplyLevel();
-        if (totSupply == 0)
-        {
-            return;
-        }
-        RobotInfo[] nearbyAllies =
+        RobotInfo[] nearby =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
-        if (nearbyAllies.length > 0)
+        for (RobotInfo r : nearby)
         {
-            int unitSupply = (int)(totSupply / nearbyAllies.length);
-            for (RobotInfo robot : nearbyAllies)
+            if (Clock.getBytecodesLeft() < 550)
             {
-                if (Clock.getBytecodesLeft() < 550)
-                {
-                    return;
-                }
-                if (unitSupply != 0 && rc.canSenseLocation(robot.location))
-                {
-                    rc.transferSupplies(unitSupply, robot.location);
-                }
+                return;
+            }
+            if (r.type == RobotType.DRONE)
+            {
+                rc.transferSupplies((int)rc.getSupplyLevel(), r.location);
+                return;
             }
         }
+        /*
+         * double totSupply = rc.getSupplyLevel(); if (totSupply == 0) { return;
+         * } RobotInfo[] nearbyAllies = rc.senseNearbyRobots(
+         * GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, myTeam); if
+         * (nearbyAllies.length > 0) { int unitSupply = (int)(totSupply /
+         * nearbyAllies.length); for (RobotInfo robot : nearbyAllies) { if
+         * (Clock.getBytecodesLeft() < 550) { return; } if (unitSupply != 0 &&
+         * rc.canSenseLocation(robot.location)) {
+         * rc.transferSupplies(unitSupply, robot.location); } } }
+         */
     }
 }
