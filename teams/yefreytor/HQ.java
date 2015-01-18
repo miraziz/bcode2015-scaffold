@@ -31,9 +31,6 @@ public class HQ
     {
         super(rc);
 
-        // Spawn before calculating anything. Buys 10 turns.
-        spawnToEnemy(RobotType.BEAVER);
-
         // Set rally
         broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
@@ -72,10 +69,13 @@ public class HQ
         rc.broadcast(Channels.buildPathCount, 0);
         visited =
             new boolean[2 * GameConstants.MAP_MAX_WIDTH][2 * GameConstants.MAP_MAX_HEIGHT];
+        queue = new ArrayDeque<MapLocation>();
+        queue.offer(allyHQ);
         fillBuildingPath();
+        rc.yield();
 
         // Wait for towers to calculate vulnerability
-        rc.yield();
+        fillBuildingPath();
         rc.yield();
         destroyedTowers = new HashSet<MapLocation>();
         analyzeTowers();
@@ -291,9 +291,6 @@ public class HQ
     private void fillBuildingPath()
         throws GameActionException
     {
-        queue = new ArrayDeque<MapLocation>();
-        queue.offer(allyHQ);
-
         // TODO Leaves at least 500 bytecodes after completion. May need to be
 // changed if there aren't enough bytecodes for supply transfer.
 
