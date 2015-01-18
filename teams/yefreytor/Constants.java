@@ -19,7 +19,7 @@ public class Constants
     public static final int MAXIMUM_BUILDINGS       = 101;
 
     // other constants
-    static int              beaverLimit             = 2;
+    static int              beaverLimit             = 1;
     static int              minerLimit              = 30;
     static int              soldierLimit            = 12;
     static int              droneLimit              = 1;
