@@ -10,7 +10,7 @@ import battlecode.common.*;
 public class Beaver
     extends Proletariat
 {
-    private BeaverTask task;
+    private BeaverTask  task;
     private boolean     reached;
     private MapLocation buildLoc;
 
@@ -58,7 +58,6 @@ public class Beaver
         throws GameActionException
     {
         super.run();
-
         rc.broadcast(
             Channels.beaverCount,
             rc.readBroadcast(Channels.beaverCount) + 1);
