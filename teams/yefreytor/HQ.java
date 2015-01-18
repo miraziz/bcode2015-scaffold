@@ -31,6 +31,7 @@ public class HQ
     {
         super(rc);
 
+        this.spawnToEnemy(RobotType.BEAVER);
         // Set rally
         broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
@@ -92,15 +93,18 @@ public class HQ
         super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
-        if (rc.isCoreReady() && roundNum >= 20)
+        if (rc.isCoreReady() && roundNum >= 150)
         {
             if (beaverCount < Constants.beaverLimit)
             {
                 int buildCount = rc.readBroadcast(Channels.buildPathCount);
                 MapLocation loc = getLocation(Channels.buildPath + buildCount);
-                this.spawn(
-                    mLocation.directionTo(loc).rotateRight(),
-                    RobotType.BEAVER);
+
+                /*
+                 * this.spawn( mLocation.directionTo(loc).rotateRight(),
+                 * RobotType.BEAVER);
+                 */
+
             }
         }
         // do broadcast things with the counts so people know what to do

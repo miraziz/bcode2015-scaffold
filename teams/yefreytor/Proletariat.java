@@ -242,6 +242,26 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
+        if (rc.getSupplyLevel() > 500)
+        {
+            RobotInfo[] allies =
+                rc.senseNearbyRobots(
+                    GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
+                    myTeam);
+            for (RobotInfo r : allies)
+            {
+                if (Clock.getBytecodesLeft() < 550)
+                {
+                    return;
+                }
+                if (this.isSupplyingUnit(r.type)
+                    && r.supplyLevel < rc.getSupplyLevel())
+                {
+                    double toGive = (rc.getSupplyLevel() - r.supplyLevel) / 2;
+                    rc.transferSupplies((int)toGive, r.location);
+                }
+            }
+        }
         /*
          * double totSupply = rc.getSupplyLevel(); if (totSupply == 0) { return;
          * } RobotInfo[] nearbyAllies = rc.senseNearbyRobots(
