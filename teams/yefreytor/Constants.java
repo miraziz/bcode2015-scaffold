@@ -16,6 +16,8 @@ public class Constants
 
     public static final int CHANNELS_PER_TOWER_VULN = 3;
 
+    public static final int MAXIMUM_BUILDINGS       = 101;
+
     // other constants
     static int              beaverLimit             = 2;
     static int              minerLimit              = 30;

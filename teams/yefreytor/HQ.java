@@ -1,6 +1,5 @@
 package yefreytor;
 
-import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -21,8 +20,6 @@ public class HQ
     HashSet<MapLocation>           destroyedTowers;
     MapLocation                    defaultRallyLoc;
 
-    private boolean[][]            visited;
-    ArrayDeque<MapLocation>        queue;
     private int                    buildingCount;
 
 
@@ -64,18 +61,9 @@ public class HQ
         System.out.println("Took " + Clock.getBytecodeNum()
             + " bytecodes so far");
 
-        // fillbuildingpath setup
-        rc.broadcast(Channels.buildPathCount, 0);
-        visited =
-            new boolean[2 * GameConstants.MAP_MAX_WIDTH][2 * GameConstants.MAP_MAX_HEIGHT];
-        queue = new ArrayDeque<MapLocation>();
-        queue.offer(allyHQ);
         fillBuildingPath();
-        rc.yield();
 
         // Wait for towers to calculate vulnerability
-        fillBuildingPath();
-        rc.yield();
         destroyedTowers = new HashSet<MapLocation>();
         analyzeTowers();
     }
@@ -139,8 +127,6 @@ public class HQ
                 }
             }
         }
-
-        fillBuildingPath();
     }
 
 
@@ -290,35 +276,36 @@ public class HQ
     private void fillBuildingPath()
         throws GameActionException
     {
-        // TODO Leaves at least 500 bytecodes after completion. May need to be
-// changed if there aren't enough bytecodes for supply transfer.
+        boolean[][] visited =
+            new boolean[2 * GameConstants.MAP_MAX_WIDTH][2 * GameConstants.MAP_MAX_HEIGHT];
+        LinkedList<MapLocation> queue = new LinkedList<MapLocation>();
 
-        while (!queue.isEmpty()
-            && Clock.getBytecodesLeft() > 2 * Constants.BUILD_PATH_BYTECODES)
+        queue.offer(allyHQ);
+        visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
+        while (!queue.isEmpty() && buildingCount <= Constants.MAXIMUM_BUILDINGS)
         {
             MapLocation cur = queue.poll();
-            if (!visited[cur.x - mapOffsetX][cur.y - mapOffsetY]
-                && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+
+            if (cur != allyHQ && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
             {
-                visited[cur.x - mapOffsetX][cur.y - mapOffsetY] = true;
+                broadcastLocation(Channels.buildPath + buildingCount, cur);
+                buildingCount++;
+            }
 
-                if (cur != allyHQ)
+            for (int i = 1; i < 8; i += 2)
+            {
+                MapLocation next = cur.add(directions[i]);
+                if (!visited[next.x - mapOffsetX][next.y - mapOffsetY]
+                    && rc.canSenseLocation(next)
+                    && rc.senseTerrainTile(next) != TerrainTile.OFF_MAP)
                 {
-                    broadcastLocation(Channels.buildPath + buildingCount, cur);
-                    buildingCount++;
-                }
-
-                for (int i = 1; i < 8; i += 2)
-                {
-                    MapLocation next = cur.add(directions[i]);
-                    if (!visited[next.x - mapOffsetX][next.y - mapOffsetY])
-                    {
-                        queue.offer(next);
-                    }
+                    visited[next.x - mapOffsetX][next.y - mapOffsetY] = true;
+                    queue.offer(next);
                 }
             }
         }
         rc.broadcast(Channels.buildPathLength, buildingCount);
+        System.out.println("Building count: " + buildingCount);
     }
 
 
