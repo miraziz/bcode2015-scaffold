@@ -10,9 +10,8 @@ import battlecode.common.*;
 public abstract class Zdaniya
     extends Soveti
 {
-    protected Direction[] spawnDirs;
-    protected Direction   toEnemy;
-    protected int         pathId;
+    protected Direction toEnemy;
+    protected int       pathId;
 
 
     /**

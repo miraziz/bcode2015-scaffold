@@ -1,7 +1,6 @@
 package yefreytor;
 
 import java.util.ArrayDeque;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -21,73 +20,134 @@ public class Shtab
     private boolean                 shouldRun;
     HashSet<MapLocation>            destroyedTowers;
 
+    private boolean[][]             visited;
+    ArrayDeque<MapLocation>         queue;
+    private int                     buildingCount;
+
 
     public Shtab(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        destroyedTowers = new HashSet<MapLocation>();
+
+        // Spawn before calculating anything. Buys 10 turns.
+        spawnToEnemy(RobotType.BEAVER);
+
+        // Set rally
+        broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
         // TODO Set miner limits based on map size
 
-        // fillbuildingpath setup
-        rc.broadcast(Channels.buildPathCount, 0);
-        visited = new HashSet<MapLocation>();
-        queue = new ArrayDeque<MapLocation>();
-        queue.offer(allyHQ);
-
-        analyzeTowers();
-
-        broadcastLocation(Channels.rallyLoc, this.findRallyPoint());
-
-        // fills path of where to build buildings, uses lots of bytecodes so
-        // split into the run method. Can reduce or raise here according to what
-        // we want
-        for (int i = 0; i < 100; i++)
-        {
-            fillBuildingPath();
-        }
-
+        // TODO Uh.........
         // builds minerfactory first then others
         tasks = new LinkedList<MolotokTask>();
-        submitBeaverTask(MolotokTask.MINE);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_TANKFACTORY);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_TANKFACTORY);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(MolotokTask.BUILD_BARRACKS);
-        submitBeaverTask(MolotokTask.BUILD_BARRACKS);
-        submitBeaverTask(MolotokTask.BUILD_MINERFACTORY);
-        sendBeaverTasks();
+        submitMolotokTask(MolotokTask.MINE);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_TANKFACTORY);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_TANKFACTORY);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_SUPPLYDEPOT);
+        submitMolotokTask(MolotokTask.BUILD_BARRACKS);
+        submitMolotokTask(MolotokTask.BUILD_BARRACKS);
+        submitMolotokTask(MolotokTask.BUILD_MINERFACTORY);
+        sendMolotokTasks();
         this.pathId = 1;
         buildCooldown = 0;
 
+        // TODO What does shouldRun do for the HQ?
         attacking = false;
         shouldRun = false;
+
+        System.out.println("Took " + Clock.getBytecodeNum()
+            + " bytecodes so far");
+
+        // fillbuildingpath setup
+        rc.broadcast(Channels.buildPathCount, 0);
+        visited =
+            new boolean[2 * GameConstants.MAP_MAX_WIDTH][2 * GameConstants.MAP_MAX_HEIGHT];
+        fillBuildingPath();
+
+        // Wait for towers to calculate vulnerability
+        rc.yield();
+        rc.yield();
+        destroyedTowers = new HashSet<MapLocation>();
+        analyzeTowers();
+    }
+
+
+    // -----------------------------------------------------------------------
+    // run
+
+    @Override
+    public void run()
+        throws GameActionException
+    {
+        int roundNum = Clock.getRoundNum();
+        super.run();
+
+        int beaverCount = rc.readBroadcast(Channels.beaverCount);
+        if (rc.isCoreReady() && roundNum >= 20)
+        {
+            if (beaverCount < Constants.beaverLimit)
+            {
+                int buildCount = rc.readBroadcast(Channels.buildPathCount);
+                MapLocation loc = getLocation(Channels.buildPath + buildCount);
+                this.spawn(
+                    mLocation.directionTo(loc).rotateRight(),
+                    RobotType.BEAVER);
+            }
+        }
+        // do broadcast things with the counts so people know what to do
+
+        needMoreBuildings();
+        rc.broadcast(Channels.beaverCount, 0);
+        rc.broadcast(Channels.helipadCount, 0);
+        rc.broadcast(Channels.minerFactoryCount, 0);
+        rc.broadcast(Channels.barracksCount, 0);
+        rc.broadcast(Channels.tankFactoryCount, 0);
+
+        sendMolotokTasks();
+        shouldRun = false;
+
+        if (!attacking && Clock.getRoundNum() > 1500)
+        {
+
+            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
+            if (enemyTowers.length > 0)
+            {
+                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
+            }
+            attacking = true;
+        }
+        if (attacking)
+        {
+            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
+            // TODO Make units broadcast the most recently destroyed tower as
+            // they deal the final blow to it, to move on to the next tower.
+            MapLocation destroyed = getLocation(Channels.destroyedTower);
+            if (destroyed != null)
+            {
+                this.destroyedTowers.add(destroyed);
+                rc.broadcast(Channels.destroyedTower, 0);
+            }
+            for (int i = 0; i < this.enemyTowers.length; i++)
+            {
+                if (!this.destroyedTowers.contains(enemyTowers[i]))
+                {
+                    broadcastLocation(Channels.rallyLoc, enemyTowers[i]);
+                }
+            }
+
+        }
     }
 
 
 // Finds symmetry in map and ranks towers
 // ------------------------------------------------------------------
-
-    private class TowerRank
-    {
-        MapLocation loc;
-        int         score;
-
-
-        public TowerRank(MapLocation loc, int score)
-        {
-            this.loc = loc;
-            this.score = score;
-        }
-    }
-
 
     private enum Symmetry
     {
@@ -98,75 +158,78 @@ public class Shtab
 
 
     /**
-     * gets what type of symmetry is present on the map
+     * Determines the symmetry of the map.
+     * 
+     * @return The symmetry of the map.
      */
     private Symmetry findSymmetry()
     {
-        MapLocation allyFurthestTower = null;
-        MapLocation enemyFurthestTower = null;
-        int dist = 5000;
-        for (MapLocation loc : allyTowers)
+        if (allyHQ.x == enemyHQ.x)
         {
-            if (allyFurthestTower == null)
+            int yAxis = (allyHQ.y + enemyHQ.y) / 2;
+            boolean works = true;
+            for (MapLocation enemy : enemyTowers)
             {
-                allyFurthestTower = loc;
-                dist = allyHQ.distanceSquaredTo(allyFurthestTower);
+                works = false;
+                for (MapLocation ally : allyTowers)
+                {
+                    if (enemy.x == ally.x
+                        && ((enemy.y - yAxis) == -(ally.y - yAxis)))
+                    {
+                        works = true;
+                        break;
+                    }
+                }
+                if (!works)
+                {
+                    break;
+                }
             }
-            else if (loc.distanceSquaredTo(allyHQ) > dist)
+
+            if (works)
             {
-                dist = loc.distanceSquaredTo(allyHQ);
-                allyFurthestTower = loc;
+                return Symmetry.X_REFLECTION;
+            }
+            else
+            {
+                return Symmetry.ROTATION;
             }
         }
-        for (MapLocation loc : enemyTowers)
+        else if (allyHQ.y == enemyHQ.y)
         {
-            if (loc.distanceSquaredTo(enemyHQ) == dist)
+            int xAxis = (allyHQ.x + enemyHQ.x) / 2;
+            boolean works = true;
+            for (MapLocation enemy : enemyTowers)
             {
-                enemyFurthestTower = loc;
-                break;
+                works = false;
+                for (MapLocation ally : allyTowers)
+                {
+                    if (enemy.y == ally.y
+                        && ((enemy.x - xAxis) == -(ally.x - xAxis)))
+                    {
+                        works = true;
+                        break;
+                    }
+                }
+                if (!works)
+                {
+                    break;
+                }
+            }
+
+            if (works)
+            {
+                return Symmetry.Y_REFLECTION;
+            }
+            else
+            {
+                return Symmetry.ROTATION;
             }
         }
-        if (enemyFurthestTower == null)
+        else
         {
             return Symmetry.ROTATION;
         }
-        int allyXOffset = allyHQ.x - allyFurthestTower.x;
-        int allyYOffset = allyHQ.y - allyFurthestTower.y;
-        int enemyXOffset = enemyHQ.x - enemyFurthestTower.x;
-        int enemyYOffset = enemyHQ.y - enemyFurthestTower.y;
-
-        rc.setIndicatorString(2, "Ally X Offset: " + allyXOffset
-            + ", Enemy X Offset: " + enemyXOffset);
-        if (allyXOffset == enemyXOffset)
-        {
-            return Symmetry.X_REFLECTION;
-        }
-        else if (allyYOffset == enemyYOffset)
-        {
-            return Symmetry.Y_REFLECTION;
-        }
-        return Symmetry.ROTATION;
-    }
-
-
-    private class TowerComparator
-        implements Comparator<TowerRank>
-    {
-
-        @Override
-        public int compare(TowerRank o1, TowerRank o2)
-        {
-            if (o1.score < o2.score)
-            {
-                return -1;
-            }
-            else if (o1.score > o2.score)
-            {
-                return 1;
-            }
-            return 0;
-        }
-
     }
 
 
@@ -174,53 +237,24 @@ public class Shtab
      * such a big method lol oops. puts the towers in order based on their
      * vulnerability, now in the enemytowers and mytowers, the towers are
      * ordered from most vulnerable to least, but only in the HQ. Needs testing
+     * 
+     * @throws GameActionException
      */
     private void analyzeTowers()
+        throws GameActionException
     {
+        System.out.println("Starting tower analysis");
 
-        PriorityQueue<TowerRank> myTowers =
-            new PriorityQueue<TowerRank>(11, new TowerComparator());
-        for (MapLocation towerLoc : this.allyTowers)
+        PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
+        for (int i = 0; i < allyTowers.length; i++)
         {
-            int droneVulnerabilityScore = 0;
-            int vulnerabilityScore = 100 + towerLoc.distanceSquaredTo(allyHQ);
-            MapLocation[] nearby =
-                MapLocation.getAllMapLocationsWithinRadiusSq(
-                    towerLoc,
-                    RobotType.TOWER.sensorRadiusSquared);
-            for (MapLocation loc : nearby)
-            {
-                if (rc.canSenseLocation(loc))
-                {
-                    TerrainTile tile = rc.senseTerrainTile(loc);
-
-                    if (tile == TerrainTile.OFF_MAP)
-                    {
-                        droneVulnerabilityScore += 12;
-                        vulnerabilityScore -= 8;
-                    }
-                    else if (tile == TerrainTile.VOID)
-                    {
-                        droneVulnerabilityScore += 6;
-                        vulnerabilityScore -= 4;
-                    }
-                }
-                RobotInfo[] allies = rc.senseNearbyRobots(25, myTeam);
-                for (RobotInfo ally : allies)
-                {
-                    if (ally.type == RobotType.HQ)
-                    {
-                        vulnerabilityScore -= 35;
-                    }
-                    else if (ally.type == RobotType.TOWER)
-                    {
-                        vulnerabilityScore -= 25;
-                    }
-                }
-            }
-            droneVulnerabilityScore += vulnerabilityScore;
-            myTowers.offer(new TowerRank(towerLoc, vulnerabilityScore));
+            int vulnerabilityScore =
+                rc.readBroadcast(Channels.towerVulnerability
+                    + Constants.CHANNELS_PER_TOWER_VULN * i + 1);
+            myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
         }
+
+        System.out.println("Towers analyzed");
         Symmetry symmetry = findSymmetry();
         rc.setIndicatorString(0, "Symmetry: " + symmetry);
         int i = 0;
@@ -247,39 +281,48 @@ public class Shtab
         }
         rc.setIndicatorString(1, str);
 
+        System.out.println("Symmetry detected");
     }
+
 
     // -------------------------------------------------------------------------------
 
-    private HashSet<MapLocation> visited;
-    ArrayDeque<MapLocation>      queue;
-    private int                  buildingCount;
-
-
+    /**
+     * @throws GameActionException
+     */
     private void fillBuildingPath()
         throws GameActionException
     {
-        if (queue.isEmpty())
-        {
-            return;
-        }
-        else
+        queue = new ArrayDeque<MapLocation>();
+        queue.offer(allyHQ);
+
+        // TODO Leaves at least 500 bytecodes after completion. May need to be
+// changed if there aren't enough bytecodes for supply transfer.
+
+        while (!queue.isEmpty()
+            && Clock.getBytecodesLeft() > 2 * Constants.BUILD_PATH_BYTECODES)
         {
             MapLocation cur = queue.poll();
-            if (visited.contains(cur) || !rc.canSenseLocation(cur))
+            if (!visited[cur.x - mapOffsetX][cur.y - mapOffsetY]
+                && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
             {
-                return;
+                visited[cur.x - mapOffsetX][cur.y - mapOffsetY] = true;
+
+                if (cur != allyHQ)
+                {
+                    broadcastLocation(Channels.buildPath + buildingCount, cur);
+                    buildingCount++;
+                }
+
+                for (int i = 1; i < 8; i += 2)
+                {
+                    MapLocation next = cur.add(directions[i]);
+                    if (!visited[next.x - mapOffsetX][next.y - mapOffsetY])
+                    {
+                        queue.offer(next);
+                    }
+                }
             }
-            visited.add(cur);
-            if (cur != allyHQ && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
-            {
-                broadcastLocation(Channels.buildPath + buildingCount, cur);
-                buildingCount++;
-            }
-            queue.offer(cur.add(Direction.NORTH_WEST));
-            queue.offer(cur.add(Direction.NORTH_EAST));
-            queue.offer(cur.add(Direction.SOUTH_EAST));
-            queue.offer(cur.add(Direction.SOUTH_WEST));
         }
         rc.broadcast(Channels.buildPathLength, buildingCount);
     }
@@ -287,23 +330,31 @@ public class Shtab
 
     // -----------------------------------------------------------------------
 
+    /**
+     * Finds the average position of allied towers and HQ and returns the
+     * closest structure to that average position.
+     * 
+     * @return The location of the tower closest to the center of mass of the
+     *         initial allied buildings on the map.
+     */
     private MapLocation findRallyPoint()
     {
         int xAvg = 0;
         int yAvg = 0;
-        for (MapLocation loc : this.allyTowers)
+        for (MapLocation loc : allyTowers)
         {
             xAvg += loc.x;
             yAvg += loc.y;
         }
         xAvg += allyHQ.x;
         yAvg += allyHQ.y;
-        xAvg /= allyTowers.length + 1;
-        yAvg /= allyTowers.length + 1;
+        xAvg /= (allyTowers.length + 1);
+        yAvg /= (allyTowers.length + 1);
         MapLocation avg = new MapLocation(xAvg, yAvg);
+
         MapLocation closest = allyHQ;
         int closestDist = closest.distanceSquaredTo(avg);
-        for (MapLocation loc : this.allyTowers)
+        for (MapLocation loc : allyTowers)
         {
             int dist = loc.distanceSquaredTo(avg);
             if (dist <= closestDist)
@@ -320,14 +371,14 @@ public class Shtab
     // BeaverTask stuff
     // ---------------------------------------------------------------------
 
-    private void submitBeaverTask(MolotokTask task)
+    private void submitMolotokTask(MolotokTask task)
     {
         tasks.addFirst(task);
         shouldRun = true;
     }
 
 
-    private void sendBeaverTasks()
+    private void sendMolotokTasks()
         throws GameActionException
     {
         if (!shouldRun)
@@ -414,74 +465,4 @@ public class Shtab
             }
         }
     }
-
-
-    // -----------------------------------------------------------------------
-    // run
-
-    @Override
-    public void run()
-        throws GameActionException
-    {
-        int roundNum = Clock.getRoundNum();
-        super.run();
-
-        int beaverCount = rc.readBroadcast(Channels.beaverCount);
-        if (rc.isCoreReady() && roundNum >= 20)
-        {
-            if (beaverCount < Constants.beaverLimit)
-            {
-                int buildCount = rc.readBroadcast(Channels.buildPathCount);
-                MapLocation loc = getLocation(Channels.buildPath + buildCount);
-                this.spawn(
-                    rc.getLocation().directionTo(loc).rotateRight(),
-                    RobotType.BEAVER);
-            }
-        }
-        // do broadcast things with the counts so people know what to do
-
-        fillBuildingPath();
-
-        needMoreBuildings();
-        rc.broadcast(Channels.beaverCount, 0);
-        rc.broadcast(Channels.helipadCount, 0);
-        rc.broadcast(Channels.minerFactoryCount, 0);
-        rc.broadcast(Channels.barracksCount, 0);
-        rc.broadcast(Channels.tankFactoryCount, 0);
-
-        sendBeaverTasks();
-        shouldRun = false;
-
-        if (!attacking && Clock.getRoundNum() > 1500)
-        {
-
-            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
-            if (enemyTowers.length > 0)
-            {
-                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
-            }
-            attacking = true;
-        }
-        if (attacking)
-        {
-            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
-            // TODO Make units broadcast the most recently destroyed tower as
-            // they deal the final blow to it, to move on to the next tower.
-            MapLocation destroyed = getLocation(Channels.destroyedTower);
-            if (destroyed != null)
-            {
-                this.destroyedTowers.add(destroyed);
-                rc.broadcast(Channels.destroyedTower, 0);
-            }
-            for (int i = 0; i < this.enemyTowers.length; i++)
-            {
-                if (!this.destroyedTowers.contains(enemyTowers[i]))
-                {
-                    broadcastLocation(Channels.rallyLoc, enemyTowers[i]);
-                }
-            }
-
-        }
-    }
-
 }

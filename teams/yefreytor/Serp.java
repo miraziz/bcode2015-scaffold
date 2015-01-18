@@ -38,6 +38,9 @@ public class Serp
             rc.readBroadcast(Channels.minerCount) + 1);
         if (rc.isCoreReady())
         {
+            // TODO Don't go back in the direction of the enemy. Have some
+// memory that prevents you from going in that direction for some K turns before
+// trying again
             runAway();
 
             // TODO Should it try to mine if it's running?
@@ -155,6 +158,7 @@ public class Serp
             else
             {
                 // TODO use array
+                // TODO Avoid diagonals unless necessary
                 int count = 0;
                 while (!rc.canMove(myDirection) && count < 8)
                 {

@@ -8,35 +8,38 @@ package yefreytor;
 public class Channels
 {
     // unit counts
-    static int beaverCount       = 0;
-    static int minerCount        = 1;
-    static int droneCount        = 2;
-    static int tankCount         = 3;
-    static int soldierCount      = 4;
-    static int basherCount       = 5;
+    static int beaverCount        = 0;
+    static int minerCount         = 1;
+    static int droneCount         = 2;
+    static int tankCount          = 3;
+    static int soldierCount       = 4;
+    static int basherCount        = 5;
 
     // building counts
-    static int barracksCount     = 10;
-    static int minerFactoryCount = 11;
-    static int helipadCount      = 12;
-    static int tankFactoryCount  = 13;
+    static int barracksCount      = 10;
+    static int minerFactoryCount  = 11;
+    static int helipadCount       = 12;
+    static int tankFactoryCount   = 13;
 
     // location of most recently destroyed tower
-    static int destroyedTower    = 20;
+    static int destroyedTower     = 20;
 
     // commands
-    static int beaverTasksTaken  = 49;
-    static int beaverTask1       = 50; // channels 50-? are tasks needed to
+    static int beaverTasksTaken   = 49;
+    static int beaverTask1        = 50; // channels 50-? are tasks needed to
 // be
-                                        // done in order
+                                         // done in order
 
-    static int rallyLoc          = 36;
-    static int buildLoc          = 37;
+    static int rallyLoc           = 36;
+    static int buildLoc           = 37;
 
-    static int miningTotal       = 200;
+    static int miningTotal        = 200;
 
-    static int buildPathLength   = 298;
-    static int buildPathCount    = 299;
-    static int buildPath         = 300; // can span up to 30ish spots
+    static int buildPathLength    = 298;
+    static int buildPathCount     = 299;
+    static int buildPath          = 300; // can span up to 30ish spots
+
+    // Tower analysis
+    static int towerVulnerability = 990;
 
 }

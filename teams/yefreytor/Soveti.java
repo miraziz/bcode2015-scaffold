@@ -10,20 +10,23 @@ import battlecode.common.*;
  */
 public abstract class Soveti
 {
-    protected RobotController rc;
-    protected MapLocation     mLocation;
-    protected int             mapOffsetX;
-    protected int             mapOffsetY;
-    protected int             broadcastO;
+    protected RobotController          rc;
 
-    protected RobotType       mType;
-    protected Team            myTeam;
-    protected Team            enemyTeam;
-    protected MapLocation     allyHQ;
-    protected MapLocation     enemyHQ;
-    protected MapLocation[]   enemyTowers;
-    protected MapLocation[]   allyTowers;
-    protected Random          rand;
+    protected MapLocation              mLocation;
+    protected int                      mapOffsetX;
+    protected int                      mapOffsetY;
+    protected int                      broadcastO;
+
+    protected RobotType                mType;
+    protected Team                     myTeam;
+    protected Team                     enemyTeam;
+    protected MapLocation              allyHQ;
+    protected MapLocation              enemyHQ;
+    protected MapLocation[]            enemyTowers;
+    protected MapLocation[]            allyTowers;
+    protected Random                   rand;
+
+    protected static final Direction[] directions = Direction.values();
 
 
     /**
