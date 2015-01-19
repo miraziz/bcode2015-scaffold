@@ -66,7 +66,7 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
@@ -471,9 +471,11 @@ public class HQ
             {
                 return;
             }
-            if (r.type == RobotType.DRONE)
+            if (this.isProductionBuilding(r.type))
             {
-                rc.transferSupplies((int)rc.getSupplyLevel(), r.location);
+                rc.transferSupplies(
+                    (int)(rc.getSupplyLevel() * .90),
+                    r.location);
                 return;
             }
         }
