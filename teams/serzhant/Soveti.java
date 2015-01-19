@@ -15,7 +15,6 @@ public abstract class Soveti
     protected MapLocation              mLocation;
     protected int                      mapOffsetX;
     protected int                      mapOffsetY;
-    protected int                      broadcastO;
 
     protected RobotType                mType;
     protected Team                     myTeam;
@@ -51,9 +50,16 @@ public abstract class Soveti
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
 
-        mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
-        mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
-        broadcastO = GameConstants.MAP_MAX_HEIGHT * 2;
+        if (allyHQ.x >= enemyHQ.x && allyHQ.y >= enemyHQ.y)
+        {
+            mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
+            mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
+        }
+        else if (allyHQ.x <= enemyHQ.x && allyHQ.y <= enemyHQ.y)
+        {
+            mapOffsetX = enemyHQ.x - GameConstants.MAP_MAX_WIDTH;
+            mapOffsetY = enemyHQ.y - GameConstants.MAP_MAX_HEIGHT;
+        }
     }
 
 
@@ -139,7 +145,7 @@ public abstract class Soveti
         int x = (loc.x - mapOffsetX);
         int y = (loc.y - mapOffsetY);
 
-        int broadcast = broadcastO * x + y;
+        int broadcast = Constants.MAP_HEIGHT * x + y;
         rc.broadcast(channel, broadcast);
     }
 
@@ -159,8 +165,8 @@ public abstract class Soveti
         int num = rc.readBroadcast(channel);
         if (num > 0)
         {
-            int x = num / broadcastO + mapOffsetX;
-            int y = num % broadcastO + mapOffsetY;
+            int x = num / Constants.MAP_HEIGHT + mapOffsetX;
+            int y = num % Constants.MAP_HEIGHT + mapOffsetY;
             res = new MapLocation(x, y);
         }
 

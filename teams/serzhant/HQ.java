@@ -300,7 +300,7 @@ public class HQ
         throws GameActionException
     {
         boolean[][] visited =
-            new boolean[2 * GameConstants.MAP_MAX_WIDTH][2 * GameConstants.MAP_MAX_HEIGHT];
+            new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
         LinkedList<MapLocation> queue = new LinkedList<MapLocation>();
 
         queue.offer(allyHQ);

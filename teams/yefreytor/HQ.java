@@ -33,7 +33,7 @@ public class HQ
 
         // TODO Set miner limits based on map size
 
-        // TODO Uh.........
+        // TODO Uh......... 
         // builds minerfactory first then others
         tasks = new LinkedList<BeaverTask>();
         submitBeaverTask(BeaverTask.MINE);
