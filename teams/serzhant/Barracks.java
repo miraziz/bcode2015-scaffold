@@ -28,7 +28,7 @@ public class Barracks
         // TODO smarter barracks
         if (rc.readBroadcast(Channels.shouldSpawnSoldier) == 1)
         {
-            spawnToEnemy(RobotType.SOLDIER);
+            // spawnToEnemy(RobotType.SOLDIER);
         }
         else if (rc.readBroadcast(Channels.shouldSpawnBasher) == 1)
         {

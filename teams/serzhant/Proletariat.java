@@ -208,25 +208,6 @@ public abstract class Proletariat
 
 
     /**
-     * Checks whether the location in the given direction is outside the
-     * boundaries of the map.
-     * 
-     * @param dir
-     *            The direction to check.
-     * @return True if the location is off the map, false otherwise.
-     */
-    private boolean isOffMap(Direction dir)
-    {
-        MapLocation loc = mLocation.add(dir);
-        if (rc.senseTerrainTile(loc) == TerrainTile.OFF_MAP)
-        {
-            return true;
-        }
-        return false;
-    }
-
-
-    /**
      * Checks whether the location in the given direction is a normal tile with
      * no robots on it.
      * 
@@ -371,7 +352,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!rc.canMove(dir) && count < turns && !inEnemyTowerRange(dir))
+        while (!rc.canMove(dir) && count < turns)
         {
             if (count % 2 == 0)
             {

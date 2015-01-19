@@ -68,4 +68,48 @@ public abstract class AttackBuilding
             broadcastLocation(Channels.rallyLoc, new MapLocation(avgX, avgY));
         }
     }
+
+
+    public boolean attack()
+        throws GameActionException
+    {
+        if (!rc.isWeaponReady())
+        {
+            return false;
+        }
+        int attackRadius = 24;
+        if (rc.getType() == RobotType.HQ)
+        {
+            allyTowers = rc.senseTowerLocations();
+            if (allyTowers.length >= 2)
+            {
+                attackRadius = 35;
+            }
+        }
+        RobotInfo[] nearbyEnemies =
+            rc.senseNearbyRobots(attackRadius - 1, enemyTeam);
+        if (nearbyEnemies.length == 0)
+        {
+            rc.setIndicatorString(0, "Dont see anyone");
+            return false;
+        }
+
+        rc.setIndicatorString(0, "See People");
+        double lowestHealth = nearbyEnemies[0].health;
+        MapLocation loc = nearbyEnemies[0].location;
+        for (RobotInfo i : nearbyEnemies)
+        {
+            if (i.health < lowestHealth)
+            {
+                lowestHealth = i.health;
+                loc = i.location;
+            }
+        }
+        if (loc != null && rc.canAttackLocation(loc))
+        {
+            rc.attackLocation(loc);
+            return true;
+        }
+        return false;
+    }
 }
