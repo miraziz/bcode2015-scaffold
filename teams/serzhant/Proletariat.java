@@ -51,7 +51,6 @@ public abstract class Proletariat
         throws GameActionException
     {
         mLocation = rc.getLocation();
-        this.manageSupply();
     }
 
 
@@ -87,28 +86,9 @@ public abstract class Proletariat
     {
         if (rc.isCoreReady() && rc.canMove(dir))
         {
-            MapLocation moveLoc = rc.getLocation().add(dir);
-            if (Clock.getRoundNum() < Constants.attackRound)
+            if (inEnemyTowerRange(dir))
             {
-                if (Clock.getRoundNum() < Constants.attackRound + 300)
-                {
-                    int distance = moveLoc.distanceSquaredTo(enemyHQ);
-                    if (enemyTowers.length >= 5)
-                    {
-                        distance -= 11;
-                    }
-                    if (distance <= RobotType.HQ.attackRadiusSquared + 2)
-                    {
-                        return false;
-                    }
-                }
-                for (MapLocation r : enemyTowers)
-                {
-                    if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
-                    {
-                        return false;
-                    }
-                }
+                return false;
             }
             rc.move(dir);
             return true;
@@ -138,13 +118,14 @@ public abstract class Proletariat
             // TODO THIS IS MADNESS
             // there is a wall ahead of us, sets onWall to false, so that the
             // next code will run
-            if (!isNormalTile(facing))
+            if (!isNormalTile(facing) || inEnemyTowerRange(facing))
             {
                 onWall = false;
             }
             else
             {
-                if (isNormalTile(facing.rotateRight()))
+                if (isNormalTile(facing.rotateRight())
+                    && !inEnemyTowerRange(facing.rotateRight()))
                 {
                     onWall = false;
                 }
@@ -161,7 +142,8 @@ public abstract class Proletariat
             // need to handle if count is 8 afterwards. Means the robot is
             // kind of stuck or something, tried turning every way
             // Maybe dump the whole visited HashSet in this case?
-            while (!isNormalTile(facing) && count < 8)
+            while ((!isNormalTile(facing) || inEnemyTowerRange(facing))
+                && count < 8)
             {
                 count++;
                 if (turnRight)
@@ -192,6 +174,36 @@ public abstract class Proletariat
         {
             return false;
         }
+    }
+
+
+    private boolean inEnemyTowerRange(Direction dir)
+    {
+        MapLocation moveLoc = rc.getLocation().add(dir);
+        int roundNum = Clock.getRoundNum();
+        if (roundNum < Constants.attackRound)
+        {
+            if (roundNum < Constants.attackRound + 300)
+            {
+                int distance = moveLoc.distanceSquaredTo(enemyHQ);
+                if (enemyTowers.length >= 2)
+                {
+                    distance -= 11;
+                }
+                if (distance <= RobotType.HQ.attackRadiusSquared + 3)
+                {
+                    return true;
+                }
+            }
+            for (MapLocation r : enemyTowers)
+            {
+                if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -359,7 +371,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!rc.canMove(dir) && count < turns)
+        while (!rc.canMove(dir) && count < turns && !inEnemyTowerRange(dir))
         {
             if (count % 2 == 0)
             {
@@ -380,35 +392,6 @@ public abstract class Proletariat
         else
         {
             return null;
-        }
-    }
-
-
-    protected void manageSupply()
-        throws GameActionException
-    {
-        if (rc.getSupplyLevel() < 300)
-        {
-            int distance = rc.getLocation().distanceSquaredTo(allyHQ);
-            int supplyPriority = 1;
-
-            if (rc.getType() == RobotType.TANK)
-            {
-                supplyPriority = 3;
-            }
-            else if (rc.getType() == RobotType.SOLDIER)
-            {
-                supplyPriority = 2;
-            }
-
-            int curPriority = rc.readBroadcast(Channels.supplyPriority);
-            if (supplyPriority > curPriority
-                || (distance > rc.readBroadcast(Channels.supplyDistance) && supplyPriority == curPriority))
-            {
-                rc.broadcast(Channels.supplyPriority, supplyPriority);
-                rc.broadcast(Channels.supplyDistance, distance);
-                broadcastLocation(Channels.supplyLoc, rc.getLocation());
-            }
         }
     }
 }

@@ -15,7 +15,6 @@ public class HQ
 {
     private LinkedList<BeaverTask> tasks;
     boolean                        attacking;
-    private int                    buildCooldown;
     private boolean                shouldRun;
     HashSet<MapLocation>           destroyedTowers;
     MapLocation                    defaultRallyLoc;
@@ -53,6 +52,7 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -61,18 +61,20 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         sendBeaverTasks();
         this.pathId = 1;
-        buildCooldown = 0;
 
         // TODO What does shouldRun do for the HQ?
         attacking = false;
@@ -266,7 +268,6 @@ public class HQ
         Symmetry symmetry = findSymmetry();
 
         int i = 0;
-        String str = "enemyTowers in vulnerability order: ";
         while (!myTowers.isEmpty())
         {
             TowerRank t = myTowers.poll();
@@ -284,7 +285,6 @@ public class HQ
                 y *= -1;
             }
             this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
-            str += enemyTowers[i].toString() + ", ";
             i++;
         }
 
@@ -414,7 +414,6 @@ public class HQ
     {
         // building stuff
         int roundNum = Clock.getRoundNum();
-        buildCooldown++;
         double myOre = rc.getTeamOre();
 
         int barracksCount = rc.readBroadcast(Channels.barracksCount);
