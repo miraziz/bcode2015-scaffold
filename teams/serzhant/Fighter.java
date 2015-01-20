@@ -52,7 +52,76 @@ public class Fighter
     private void micro(RobotInfo[] nearby)
         throws GameActionException
     {
-        bug();
+        if (!rc.isCoreReady())
+        {
+            return;
+        }
+        boolean inDangerRange = false;
+        boolean inEnemyAttackRange = false;
+        int myTeamHealth = 0;
+        int enemyTeamHealth = 0;
+        int avgX = 0;
+        int avgY = 0;
+        int enemyCount = 0;
+        for (RobotInfo r : nearby)
+        {
+            if (isAttackingUnit(r.type))
+            {
+                if (r.team == enemyTeam)
+                {
+                    if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared + 2)
+                    {
+                        inDangerRange = true;
+                        if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
+                        {
+                            inEnemyAttackRange = true;
+                        }
+                    }
+                    enemyCount++;
+                    enemyTeamHealth += r.health;
+                    avgX += r.location.x;
+                    avgY += r.location.y;
+                }
+                else
+                {
+                    myTeamHealth += rc.getHealth();
+                }
+            }
+        }
+        if (enemyCount == 0)
+        {
+            bug();
+            return;
+        }
+        avgX /= enemyCount;
+        avgY /= enemyCount;
+        MapLocation enemy = new MapLocation(avgX, avgY);
+        if (myTeamHealth >= enemyTeamHealth * 2)
+        {
+            bug();
+        }
+        else if (myTeamHealth < enemyTeamHealth * 2)
+        {
+            if (inEnemyAttackRange)
+            {
+                runAway(enemy.directionTo(rc.getLocation()));
+            }
+        }
+        else if (!inDangerRange)
+        {
+            bug();
+        }
+    }
+
+
+    private void runAway(Direction towards)
+        throws GameActionException
+    {
+        Direction dir = this.getFreeForwardDirection(towards);
+        if (dir != null && rc.canMove(dir))
+        {
+            rc.move(dir);
+        }
     }
 
 
