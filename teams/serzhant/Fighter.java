@@ -72,7 +72,7 @@ public class Fighter
             this.setDestination(getLocation(Channels.rallyLoc));
         }
         RobotInfo[] nearby =
-            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
+            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
         if (!attack(nearby))
         {
             micro(nearby);
@@ -91,15 +91,16 @@ public class Fighter
         boolean inDangerRange = false;
         boolean inEnemyAttackRange = false;
         boolean nearTowerRange = false;
-        int myTeamHealth = 0;
+        int myTeamHealth = (int)rc.getHealth();
         int enemyTeamHealth = 0;
         int avgX = 0;
         int avgY = 0;
+        int allyCount = 0;
         int enemyCount = 0;
         if ((attacking && dest.distanceSquaredTo(rc.getLocation()) < 35))
         {
             nearTowerRange = true;
-            enemyTeamHealth += RobotType.TOWER.maxHealth / 2;
+            enemyTeamHealth += RobotType.TOWER.maxHealth / 4;
         }
         for (RobotInfo r : nearby)
         {
@@ -125,20 +126,21 @@ public class Fighter
                 }
                 else if (isAttackingUnit(type))
                 {
+                    allyCount++;
                     myTeamHealth += rc.getHealth();
                 }
             }
         }
         if (nearTowerRange)
         {
-            System.out.println("I'm near tower range");
             rc.setIndicatorLine(mLocation, dest, 150, 150, 150);
             if (rc.getLocation().distanceSquaredTo(dest) <= rc.getType().attackRadiusSquared)
             {
                 return;
             }
-            if ((attacking && (myTeamHealth >= enemyTeamHealth))
-                || Clock.getRoundNum() > 1800 || committed)
+            if ((allyCount >= 8 && enemyCount <= 4)
+                || Clock.getRoundNum() > Constants.towerAttackRound
+                || committed)
             {
                 committed = true;
                 Direction dir =
@@ -207,7 +209,7 @@ public class Fighter
         RobotInfo toAttack = null;
         for (RobotInfo r : nearby)
         {
-            if (rc.canAttackLocation(r.location))
+            if (r.team == this.enemyTeam && rc.canAttackLocation(r.location))
             {
                 int priority = getPriority(r.type);
                 if (priority > highestPriority)

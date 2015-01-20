@@ -40,7 +40,7 @@ public class Constants
     // other constants
     static int                 beaverLimit             = 1;
     static int                 minerLimit              = 30;
-    static int                 soldierLimit            = 12;
+    static int                 soldierLimit            = 6;
     static int                 droneLimit              = 1;
 
     static int                 tankCost                = RobotType.TANK.oreCost;
@@ -56,4 +56,6 @@ public class Constants
 
     static int                 attackRound             = 1800;
     static int                 requiredTanksForAttack  = 18;
+
+    static int                 towerAttackRound        = 1650;
 }
