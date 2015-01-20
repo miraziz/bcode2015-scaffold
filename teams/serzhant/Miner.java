@@ -195,8 +195,8 @@ public class Miner
                         MapLocation bestLoc = findClosestOre();
                         if (bestLoc != null)
                         {
+                            mLocation = rc.getLocation();
                             setPath(bestLoc);
-                            moveAlongPath();
                         }
                     }
                 }

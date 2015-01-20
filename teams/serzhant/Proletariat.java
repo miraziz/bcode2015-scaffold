@@ -101,7 +101,7 @@ public abstract class Proletariat
     {
         if (rc.canMove(dir))
         {
-            if (!inEnemyRange(mLocation.add(dir)) && !inEnemyTowerRange(dir))
+            if (!inEnemyRange(mLocation.add(dir)))
             {
                 rc.move(dir);
                 return true;
@@ -112,6 +112,7 @@ public abstract class Proletariat
 
 
     private boolean inEnemyRange(MapLocation loc)
+        throws GameActionException
     {
         RobotInfo[] enemyRobots =
             rc.senseNearbyRobots(mType.sensorRadiusSquared, enemyTeam);
@@ -119,8 +120,22 @@ public abstract class Proletariat
         int len = enemyRobots.length;
         for (int i = 0; i < len; ++i)
         {
-            if (enemyRobots[i].location.distanceSquaredTo(loc) <= enemyRobots[i].type.attackRadiusSquared)
+            if (!enemyRobots[i].type.canMine()
+                && enemyRobots[i].location.distanceSquaredTo(loc) <= enemyRobots[i].type.attackRadiusSquared)
             {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < enemyTowers.length; ++i)
+        {
+            if (enemyTowers[i].distanceSquaredTo(loc) <= RobotType.TOWER.attackRadiusSquared)
+            {
+                if (rc.canSenseLocation(enemyTowers[i])
+                    && rc.senseRobotAtLocation(enemyTowers[i]) == null)
+                {
+                    continue;
+                }
                 return true;
             }
         }
@@ -266,6 +281,10 @@ public abstract class Proletariat
     {
         if (rc.getSupplyLevel() > 500)
         {
+            if (Clock.getBytecodesLeft() < 700)
+            {
+                return;
+            }
             RobotInfo[] allies =
                 rc.senseNearbyRobots(
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
@@ -273,7 +292,7 @@ public abstract class Proletariat
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {
-                if (Clock.getBytecodesLeft() < 550)
+                if (Clock.getBytecodesLeft() < 700)
                 {
                     return;
                 }
@@ -286,7 +305,7 @@ public abstract class Proletariat
                     targetRobot = r;
                 }
             }
-            if (Clock.getBytecodesLeft() < 550)
+            if (Clock.getBytecodesLeft() < 700)
             {
                 return;
             }
