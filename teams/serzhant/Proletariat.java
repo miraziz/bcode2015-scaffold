@@ -22,7 +22,7 @@ public abstract class Proletariat
 
     private double                  lastRoundHealth;
     private boolean                 turnRight;
-    private MapLocation             dest;
+    protected MapLocation           dest;
     private Boolean                 onWall;
     protected Direction             facing;
     private LinkedList<MapLocation> helper;         // using for
@@ -209,29 +209,26 @@ public abstract class Proletariat
 
 
     private boolean inEnemyTowerRange(Direction dir)
+        throws GameActionException
     {
         MapLocation moveLoc = rc.getLocation().add(dir);
+        boolean attacking = rc.readBroadcast(Channels.attacking) == 1;
         int roundNum = Clock.getRoundNum();
-        if (roundNum < Constants.attackRound)
+        int distance = moveLoc.distanceSquaredTo(enemyHQ);
+        if (enemyTowers.length >= 2)
         {
-            if (roundNum < Constants.attackRound + 300)
+            distance -= 11;
+        }
+        if (distance <= RobotType.HQ.attackRadiusSquared + 3)
+        {
+            return true;
+        }
+
+        for (MapLocation r : enemyTowers)
+        {
+            if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
             {
-                int distance = moveLoc.distanceSquaredTo(enemyHQ);
-                if (enemyTowers.length >= 2)
-                {
-                    distance -= 11;
-                }
-                if (distance <= RobotType.HQ.attackRadiusSquared + 3)
-                {
-                    return true;
-                }
-            }
-            for (MapLocation r : enemyTowers)
-            {
-                if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
-                {
-                    return true;
-                }
+                return true;
             }
         }
         return false;
