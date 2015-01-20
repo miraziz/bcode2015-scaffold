@@ -101,7 +101,7 @@ public abstract class Proletariat
     {
         if (rc.canMove(dir))
         {
-            if (!inEnemyRange(mLocation.add(dir)))
+            if (!inEnemyRange(mLocation.add(dir)) && !inEnemyTowerRange(dir))
             {
                 rc.move(dir);
                 return true;
@@ -407,11 +407,17 @@ public abstract class Proletariat
 
     protected Direction[] getSpanningDirections(Direction dir)
     {
-        Direction[] dirs = new Direction[8];
+        return getSpanningDirections(dir, 8);
+    }
+
+
+    protected Direction[] getSpanningDirections(Direction dir, int turns)
+    {
+        Direction[] dirs = new Direction[turns];
         Direction left = dir;
         Direction right = dir.rotateRight();
         int count = 0;
-        while (count < 8)
+        while (count < turns)
         {
             if (count % 2 == 0)
             {

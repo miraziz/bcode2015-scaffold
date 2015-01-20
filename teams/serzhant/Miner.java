@@ -325,11 +325,13 @@ public class Miner
         Direction dir =
             mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
 
-        dir = getFreeStrafeDirection(dir);
-        if (dir != null)
+        Direction[] dirs = getSpanningDirections(dir);
+        for (int i = 0; i < dirs.length; i++)
         {
-            rc.move(dir);
-            return true;
+            if (moveSafely(dirs[i]))
+            {
+                return true;
+            }
         }
         return false;
     }
