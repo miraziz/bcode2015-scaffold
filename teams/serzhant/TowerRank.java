@@ -21,7 +21,6 @@ public class TowerRank
     }
 
 
-    @Override
     public int compareTo(TowerRank o)
     {
         return score - o.score;

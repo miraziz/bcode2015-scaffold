@@ -102,7 +102,7 @@ public abstract class Building
             Direction right = dir;
             Direction left = dir;
             int count = 0;
-            while (!rc.canSpawn(dir, type))
+            while (!rc.canSpawn(dir, type) && count < 8)
             {
                 if (count % 2 == 0)
                 {
@@ -119,6 +119,7 @@ public abstract class Building
             if (count < 8)
             {
                 rc.spawn(dir, type);
+                return true;
             }
         }
         return false;

@@ -541,7 +541,9 @@ public class Miner
             rc.broadcast(Channels.highestEnemyHealth, enemyHealth);
             avgX /= nearby.length;
             avgY /= nearby.length;
-            broadcastLocation(Channels.rallyLoc, new MapLocation(avgX, avgY));
+            broadcastLocation(Channels.highestEnemyHealthLoc, new MapLocation(
+                avgX,
+                avgY));
         }
     }
 }

@@ -42,7 +42,7 @@ public class Fighter
             + getLocation(Channels.rallyLoc));
         RobotInfo[] nearby =
             rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
-        if (!attack())
+        if (!attack(nearby))
         {
             micro(nearby);
         }
@@ -96,6 +96,11 @@ public class Fighter
         avgX /= enemyCount;
         avgY /= enemyCount;
         MapLocation enemy = new MapLocation(avgX, avgY);
+        if (enemyTeamHealth > rc.readBroadcast(Channels.highestEnemyHealth))
+        {
+            rc.broadcast(Channels.highestEnemyHealth, enemyTeamHealth);
+            broadcastLocation(Channels.highestEnemyHealthLoc, enemy);
+        }
         if (myTeamHealth >= enemyTeamHealth * 2)
         {
             bug();

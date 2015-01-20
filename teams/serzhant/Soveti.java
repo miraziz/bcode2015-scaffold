@@ -55,7 +55,7 @@ public abstract class Soveti
             mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
             mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
         }
-        else if (allyHQ.x <= enemyHQ.x && allyHQ.y <= enemyHQ.y)
+        else
         {
             mapOffsetX = enemyHQ.x - GameConstants.MAP_MAX_WIDTH;
             mapOffsetY = enemyHQ.y - GameConstants.MAP_MAX_HEIGHT;
@@ -117,13 +117,6 @@ public abstract class Soveti
                 }
                 if (rc.canAttackLocation(target.location))
                 {
-                    if (target.type == RobotType.TOWER
-                        && target.health <= rc.getType().attackPower)
-                    {
-                        broadcastLocation(
-                            Channels.destroyedTower,
-                            target.location);
-                    }
                     rc.attackLocation(target.location);
                     return true;
                 }
@@ -192,7 +185,8 @@ public abstract class Soveti
     protected boolean isSupplyingUnit(RobotType type)
     {
         return type == RobotType.SOLDIER || type == RobotType.TANK
-            || type == RobotType.MINER || type == RobotType.LAUNCHER;
+            || type == RobotType.MINER || type == RobotType.LAUNCHER
+            || type == RobotType.DRONE;
     }
 
 

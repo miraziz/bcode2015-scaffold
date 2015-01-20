@@ -62,12 +62,14 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_BARRACKS);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
@@ -86,7 +88,7 @@ public class HQ
 
         // Wait for towers to calculate vulnerability
         destroyedTowers = new HashSet<MapLocation>();
-        analyzeTowers();
+        // analyzeTowers();
     }
 
 
@@ -113,7 +115,6 @@ public class HQ
                 this.spawn(
                     mLocation.directionTo(loc).rotateRight(),
                     RobotType.BEAVER);
-
             }
         }
         // do broadcast things with the counts so people know what to do
@@ -123,40 +124,44 @@ public class HQ
         sendBeaverTasks();
         shouldRun = false;
 
-        if (!attacking && Clock.getRoundNum() > Constants.attackRound)
-        {
-            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
-            if (enemyTowers.length > 0)
-            {
-                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
-            }
-            attacking = true;
-        }
+        manageRallyLoc(roundNum);
 
-        if (attacking)
-        {
-            broadcastLocation(Channels.rallyLoc, this.enemyHQ);
-            // TODO Make units broadcast the most recently destroyed tower as
-            // they deal the final blow to it, to move on to the next tower.
-            MapLocation destroyed = getLocation(Channels.destroyedTower);
-            if (destroyed != null)
-            {
-                this.destroyedTowers.add(destroyed);
-                rc.broadcast(Channels.destroyedTower, 0);
-            }
-            for (int i = 0; i < this.enemyTowers.length; i++)
-            {
-                if (!this.destroyedTowers.contains(enemyTowers[i]))
-                {
-                    broadcastLocation(Channels.rallyLoc, enemyTowers[i]);
-                }
-            }
-        }
     }
 
 
 // Finds symmetry in map and ranks towers
 // ------------------------------------------------------------------
+
+    private void manageRallyLoc(int roundNum)
+        throws GameActionException
+    {
+        if (!attacking && Clock.getRoundNum() > Constants.attackRound)
+        {
+
+            attacking = true;
+        }
+        if (attacking)
+        {
+            enemyTowers = rc.senseEnemyTowerLocations();
+            if (enemyTowers.length > 0)
+            {
+                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
+            }
+            else
+            {
+                broadcastLocation(Channels.rallyLoc, this.enemyHQ);
+            }
+        }
+        if (!attacking)
+        {
+            MapLocation newRally = getLocation(Channels.highestEnemyHealthLoc);
+            if (newRally != null)
+            {
+                broadcastLocation(Channels.rallyLoc, newRally);
+            }
+        }
+    }
+
 
     private enum Symmetry
     {
@@ -304,6 +309,8 @@ public class HQ
         LinkedList<MapLocation> queue = new LinkedList<MapLocation>();
 
         queue.offer(allyHQ);
+        System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
+            + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
         visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
         while (!queue.isEmpty() && buildingCount <= Constants.MAXIMUM_BUILDINGS)
         {
@@ -477,15 +484,5 @@ public class HQ
                 return;
             }
         }
-        /*
-         * double totSupply = rc.getSupplyLevel(); if (totSupply == 0) { return;
-         * } RobotInfo[] nearbyAllies = rc.senseNearbyRobots(
-         * GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, myTeam); if
-         * (nearbyAllies.length > 0) { int unitSupply = (int)(totSupply /
-         * nearbyAllies.length); for (RobotInfo robot : nearbyAllies) { if
-         * (Clock.getBytecodesLeft() < 550) { return; } if (unitSupply != 0 &&
-         * rc.canSenseLocation(robot.location)) {
-         * rc.transferSupplies(unitSupply, robot.location); } } }
-         */
     }
 }
