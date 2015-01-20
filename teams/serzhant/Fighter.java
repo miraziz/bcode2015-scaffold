@@ -138,7 +138,7 @@ public class Fighter
             {
                 return;
             }
-            if ((allyCount >= 8 && enemyCount <= 4)
+            if ((allyCount - enemyCount >= 5)
                 || Clock.getRoundNum() > Constants.towerAttackRound
                 || committed)
             {
