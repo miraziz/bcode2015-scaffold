@@ -65,5 +65,5 @@ public class Constants
     static int                 attackRound             = 1800;
     static int                 requiredTanksForAttack  = 18;
 
-    static int                 towerAttackRound        = 1650;
+    static int                 towerAttackRound        = 1900;
 }
