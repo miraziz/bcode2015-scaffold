@@ -25,9 +25,13 @@ public class Constants
     public static final int    MAP_HEIGHT              =
                                                            2 * GameConstants.MAP_MAX_HEIGHT + 10;
 
-    public static double       MIN_ORE                 = 3.5;
-    public static final double POTATO_MIN_ORE          = 3.5;
-    public static final double NORMAL_MIN_ORE          = 3.5;
+    public static final double POTATO_MIN_ORE          = 1;
+    public static final double NORM_MIN_ORE            = 3;
+    public static final double FAST_MIN_ORE            =
+                                                           GameConstants.MINER_MINE_MAX
+                                                               * GameConstants.MINER_MINE_RATE;
+
+    public static double       MIN_ORE                 = NORM_MIN_ORE;
     public static final int    BETTER_ORE_MIN_RANGE    = 3;
     public static final int    BETTER_ORE_MAX_RANGE    = 4;
 
@@ -37,10 +41,14 @@ public class Constants
                                                            GameConstants.MINER_MINE_MAX
                                                                * GameConstants.MINER_MINE_RATE;
 
+    public static final int    TOT_MINER_FRACS         = 10;
+    public static final double FAST_MINER_FRACS        = 1;
+    public static final double NORM_MINER_FRACS        = 8 + FAST_MINER_FRACS;
+
     // other constants
     static int                 beaverLimit             = 1;
-    static int                 minerLimit              = 30;
     static int                 soldierLimit            = 6;
+    static int                 minerLimit              = 50;
     static int                 droneLimit              = 1;
 
     static int                 tankCost                = RobotType.TANK.oreCost;
