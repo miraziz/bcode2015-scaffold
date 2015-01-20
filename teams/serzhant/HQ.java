@@ -469,7 +469,7 @@ public class HQ
             {
                 return;
             }
-            if (this.isProductionBuilding(r.type))
+            if (r.type.canSpawn())
             {
                 rc.transferSupplies(
                     (int)(rc.getSupplyLevel() * .90),

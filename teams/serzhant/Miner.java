@@ -435,12 +435,19 @@ public class Miner
                 rc.yield();
             }
             double ore = rc.senseOre(cur);
-            if (ore >= 0 && rc.canSenseLocation(cur))
+
+            if (ore == -1)
+            {
+                oreLoc = cur;
+                break;
+            }
+            else if (rc.canSenseLocation(cur))
             {
                 // TODO Go into previously seen ores (so don't do
 // rc.canSenseLocation)
                 RobotInfo robot = rc.senseRobotAtLocation(cur);
-                if (robot == null || !isBuildingOrBeaver(robot.type))
+                if (robot == null || !robot.type.isBuilding
+                    && !robot.type.canBuild())
                 {
                     // TODO Avoid stationary units in another way (Not just
 // avoid beavers)
