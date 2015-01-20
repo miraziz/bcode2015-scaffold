@@ -422,20 +422,20 @@ public class HQ
         int droneCount = rc.readBroadcast(Channels.droneCount);
 
         rc.broadcast(Channels.shouldSpawnBasher, 0);
-        rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        rc.broadcast(Channels.shouldSpawnSoldier, 0);
         rc.broadcast(Channels.shouldSpawnDrone, 0);
         if (droneCount == 0)
         {
             rc.broadcast(Channels.shouldSpawnDrone, 1);
         }
-        if (myOre > aerospaceCount * Constants.launcherCost
-            + Constants.soldierCost)
+        if (soldierCount < Constants.soldierLimit)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
         }
-        if (!attacking && tankCount > Constants.requiredTanksForAttack)
+        if (!attacking && tankCount >= Constants.requiredTanksForAttack)
         {
             attacking = true;
+            System.out.println("Tanks should attack now");
             rc.broadcast(Channels.attacking, 1);
         }
 
