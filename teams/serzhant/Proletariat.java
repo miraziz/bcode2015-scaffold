@@ -108,7 +108,7 @@ public abstract class Proletariat
     protected boolean bug()
         throws GameActionException
     {
-        if (dest == null)
+        if (dest == null || !rc.isCoreReady())
         {
             return false;
         }
