@@ -180,7 +180,7 @@ public class Fighter
         {
             priority = 2;
         }
-        else if (isProductionBuilding(type))
+        else if (type.canSpawn())
         {
             priority = 1;
         }

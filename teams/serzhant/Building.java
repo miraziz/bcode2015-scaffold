@@ -58,8 +58,7 @@ public abstract class Building
             {
                 return;
             }
-            if (isProductionBuilding(r.type)
-                && rc.getSupplyLevel() > r.supplyLevel)
+            if (r.type.canSpawn() && rc.getSupplyLevel() > r.supplyLevel)
             {
                 rc.transferSupplies(
                     (int)((rc.getSupplyLevel() - r.supplyLevel) / 2),
