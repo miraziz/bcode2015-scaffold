@@ -26,7 +26,7 @@ public class Constants
                                                            2 * GameConstants.MAP_MAX_HEIGHT + 10;
 
     public static final double POTATO_MIN_ORE          = 1;
-    public static final double NORM_MIN_ORE            = 3;
+    public static final double NORM_MIN_ORE            = 2;
     public static final double FAST_MIN_ORE            =
                                                            GameConstants.MINER_MINE_MAX
                                                                * GameConstants.MINER_MINE_RATE;
@@ -43,7 +43,7 @@ public class Constants
 
     public static final int    TOT_MINER_FRACS         = 10;
     public static final double FAST_MINER_FRACS        = 1;
-    public static final double NORM_MINER_FRACS        = 8 + FAST_MINER_FRACS;
+    public static final double NORM_MINER_FRACS        = 9 + FAST_MINER_FRACS;
 
     // other constants
     static int                 beaverLimit             = 1;
