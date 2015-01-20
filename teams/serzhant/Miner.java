@@ -21,7 +21,6 @@ public class Miner
     private MapLocation   minerDest;
     private double        bestOreNum;
     private int           myMinerID;
-    private int           minerPotato;
 
 
     public Miner(RobotController rc)
@@ -132,14 +131,18 @@ public class Miner
         super.run();
 
         myMinerID = rc.readBroadcast(Channels.minerCount);
-        minerPotato = rc.readBroadcast(Channels.minerPotato);
-        if(myMinerID % minerPotato == minerPotato - 1)
+        int mGroup = myMinerID % Constants.TOT_MINER_FRACS;
+        if (mGroup < Constants.FAST_MINER_FRACS)
         {
-            Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
+            Constants.MIN_ORE = Constants.FAST_MIN_ORE;
+        }
+        else if (mGroup < Constants.NORM_MINER_FRACS)
+        {
+            Constants.MIN_ORE = Constants.NORM_MIN_ORE;
         }
         else
         {
-            Constants.MIN_ORE = Constants.NORMAL_MIN_ORE;
+            Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
         }
         rc.broadcast(Channels.minerCount, myMinerID + 1);
 
