@@ -11,6 +11,10 @@ public class Fighter
     extends Proletariat
 {
 
+    private boolean attacking;
+    private boolean committed;
+
+
     /**
      * Sets rally point.
      * 
@@ -21,7 +25,7 @@ public class Fighter
         throws GameActionException
     {
         super(rc);
-
+        committed = false;
         setDestination(getLocation(Channels.rallyLoc));
     }
 
@@ -37,7 +41,7 @@ public class Fighter
         // TODO Stop them from moving when they're in a clump to avoid wasting
 // supply
         this.setDestination(getLocation(Channels.rallyLoc));
-        boolean attacking = rc.readBroadcast(Channels.attacking) == 1;
+        attacking = rc.readBroadcast(Channels.attacking) == 1;
         rc.setIndicatorString(0, "Traveling to: "
             + getLocation(Channels.rallyLoc));
         if (attacking)
@@ -83,37 +87,69 @@ public class Fighter
         {
             return;
         }
+        rc.setIndicatorString(2, "attacking: " + attacking);
         boolean inDangerRange = false;
         boolean inEnemyAttackRange = false;
+        boolean nearTowerRange = false;
         int myTeamHealth = 0;
         int enemyTeamHealth = 0;
         int avgX = 0;
         int avgY = 0;
         int enemyCount = 0;
+        if ((attacking && dest.distanceSquaredTo(rc.getLocation()) < 35))
+        {
+            nearTowerRange = true;
+            enemyTeamHealth += RobotType.TOWER.maxHealth / 2;
+        }
         for (RobotInfo r : nearby)
         {
-            if (isAttackingUnit(r.type))
+            RobotType type = r.type;
+            if (isAttackingUnit(type))
             {
                 if (r.team == enemyTeam)
                 {
-                    if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared + 2)
+                    if (rc.getLocation().distanceSquaredTo(r.location) <= type.attackRadiusSquared + 2)
                     {
                         inDangerRange = true;
-                        if (rc.getLocation().distanceSquaredTo(r.location) <= r.type.attackRadiusSquared)
+                        if (rc.getLocation().distanceSquaredTo(r.location) <= type.attackRadiusSquared)
                         {
                             inEnemyAttackRange = true;
                         }
                     }
                     enemyCount++;
+
                     enemyTeamHealth += r.health;
+
                     avgX += r.location.x;
                     avgY += r.location.y;
                 }
-                else
+                else if (isAttackingUnit(type))
                 {
                     myTeamHealth += rc.getHealth();
                 }
             }
+        }
+        if (nearTowerRange)
+        {
+            System.out.println("I'm near tower range");
+            rc.setIndicatorLine(mLocation, dest, 150, 150, 150);
+            if (rc.getLocation().distanceSquaredTo(dest) <= rc.getType().attackRadiusSquared)
+            {
+                return;
+            }
+            if ((attacking && (myTeamHealth >= enemyTeamHealth))
+                || Clock.getRoundNum() > 1800 || committed)
+            {
+                committed = true;
+                Direction dir =
+                    this.getFreeStrafeDirection(rc.getLocation().directionTo(
+                        dest));
+                if (dir != null)
+                {
+                    rc.move(dir);
+                }
+            }
+            return;
         }
         if (enemyCount == 0)
         {
@@ -128,6 +164,8 @@ public class Fighter
             rc.broadcast(Channels.highestEnemyHealth, enemyTeamHealth);
             broadcastLocation(Channels.highestEnemyHealthLoc, enemy);
         }
+
+        committed = false;
         if (myTeamHealth >= enemyTeamHealth * 2)
         {
             bug();
@@ -143,6 +181,7 @@ public class Fighter
         {
             bug();
         }
+
     }
 
 
