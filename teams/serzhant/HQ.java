@@ -78,6 +78,7 @@ public class HQ
         this.pathId = 1;
 
         // TODO What does shouldRun do for the HQ?
+        rc.broadcast(Channels.attacking, 0);
         attacking = false;
         shouldRun = false;
 
@@ -111,7 +112,6 @@ public class HQ
             {
                 int buildCount = rc.readBroadcast(Channels.buildPathCount);
                 MapLocation loc = getLocation(Channels.buildPath + buildCount);
-
                 this.spawn(
                     mLocation.directionTo(loc).rotateRight(),
                     RobotType.BEAVER);
@@ -137,20 +137,8 @@ public class HQ
     {
         if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
-
             attacking = true;
-        }
-        if (attacking)
-        {
-            enemyTowers = rc.senseEnemyTowerLocations();
-            if (enemyTowers.length > 0)
-            {
-                broadcastLocation(Channels.rallyLoc, this.enemyTowers[0]);
-            }
-            else
-            {
-                broadcastLocation(Channels.rallyLoc, this.enemyHQ);
-            }
+            rc.broadcast(Channels.attacking, 1);
         }
         if (!attacking)
         {
@@ -160,6 +148,7 @@ public class HQ
                 broadcastLocation(Channels.rallyLoc, newRally);
             }
         }
+        rc.broadcast(Channels.highestEnemyHealth, 0);
     }
 
 
@@ -292,7 +281,6 @@ public class HQ
             i++;
         }
 
-        System.out.println("Symmetry detected");
     }
 
 
@@ -443,6 +431,11 @@ public class HQ
             + Constants.soldierCost)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        }
+        if (!attacking && tankCount > Constants.requiredTanksForAttack)
+        {
+            attacking = true;
+            rc.broadcast(Channels.attacking, 1);
         }
 
         rc.broadcast(Channels.beaverCount, 0);

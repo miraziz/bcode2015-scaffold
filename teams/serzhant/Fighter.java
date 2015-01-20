@@ -34,12 +34,28 @@ public class Fighter
         throws GameActionException
     {
         super.run();
-
         // TODO Stop them from moving when they're in a clump to avoid wasting
 // supply
         this.setDestination(getLocation(Channels.rallyLoc));
+        boolean attacking = rc.readBroadcast(Channels.attacking) == 1;
         rc.setIndicatorString(0, "Traveling to: "
             + getLocation(Channels.rallyLoc));
+        if (attacking)
+        {
+            enemyTowers = rc.senseEnemyTowerLocations();
+            if (enemyTowers.length > 0)
+            {
+                this.setDestination(enemyTowers[0]);
+            }
+            else
+            {
+                this.setDestination(enemyHQ);
+            }
+        }
+        else
+        {
+            this.setDestination(getLocation(Channels.rallyLoc));
+        }
         RobotInfo[] nearby =
             rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
         if (!attack(nearby))

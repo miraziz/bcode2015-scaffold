@@ -52,5 +52,6 @@ public class Constants
     static double              tankFactoryRate         = 125 / 30;
     static double              helipadRate             = 125 / 30;
 
-    static int                 attackRound             = 1500;
+    static int                 attackRound             = 1800;
+    static int                 requiredTanksForAttack  = 18;
 }

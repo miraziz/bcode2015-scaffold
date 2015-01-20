@@ -7,6 +7,8 @@ package serzhant;
  */
 public class Channels
 {
+    static int attacking             = 5000;
+
     // unit counts
     static int beaverCount           = 0;
     static int minerCount            = 1;
@@ -39,7 +41,8 @@ public class Channels
 
     // commands
     static int beaverTasksTaken      = 49;
-    static int beaverTask1           = 50; // channels 50-? are tasks needed to
+    static int beaverTask1           = 50;  // channels 50-? are tasks needed
+// to
 // be done in order
 
     static int rallyLoc              = 36;
