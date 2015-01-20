@@ -78,20 +78,51 @@ public abstract class Proletariat
 
 
     /**
-     * @return true if a move was made in the direction given
-     * @return false if no move was made
+     * @return true if a move was made in the direction given, false if no move
+     *         was made.
      */
     protected boolean move(Direction dir)
         throws GameActionException
     {
         if (rc.isCoreReady() && rc.canMove(dir))
         {
-            if (inEnemyTowerRange(dir))
+            if (!inEnemyTowerRange(dir))
             {
-                return false;
+                rc.move(dir);
+                return true;
             }
-            rc.move(dir);
-            return true;
+        }
+        return false;
+    }
+
+
+    protected boolean moveSafely(Direction dir)
+        throws GameActionException
+    {
+        if (rc.isCoreReady() && rc.canMove(dir))
+        {
+            if (!inEnemyRange(mLocation.add(dir)))
+            {
+                rc.move(dir);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private boolean inEnemyRange(MapLocation loc)
+    {
+        RobotInfo[] enemyRobots =
+            rc.senseNearbyRobots(mType.sensorRadiusSquared, enemyTeam);
+
+        int len = enemyRobots.length;
+        for (int i = 0; i < len; ++i)
+        {
+            if (enemyRobots[i].location.distanceSquaredTo(loc) <= enemyRobots[i].type.attackRadiusSquared)
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -374,5 +405,29 @@ public abstract class Proletariat
         {
             return null;
         }
+    }
+
+
+    protected Direction[] getSpanningDirections(Direction dir)
+    {
+        Direction[] dirs = new Direction[8];
+        Direction left = dir;
+        Direction right = dir.rotateRight();
+        int count = 0;
+        while (count < 8)
+        {
+            if (count % 2 == 0)
+            {
+                dirs[count] = left;
+                left = left.rotateLeft();
+            }
+            else
+            {
+                dirs[count] = right;
+                right = right.rotateRight();
+            }
+            count++;
+        }
+        return dirs;
     }
 }

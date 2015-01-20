@@ -148,6 +148,7 @@ public class Miner
             {
                 if (pathFollowing)
                 {
+                    // TODO Move out of way?
                     if (rc.senseOre(mLocation) >= Constants.PATH_ORE)
                     {
                         rc.mine();
@@ -157,20 +158,17 @@ public class Miner
                         moveAlongPath();
                     }
                 }
-                else
+
+                if (!pathFollowing)
                 {
-                    if (!moveOrMine())
+                    if (!unblockAlly() && !moveOrMine())
                     {
                         // Mine on the way to best ore or stay in your area
                         MapLocation bestLoc = findClosestOre();
                         if (bestLoc != null)
                         {
                             setPath(bestLoc);
-                            run();
-                        }
-                        else
-                        {
-                            moveRandom();
+                            moveAlongPath();
                         }
                     }
                 }
@@ -198,18 +196,42 @@ public class Miner
     }
 
 
-    private void moveRandom()
+    private boolean unblockAlly()
         throws GameActionException
     {
-        for (int i = 0; i < minerDirs.length; i++)
+        MapLocation loc;
+        RobotInfo robot;
+        MapLocation blockedAllyLoc = null;
+        Direction blockedDir = null;
+        for (int i = minerDirs.length - 1; i >= 0; --i)
         {
-            if (rc.canMove(minerDirs[i]))
+            loc = mLocation.add(minerDirs[i]);
+            if (rc.senseOre(loc) < Constants.MIN_ORE)
             {
-                rc.move(minerDirs[i]);
-                break;
+                robot = rc.senseRobotAtLocation(loc);
+                if (robot != null && robot.type == mType
+                    && robot.team == myTeam)
+                {
+                    blockedAllyLoc = loc;
+                    blockedDir = minerDirs[i];
+                }
             }
         }
 
+        if (blockedDir != null)
+        {
+            Direction[] dirs = getSpanningDirections(blockedDir.opposite());
+            for (int i = 0; i < dirs.length; i++)
+            {
+                if (rc.canMove(dirs[i])
+                    && rc.senseOre(mLocation.add(dirs[i])) >= Constants.MIN_ORE
+                    && moveSafely(dirs[i]))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -217,9 +239,8 @@ public class Miner
         throws GameActionException
     {
         Direction dirToMove = mLocation.directionTo(path[curPathPos]);
-        if (rc.canMove(dirToMove))
+        if (rc.canMove(dirToMove) && moveSafely(dirToMove))
         {
-            rc.move(dirToMove);
             curPathPos++;
             if (curPathPos == path.length)
             {
@@ -306,8 +327,10 @@ public class Miner
                 if (rc.canMove(minerDirs[i])
                     && rc.senseOre(mLocation.add(minerDirs[i])) >= Constants.MIN_ORE)
                 {
-                    rc.move(minerDirs[i]);
-                    return true;
+                    if (moveSafely(minerDirs[i]))
+                    {
+                        return true;
+                    }
                 }
             }
         }
@@ -414,11 +437,14 @@ public class Miner
             double ore = rc.senseOre(cur);
             if (ore >= 0 && rc.canSenseLocation(cur))
             {
+                // TODO Go into previously seen ores (so don't do
+// rc.canSenseLocation)
                 RobotInfo robot = rc.senseRobotAtLocation(cur);
-                if (robot == null || !isBuilding(robot.type))
+                if (robot == null || !isBuildingOrBeaver(robot.type))
                 {
-                    if (ore >= Constants.MIN_ORE
-                        && (robot == null || robot.type != mType))
+                    // TODO Avoid stationary units in another way (Not just
+// avoid beavers)
+                    if (ore >= Constants.MIN_ORE)
                     {
                         oreLoc = cur;
                         break;
