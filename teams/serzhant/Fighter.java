@@ -45,7 +45,18 @@ public class Fighter
             enemyTowers = rc.senseEnemyTowerLocations();
             if (enemyTowers.length > 0)
             {
-                this.setDestination(enemyTowers[0]);
+                MapLocation closest = enemyTowers[0];
+                int minDistance = Integer.MAX_VALUE;
+                for (MapLocation t : enemyTowers)
+                {
+                    int dist = rc.getLocation().distanceSquaredTo(t);
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        closest = t;
+                    }
+                }
+                this.setDestination(closest);
             }
             else
             {
