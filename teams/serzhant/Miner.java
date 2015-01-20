@@ -1,7 +1,5 @@
 package serzhant;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import battlecode.common.*;
 
 /**
@@ -69,7 +67,7 @@ public class Miner
             }
 
         }
-        else if (allyHQ.x > enemyHQ.x && allyHQ.y < enemyHQ.y)
+        else if (allyHQ.x < enemyHQ.x && allyHQ.y > enemyHQ.y)
         {
             // TODO Take into account difference between x and y (prefer bigger
 // dimension)
@@ -83,7 +81,7 @@ public class Miner
             minerDirs[6] = Direction.SOUTH_EAST;
             minerDirs[7] = Direction.NORTH_EAST;
         }
-        else if (allyHQ.x < enemyHQ.x && allyHQ.y < enemyHQ.y)
+        else if (allyHQ.x > enemyHQ.x && allyHQ.y > enemyHQ.y)
         {
             // second quadrant
             minerDirs[0] = Direction.EAST;
@@ -95,7 +93,7 @@ public class Miner
             minerDirs[6] = Direction.SOUTH_WEST;
             minerDirs[7] = Direction.NORTH_WEST;
         }
-        else if (allyHQ.x < enemyHQ.x && allyHQ.y > enemyHQ.y)
+        else if (allyHQ.x > enemyHQ.x && allyHQ.y < enemyHQ.y)
         {
             // third quadrant
             minerDirs[0] = Direction.EAST;
@@ -107,7 +105,7 @@ public class Miner
             minerDirs[6] = Direction.NORTH_WEST;
             minerDirs[7] = Direction.SOUTH_WEST;
         }
-        else if (allyHQ.x > enemyHQ.x && allyHQ.y > enemyHQ.y)
+        else if (allyHQ.x < enemyHQ.x && allyHQ.y < enemyHQ.y)
         {
             // fourth quadrant
             minerDirs[0] = Direction.WEST;
@@ -134,7 +132,9 @@ public class Miner
         rc.broadcast(
             Channels.minerCount,
             rc.readBroadcast(Channels.minerCount) + 1);
+
         findDefenseSpot();
+
         if (rc.isCoreReady())
         {
             // TODO Don't go back in the direction of the enemy. Have some
@@ -168,28 +168,48 @@ public class Miner
                             setPath(bestLoc);
                             run();
                         }
+                        else
+                        {
+                            moveRandom();
+                        }
                     }
                 }
             }
         }
 
-        if (!rc.isCoreReady() && !pathFollowing && rc.getSupplyLevel() > 14)
-        {
-            System.out.println("CORE DELAY START: " + rc.getCoreDelay());
-            MapLocation bestLoc = checkBetterOre();
-            if (bestLoc != null)
-            {
-                setPath(bestLoc);
-                run();
-            }
-            System.out.println("CORE DELAY END: " + rc.getCoreDelay());
-        }
+// if (!rc.isCoreReady() && !pathFollowing && rc.getSupplyLevel() > 14)
+// {
+// System.out.println("CORE DELAY START: " + rc.getCoreDelay());
+// MapLocation bestLoc = checkBetterOre();
+// if (bestLoc != null)
+// {
+// setPath(bestLoc);
+// run();
+// }
+// System.out.println("CORE DELAY END: " + rc.getCoreDelay());
+// }
 
         rc.setIndicatorString(1, "IS FOLLOWING: " + pathFollowing);
         rc.setIndicatorString(2, "DEST: " + minerDest);
         rc.setIndicatorString(3, "ORE: " + bestOreNum);
 
         // TODO If nothing is found, go in a random direction or blow up
+
+    }
+
+
+    private void moveRandom()
+        throws GameActionException
+    {
+        for (int i = 0; i < minerDirs.length; i++)
+        {
+            if (rc.canMove(minerDirs[i]))
+            {
+                rc.move(minerDirs[i]);
+                break;
+            }
+        }
+
     }
 
 
@@ -283,7 +303,8 @@ public class Miner
         {
             for (int i = 0; i < minerDirs.length; i++)
             {
-                if (rc.canMove(minerDirs[i]))
+                if (rc.canMove(minerDirs[i])
+                    && rc.senseOre(mLocation.add(minerDirs[i])) >= Constants.MIN_ORE)
                 {
                     rc.move(minerDirs[i]);
                     return true;
@@ -365,6 +386,7 @@ public class Miner
 
 
     private MapLocation findClosestOre()
+        throws GameActionException
     {
         mapPointers = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
         mapLevels = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
@@ -385,40 +407,49 @@ public class Miner
             cX = cur.x - mapOffsetX;
             cY = cur.y - mapOffsetY;
 
-            double ore = rc.senseOre(cur);
-            if (ore >= 0)
+            if (Clock.getBytecodesLeft() < 100)
             {
-                if (ore >= Constants.MIN_ORE)
+                rc.yield();
+            }
+            double ore = rc.senseOre(cur);
+            if (ore >= 0 && rc.canSenseLocation(cur))
+            {
+                RobotInfo robot = rc.senseRobotAtLocation(cur);
+                if (robot == null || !isBuilding(robot.type))
                 {
-                    oreLoc = cur;
-                    break;
-                }
-
-                if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
-                {
-                    for (int i = 0; i < 8; i += 2)
+                    if (ore >= Constants.MIN_ORE
+                        && (robot == null || robot.type != mType))
                     {
-                        MapLocation next = cur.add(directions[i]);
-                        oX = next.x - mapOffsetX;
-                        oY = next.y - mapOffsetY;
-                        if (mapPointers[oX][oY] == 0)
-                        {
-                            mapPointers[oX][oY] =
-                                cX * Constants.MAP_HEIGHT + cY;
-                            mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
-                            trollQ[endQ++] = next;
-                        }
+                        oreLoc = cur;
+                        break;
+                    }
 
-                        if (i == 6)
+                    if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+                    {
+                        for (int i = 0; i < 8; i += 2)
                         {
-                            i = -1;
+                            MapLocation next = cur.add(directions[i]);
+                            oX = next.x - mapOffsetX;
+                            oY = next.y - mapOffsetY;
+                            if (mapPointers[oX][oY] == 0)
+                            {
+                                mapPointers[oX][oY] =
+                                    cX * Constants.MAP_HEIGHT + cY;
+                                mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
+                                trollQ[endQ++] = next;
+                            }
+
+                            if (i == 6)
+                            {
+                                i = -1;
+                            }
                         }
                     }
                 }
             }
         }
-        System.out.println("Finishing findClosestOre: "
-            + Clock.getBytecodeNum());
+// System.out.println("Finishing findClosestOre: "
+// + Clock.getBytecodeNum());
         return oreLoc;
     }
 

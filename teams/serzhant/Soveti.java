@@ -204,6 +204,15 @@ public abstract class Soveti
     }
 
 
+    protected boolean isBuilding(RobotType type)
+    {
+        return type == RobotType.BARRACKS || type == RobotType.MINERFACTORY
+            || type == RobotType.TANKFACTORY || type == RobotType.HELIPAD
+            || type == RobotType.AEROSPACELAB || type == RobotType.HQ
+            || type == RobotType.TOWER;
+    }
+
+
     /**
      * Returns a random direction.
      * 

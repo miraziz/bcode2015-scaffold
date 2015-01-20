@@ -25,7 +25,7 @@ public class Constants
     public static final int    MAP_HEIGHT              =
                                                            2 * GameConstants.MAP_MAX_HEIGHT + 10;
 
-    public static final double MIN_ORE                 = 4;
+    public static final double MIN_ORE                 = 5;
     public static final int    BETTER_ORE_MIN_RANGE    = 3;
     public static final int    BETTER_ORE_MAX_RANGE    = 4;
 
@@ -33,7 +33,7 @@ public class Constants
 
     public static final double PATH_ORE                =
                                                            GameConstants.MINER_MINE_MAX
-                                                               / GameConstants.MINER_MINE_RATE;
+                                                               * GameConstants.MINER_MINE_RATE;
 
     // other constants
     static int                 beaverLimit             = 1;
