@@ -20,6 +20,8 @@ public class Miner
     private int           pathFailedCount;
     private MapLocation   minerDest;
     private double        bestOreNum;
+    private int           myMinerID;
+    private int           minerPotato;
 
 
     public Miner(RobotController rc)
@@ -129,11 +131,21 @@ public class Miner
     {
         super.run();
 
-        rc.broadcast(
-            Channels.minerCount,
-            rc.readBroadcast(Channels.minerCount) + 1);
+        myMinerID = rc.readBroadcast(Channels.minerCount);
+        minerPotato = rc.readBroadcast(Channels.minerPotato);
+        if(myMinerID % minerPotato == minerPotato - 1)
+        {
+            Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
+        }
+        else
+        {
+            Constants.MIN_ORE = Constants.NORMAL_MIN_ORE;
+        }
+        rc.broadcast(Channels.minerCount, myMinerID + 1);
 
         findDefenseSpot();
+
+        String doing = "Not set";
 
         if (rc.isCoreReady())
         {
@@ -142,26 +154,39 @@ public class Miner
 // trying again
             if (runAway())
             {
+                doing = "Running away";
                 pathFollowing = false;
             }
             else
             {
+                boolean coreDelayed = false;
                 if (pathFollowing)
                 {
                     // TODO Move out of way?
                     if (rc.senseOre(mLocation) >= Constants.PATH_ORE)
                     {
+                        doing = "Mining on path";
                         rc.mine();
+                        coreDelayed = true;
                     }
                     else
                     {
-                        moveAlongPath();
+                        doing = "Moving along path";
+                        coreDelayed = moveAlongPath();
                     }
                 }
 
-                if (!pathFollowing)
+                if (!coreDelayed && !pathFollowing)
                 {
-                    if (!unblockAlly() && !moveOrMine())
+                    if (unblockAlly())
+                    {
+                        doing = "Unblocking ally";
+                    }
+                    else if (moveOrMine())
+                    {
+                        doing = "Moving or mining";
+                    }
+                    else
                     {
                         // Mine on the way to best ore or stay in your area
                         MapLocation bestLoc = findClosestOre();
@@ -187,6 +212,7 @@ public class Miner
 // System.out.println("CORE DELAY END: " + rc.getCoreDelay());
 // }
 
+        rc.setIndicatorString(0, doing);
         rc.setIndicatorString(1, "IS FOLLOWING: " + pathFollowing);
         rc.setIndicatorString(2, "DEST: " + minerDest);
         rc.setIndicatorString(3, "ORE: " + bestOreNum);
@@ -201,7 +227,6 @@ public class Miner
     {
         MapLocation loc;
         RobotInfo robot;
-        MapLocation blockedAllyLoc = null;
         Direction blockedDir = null;
         for (int i = minerDirs.length - 1; i >= 0; --i)
         {
@@ -212,8 +237,8 @@ public class Miner
                 if (robot != null && robot.type == mType
                     && robot.team == myTeam)
                 {
-                    blockedAllyLoc = loc;
                     blockedDir = minerDirs[i];
+                    break;
                 }
             }
         }
@@ -223,8 +248,7 @@ public class Miner
             Direction[] dirs = getSpanningDirections(blockedDir.opposite());
             for (int i = 0; i < dirs.length; i++)
             {
-                if (rc.canMove(dirs[i])
-                    && rc.senseOre(mLocation.add(dirs[i])) >= Constants.MIN_ORE
+                if (rc.senseOre(mLocation.add(dirs[i])) >= Constants.MIN_ORE
                     && moveSafely(dirs[i]))
                 {
                     return true;
@@ -235,17 +259,19 @@ public class Miner
     }
 
 
-    private void moveAlongPath()
+    private boolean moveAlongPath()
         throws GameActionException
     {
         Direction dirToMove = mLocation.directionTo(path[curPathPos]);
-        if (rc.canMove(dirToMove) && moveSafely(dirToMove))
+        rc.setIndicatorLine(mLocation, path[path.length - 1], 0, 255, 0);
+        if (moveSafely(dirToMove))
         {
             curPathPos++;
             if (curPathPos == path.length)
             {
                 pathFollowing = false;
             }
+            return true;
         }
         else
         {
@@ -257,6 +283,7 @@ public class Miner
             {
                 pathFailedCount++;
             }
+            return false;
         }
     }
 
@@ -282,7 +309,8 @@ public class Miner
         int avgY = 0;
         for (RobotInfo enemy : enemies)
         {
-            if (enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
+            if (!enemy.type.canMine()
+                && enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
             {
                 avgX += enemy.location.x;
                 avgY += enemy.location.y;
@@ -324,13 +352,10 @@ public class Miner
         {
             for (int i = 0; i < minerDirs.length; i++)
             {
-                if (rc.canMove(minerDirs[i])
-                    && rc.senseOre(mLocation.add(minerDirs[i])) >= Constants.MIN_ORE)
+                if (rc.senseOre(mLocation.add(minerDirs[i])) >= Constants.MIN_ORE
+                    && moveSafely(minerDirs[i]))
                 {
-                    if (moveSafely(minerDirs[i]))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }

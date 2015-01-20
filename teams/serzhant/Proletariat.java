@@ -99,7 +99,7 @@ public abstract class Proletariat
     protected boolean moveSafely(Direction dir)
         throws GameActionException
     {
-        if (rc.isCoreReady() && rc.canMove(dir))
+        if (rc.canMove(dir))
         {
             if (!inEnemyRange(mLocation.add(dir)))
             {

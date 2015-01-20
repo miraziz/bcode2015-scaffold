@@ -103,6 +103,8 @@ public class HQ
         int roundNum = Clock.getRoundNum();
         Constants.beaverLimit = roundNum / 500 + 1;
 
+        rc.broadcast(Channels.minerPotato, 4 - roundNum / 501);
+
         super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
@@ -125,7 +127,6 @@ public class HQ
         shouldRun = false;
 
         manageRallyLoc(roundNum);
-
     }
 
 
