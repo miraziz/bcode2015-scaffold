@@ -23,7 +23,7 @@ public abstract class Proletariat
     private double                  lastRoundHealth;
     private boolean                 turnRight;
     protected MapLocation           dest;
-    private Boolean                 onWall;
+    protected Boolean               onWall;
     protected Direction             facing;
     private LinkedList<MapLocation> helper;         // using for
 // experimenting something, may be completely useless
@@ -161,7 +161,7 @@ public abstract class Proletariat
         // if we are already attached and traveling along a wall
         if (onWall)
         {
-            // TODO THIS IS MADNESS
+            // TODO THIS IS MADNESS <---- agreed.
             // there is a wall ahead of us, sets onWall to false, so that the
             // next code will run
             if (!isNormalTile(facing) || inEnemyTowerRange(facing))
@@ -223,13 +223,16 @@ public abstract class Proletariat
     }
 
 
-    private boolean inEnemyTowerRange(Direction dir)
+    protected boolean inEnemyTowerRange(Direction dir)
         throws GameActionException
     {
-        MapLocation moveLoc = rc.getLocation().add(dir);
-        boolean attacking = rc.readBroadcast(Channels.attacking) == 1;
-        int roundNum = Clock.getRoundNum();
-        int distance = moveLoc.distanceSquaredTo(enemyHQ);
+        return inEnemyTowerRange(rc.getLocation().add(dir));
+    }
+
+
+    protected boolean inEnemyTowerRange(MapLocation loc)
+    {
+        int distance = loc.distanceSquaredTo(enemyHQ);
         if (enemyTowers.length >= 2)
         {
             distance -= 11;
@@ -241,7 +244,7 @@ public abstract class Proletariat
 
         for (MapLocation r : enemyTowers)
         {
-            if (r.distanceSquaredTo(moveLoc) <= RobotType.TOWER.attackRadiusSquared)
+            if (r.distanceSquaredTo(loc) <= RobotType.TOWER.attackRadiusSquared)
             {
                 return true;
             }
@@ -399,7 +402,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!rc.canMove(dir) && count < turns)
+        while (!canMove(dir) && count < turns)
         {
             if (count % 2 == 0)
             {
@@ -421,6 +424,12 @@ public abstract class Proletariat
         {
             return null;
         }
+    }
+
+
+    private boolean canMove(Direction dir)
+    {
+        return rc.canMove(dir);
     }
 
 

@@ -198,7 +198,7 @@ public class Fighter
     }
 
 
-    private boolean attack(RobotInfo[] nearby)
+    protected boolean attack(RobotInfo[] nearby)
         throws GameActionException
     {
         if (!rc.isWeaponReady())

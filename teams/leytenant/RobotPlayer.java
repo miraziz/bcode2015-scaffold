@@ -71,11 +71,23 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.DRONE)
         {
-            robot = new SupplyDrone(rc);
+            robot = new CombatDrone(rc);
         }
         else if (rc.getType() == RobotType.BASHER)
         {
             robot = new Basher(rc);
+        }
+        else if (rc.getType() == RobotType.TECHNOLOGYINSTITUTE)
+        {
+            robot = new TechnologyInstitute(rc);
+        }
+        else if (rc.getType() == RobotType.TRAININGFIELD)
+        {
+            robot = new TrainingField(rc);
+        }
+        else if (rc.getType() == RobotType.COMMANDER)
+        {
+            robot = new Commander(rc);
         }
 
         while (true)

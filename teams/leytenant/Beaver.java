@@ -213,6 +213,14 @@ public class Beaver
         {
             toBuild = RobotType.AEROSPACELAB;
         }
+        else if (task == BeaverTask.BUILD_TECHINSTITUTE)
+        {
+            toBuild = RobotType.TECHNOLOGYINSTITUTE;
+        }
+        else if (task == BeaverTask.BUILD_TRAININGFIELD)
+        {
+            toBuild = RobotType.TRAININGFIELD;
+        }
         return toBuild;
     }
 

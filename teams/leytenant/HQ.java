@@ -28,7 +28,9 @@ public class HQ
         super(rc);
 
         // Set rally
-        broadcastLocation(Channels.rallyLoc, findRallyPoint());
+        // broadcastLocation(Channels.rallyLoc, findRallyPoint());
+
+        broadcastLocation(Channels.rallyLoc, enemyHQ);
 
         // TODO Set miner limits based on map size
 
@@ -86,10 +88,10 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TANKFACTORY);
-        submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        // submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+        // submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         sendBeaverTasks();
@@ -165,6 +167,10 @@ public class HQ
             if (newRally != null)
             {
                 broadcastLocation(Channels.rallyLoc, newRally);
+            }
+            else
+            {
+                broadcastLocation(Channels.rallyLoc, enemyHQ);
             }
         }
         rc.broadcast(Channels.highestEnemyHealth, 0);
@@ -488,7 +494,7 @@ public class HQ
             {
                 return;
             }
-            if (r.type.canSpawn())
+            if (r.type == RobotType.COMMANDER || r.type.canSpawn())
             {
                 rc.transferSupplies(
                     (int)(rc.getSupplyLevel() * .90),
