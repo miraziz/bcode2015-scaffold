@@ -13,15 +13,20 @@ public class Commander
         throws GameActionException
     {
         super(rc);
-        this.setDestination(allyHQ);
+        // this.setDestination(allyHQ);
         lastRoundHealth = rc.getHealth();
         runningAway = true;
+        this.setDestination(enemyHQ);
     }
 
 
     public void run()
         throws GameActionException
     {
+        if (bug())
+        {
+            return;
+        }
         if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 60)
         {
             runningAway = false;
@@ -71,8 +76,8 @@ public class Commander
             MapLocation loc = findFlashLoc();
             if (loc != null)
             {
-                rc.castFlash(loc);
-                return;
+                // rc.castFlash(loc);
+                // return;
             }
         }
         bug();
@@ -85,6 +90,10 @@ public class Commander
         Direction dir = rc.getLocation().directionTo(dest);
         Direction right = dir.rotateRight().rotateRight();
         Direction left = dir.rotateLeft().rotateLeft();
+        if (!runningAway && rc.getLocation().distanceSquaredTo(dest) < 35)
+        {
+            return null;
+        }
         if (!dir.isDiagonal())
         {
             MapLocation target = rc.getLocation().add(dir, 3);

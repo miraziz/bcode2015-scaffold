@@ -20,15 +20,11 @@ public abstract class Proletariat
         RUN
     }
 
-    private double                  lastRoundHealth;
-    private boolean                 turnRight;
-    protected MapLocation           dest;
-    protected Boolean               onWall;
-    protected Direction             facing;
-    private LinkedList<MapLocation> helper;         // using for
-// experimenting something, may be completely useless
-    private HashSet<MapLocation>    visited;        // only necessary for
-// very specific cases i think.
+    private double               lastRoundHealth;
+    private HashSet<MapLocation> visited;
+    protected MapLocation        dest;
+    protected Boolean            onWall;
+    protected Direction          facing;
 
 
     public Proletariat(RobotController rc)
@@ -36,10 +32,8 @@ public abstract class Proletariat
     {
         super(rc);
         visited = new HashSet<MapLocation>();
-        helper = new LinkedList<MapLocation>();
         onWall = false;
         dest = null;
-        turnRight = rand.nextBoolean();
     }
 
 
@@ -70,27 +64,7 @@ public abstract class Proletariat
             dest = loc;
             // TODO How does facing work? Does the robot face wherever it moved?
             facing = mLocation.directionTo(dest);
-            visited.clear();
             return true;
-        }
-        return false;
-    }
-
-
-    /**
-     * @return true if a move was made in the direction given, false if no move
-     *         was made.
-     */
-    protected boolean move(Direction dir)
-        throws GameActionException
-    {
-        if (rc.isCoreReady() && rc.canMove(dir))
-        {
-            if (!inEnemyTowerRange(dir))
-            {
-                rc.move(dir);
-                return true;
-            }
         }
         return false;
     }
@@ -158,68 +132,96 @@ public abstract class Proletariat
         {
             return false;
         }
-        // if we are already attached and traveling along a wall
-        if (onWall)
+        Direction towardsRally = rc.getLocation().directionTo(dest);
+        boolean clearAhead =
+            isNormalTile(towardsRally)
+                && !visited.contains(rc.getLocation().add(towardsRally));
+        visited.add(rc.getLocation());
+        if (clearAhead)
         {
-            // TODO THIS IS MADNESS <---- agreed.
-            // there is a wall ahead of us, sets onWall to false, so that the
-            // next code will run
-            if (!isNormalTile(facing) || inEnemyTowerRange(facing))
-            {
-                onWall = false;
-            }
-            else
-            {
-                if (isNormalTile(facing.rotateRight())
-                    && !inEnemyTowerRange(facing.rotateRight()))
-                {
-                    onWall = false;
-                }
-            }
-        }
-
-        // not against a wall, check for a wall ahead, and move forward
-        if (!onWall)
-        {
-            facing = rc.getLocation().directionTo(dest);
-
-            int count = 0;
-            // there is a wall ahead, need to start bugging mode
-            // need to handle if count is 8 afterwards. Means the robot is
-            // kind of stuck or something, tried turning every way
-            // Maybe dump the whole visited HashSet in this case?
-            while ((!isNormalTile(facing) || inEnemyTowerRange(facing))
-                && count < 8)
-            {
-                count++;
-                if (turnRight)
-                {
-                    facing = facing.rotateLeft();
-                }
-                else
-                {
-                    facing = facing.rotateRight();
-                }
-                onWall = true;
-            }
-            if (count == 8)
-            {
-                if (!helper.isEmpty())
-                {
-                    visited.remove(helper.removeFirst());
-                }
-            }
-        }
-        if (move(facing))
-        {
-            // visited.add(mLocation);
-            // helper.addLast(mLocation);
-            return true;
+            rc.setIndicatorString(0, "It's clear ahead");
+            onWall = false;
+            facing = towardsRally;
+            rc.setIndicatorString(1, "" + facing);
+            return move(facing);
         }
         else
         {
-            return false;
+            onWall = true;
+            if (isNormalTile(facing))
+            {
+                return move(facing);
+            }
+            else
+            {
+                facing = facing.rotateLeft();
+                return bug();
+            }
         }
+
+// if (dest == null || !rc.isCoreReady())
+// {
+// return false;
+// }
+// // if we are already attached and traveling along a wall
+// if (onWall)
+// {
+// // TODO THIS IS MADNESS <---- agreed.
+// // there is a wall ahead of us, sets onWall to false, so that the
+// // next code will run
+// if (!isNormalTile(facing) || inEnemyTowerRange(facing))
+// {
+// onWall = false;
+// }
+// else if (isNormalTile(facing.rotateRight())
+// && !inEnemyTowerRange(facing.rotateRight()))
+// {
+// onWall = false;
+// }
+// }
+// // not against a wall, check for a wall ahead, and move forward
+// if (!onWall)
+// {
+// facing = rc.getLocation().directionTo(dest);
+//
+// int count = 0;
+// while ((!isNormalTile(facing) || inEnemyTowerRange(facing))
+// && count < 8)
+// {
+// count++;
+// if (turnRight)
+// {
+// facing = facing.rotateLeft();
+// }
+// else
+// {
+// facing = facing.rotateRight();
+// }
+// onWall = true;
+// }
+// }
+// if (move(facing))
+// {
+// // visited.add(mLocation);
+// // helper.addLast(mLocation);
+// return true;
+// }
+// else
+// {
+// return false;
+// }
+    }
+
+
+    protected boolean move(Direction dir)
+        throws GameActionException
+    {
+        if (rc.canMove(dir))
+        {
+            rc.move(dir);
+            return true;
+        }
+        return false;
     }
 
 
@@ -266,15 +268,7 @@ public abstract class Proletariat
     private boolean isNormalTile(Direction dir)
         throws GameActionException
     {
-        MapLocation loc = mLocation.add(dir);
-        if (rc.senseTerrainTile(loc) != TerrainTile.NORMAL
-        // || visited.contains(loc) // comment this line to not have any
-        // effects from the hashtable/linked list
-            || rc.senseRobotAtLocation(loc) != null)
-        {
-            return false;
-        }
-        return true;
+        return rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.NORMAL;
     }
 
 
