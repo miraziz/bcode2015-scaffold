@@ -16,15 +16,13 @@ public class Tank
         throws GameActionException
     {
         super(rc);
+        mTypeChannel = Channels.tankCount;
     }
 
 
     public void run()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.tankCount,
-            rc.readBroadcast(Channels.tankCount) + 1);
         super.run();
     }
 }

@@ -28,6 +28,12 @@ public abstract class Soveti
     protected static final Direction[] directions = Direction.values();
 
 
+    public Soveti()
+    {
+
+    }
+
+
     /**
      * Saves known locations of towers and HQs, initializes map broadcast
      * parameters and determines this robot's current location.

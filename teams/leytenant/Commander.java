@@ -43,7 +43,7 @@ public class Commander
         else
         {
             RobotInfo[] nearby =
-                rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+                rc.senseNearbyRobots(mType.sensorRadiusSquared);
             attack(nearby);
             if (rc.isCoreReady())
             {

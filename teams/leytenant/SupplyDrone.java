@@ -10,15 +10,13 @@ public class SupplyDrone
         throws GameActionException
     {
         super(rc);
+        mTypeChannel = Channels.droneCount;
     }
 
 
     public void run()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.droneCount,
-            rc.readBroadcast(Channels.droneCount) + 1);
         if (rc.getSupplyLevel() < 100)
         {
             rc.setIndicatorString(1, "Going back to HQ");

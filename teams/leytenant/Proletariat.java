@@ -1,7 +1,5 @@
 package leytenant;
 
-import java.util.HashSet;
-import java.util.LinkedList;
 import battlecode.common.*;
 
 /**
@@ -25,6 +23,8 @@ public abstract class Proletariat
     protected MapLocation dest;
     protected Boolean     onWall;
     protected Direction   facing;
+    protected int         mTypeNumber;
+    protected int         mTypeChannel;
 
 
     public Proletariat(RobotController rc)
@@ -45,6 +45,8 @@ public abstract class Proletariat
         throws GameActionException
     {
         mLocation = rc.getLocation();
+        mTypeNumber = rc.readBroadcast(mTypeChannel);
+        rc.broadcast(mTypeChannel, mTypeNumber + 1);
     }
 
 
@@ -293,6 +295,22 @@ public abstract class Proletariat
                 rc.senseNearbyRobots(
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                     myTeam);
+
+            if (rc.getID() == 16995)
+            {
+                for (int i = 0; i < allies.length && i < 3; ++i)
+                {
+                    int red = i == 2 ? 255 : 0;
+                    int green = i == 0 ? 255 : 0;
+                    int blue = i == 1 ? 255 : 0;
+                    rc.setIndicatorLine(
+                        new MapLocation(mapOffsetX, mapOffsetY),
+                        allies[i].location,
+                        red,
+                        green,
+                        blue);
+                }
+            }
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {
@@ -461,5 +479,63 @@ public abstract class Proletariat
             count++;
         }
         return dirs;
+    }
+
+
+    /**
+     * Runs in the opposite direction of the average location of enemy units
+     * within attacking distance.
+     * 
+     * @return True if this unit moved away, false otherwise.
+     * @throws GameActionException
+     */
+    protected boolean runAway()
+        throws GameActionException
+    {
+        RobotInfo[] enemies =
+            rc.senseNearbyRobots(mType.sensorRadiusSquared, enemyTeam);
+        if (enemies.length == 0)
+        {
+            return false;
+        }
+
+        int enemiesThatCanAttack = 0;
+        int avgX = 0;
+        int avgY = 0;
+        for (RobotInfo enemy : enemies)
+        {
+            if (!enemy.type.canMine()
+                && enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
+            {
+                avgX += enemy.location.x;
+                avgY += enemy.location.y;
+                enemiesThatCanAttack++;
+            }
+        }
+        avgX /= enemies.length;
+        avgY /= enemies.length;
+
+        if (enemiesThatCanAttack == 0)
+        {
+            return false;
+        }
+
+        Direction dirAway =
+            mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
+        Direction[] dirs = getSpanningDirections(dirAway);
+        for (int i = 0; i < dirs.length; i++)
+        {
+            if (moveSafely(dirs[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    protected Direction[] getSpanningForwardDirections(Direction directionTo)
+    {
+        return getSpanningDirections(directionTo, 3);
     }
 }

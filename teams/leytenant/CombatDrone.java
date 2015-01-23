@@ -10,6 +10,7 @@ public class CombatDrone
         throws GameActionException
     {
         super(rc);
+        mTypeChannel = Channels.droneCount;
     }
 
 
