@@ -152,8 +152,7 @@ public class HQ
             MapLocation newRally = getLocation(Channels.highestEnemyHealthLoc);
             if (newRally != null)
             {
-                // broadcastLocation(Channels.rallyLoc, newRally);
-                broadcastLocation(Channels.rallyLoc, enemyHQ);
+                broadcastLocation(Channels.rallyLoc, newRally);
             }
             else
             {
@@ -161,6 +160,7 @@ public class HQ
             }
         }
         rc.broadcast(Channels.highestEnemyHealth, 0);
+        rc.broadcast(Channels.highestEnemyHealthLoc, 0);
     }
 
 

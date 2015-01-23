@@ -26,15 +26,15 @@ public class Commander
         RobotInfo[] nearby =
             rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
         attack(nearby);
-        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 60)
+        if (!rc.isCoreReady())
+        {
+            return;
+        }
+        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 150)
         {
             runningAway = false;
         }
-        if (runningAway)
-        {
-            this.setDestination(allyHQ);
-        }
-        else if (shouldRunAway())
+        if (runningAway || shouldRunAway())
         {
             this.setDestination(allyHQ);
             runningAway = true;
@@ -43,10 +43,8 @@ public class Commander
         {
             this.setDestination(getLocation(Channels.rallyLoc));
         }
-        if (rc.isCoreReady())
-        {
-            micro(nearby);
-        }
+        micro(nearby);
+
     }
 
 
@@ -54,7 +52,7 @@ public class Commander
     {
         double healthDifference = lastRoundHealth - rc.getHealth();
         lastRoundHealth = rc.getHealth();
-        if (healthDifference > rc.getHealth() || lastRoundHealth < 30
+        if (healthDifference > rc.getHealth() || lastRoundHealth < 100
             || rc.getSupplyLevel() < 1000)
         {
             return true;
@@ -69,7 +67,8 @@ public class Commander
         int avgX = 0;
         int avgY = 0;
         int enemyCount = 0;
-        double enemyPower = 0;
+        double enemyAttackDamage = 0;
+        boolean shouldMove = true;
         for (int i = 0; i < nearby.length; i++)
         {
             if (nearby[i].team == enemyTeam)
@@ -78,31 +77,37 @@ public class Commander
                 avgY += nearby[i].location.y;
                 if (rc.getLocation().distanceSquaredTo(nearby[i].location) <= nearby[i].type.attackRadiusSquared)
                 {
-                    enemyPower += getDPR(nearby[i].type);
+                    enemyAttackDamage += getDPR(nearby[i].type);
+                    shouldMove = false;
                 }
                 enemyCount++;
             }
         }
-        if (enemyCount != 0 && enemyPower > Constants.COMMANDER_DPR)
+        if (enemyCount != 0)
         {
             avgX /= enemyCount;
             avgY /= enemyCount;
-            Direction away = new MapLocation(avgX, avgY).directionTo(mLocation);
-            if (enemyPower > Constants.COMMANDER_DPR)
+            if (enemyAttackDamage > rc.getHealth())
             {
-                this.setDestination(rc.getLocation().add(away, 4));
+                runningAway = true;
+                this.setDestination(allyHQ);
             }
         }
-        if (rc.getFlashCooldown() == 0)
+        if (shouldMove)
         {
-            MapLocation loc = findFlashLoc();
-            if (loc != null)
+            if (rc.getFlashCooldown() == 0
+                && rc.getLocation().distanceSquaredTo(dest) >= 20)
             {
-                rc.castFlash(loc);
-                return;
+                MapLocation loc = findFlashLoc();
+                if (loc != null)
+                {
+                    rc.castFlash(loc);
+                    return;
+                }
             }
+            bug();
         }
-        bug();
+
     }
 
 
