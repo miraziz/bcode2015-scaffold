@@ -133,25 +133,20 @@ public abstract class Proletariat
         {
             return false;
         }
-
-        print("" + facing);
         if (onWall)
         {
             if (isClear(rotateBackward(facing)))
             {
-                print("1");
                 onWall = false;
                 facing = rotateBackward(facing);
                 return move(facing);
             }
             else if (isClear(facing))
             {
-                print("2");
                 return move(facing);
             }
             else
             {
-                print("3");
                 facing = rotateForward(facing);
                 return bug();
             }
@@ -162,12 +157,10 @@ public abstract class Proletariat
             boolean clearAhead = isClear(facing);
             if (clearAhead)
             {
-                print("4");
                 return move(facing);
             }
             else
             {
-                print("5");
                 onWall = true;
                 facing = rotateForward(facing);
                 return bug();
@@ -191,6 +184,7 @@ public abstract class Proletariat
     protected boolean move(Direction dir)
         throws GameActionException
     {
+
         if (rc.canMove(dir))
         {
             if (!visited.equals(rc.getLocation()))
@@ -199,6 +193,13 @@ public abstract class Proletariat
             }
             rc.move(dir);
             return true;
+        }
+        else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
+        {
+            System.out.println("HERE");
+            visited = rc.getLocation();
+            turnRight = !turnRight;
+            return bug();
         }
         return false;
     }

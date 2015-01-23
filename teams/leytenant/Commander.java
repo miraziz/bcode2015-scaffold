@@ -23,38 +23,30 @@ public class Commander
         throws GameActionException
     {
         super.run();
-        if (bug())
+        RobotInfo[] nearby =
+            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+        attack(nearby);
+        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 60)
         {
-            return;
+            runningAway = false;
         }
-        else
+        if (runningAway)
         {
-            return;
+            this.setDestination(allyHQ);
         }
-// RobotInfo[] nearby =
-// rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
-// attack(nearby);
-// if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 60)
-// {
-// runningAway = false;
-// }
-// if (runningAway)
-// {
-// this.setDestination(allyHQ);
-// }
-// else if (shouldRunAway())
-// {
-// this.setDestination(allyHQ);
-// runningAway = true;
-// }
-// if (!runningAway)
-// {
-// this.setDestination(getLocation(Channels.rallyLoc));
-// }
-// if (rc.isCoreReady())
-// {
-// micro(nearby);
-// }
+        else if (shouldRunAway())
+        {
+            this.setDestination(allyHQ);
+            runningAway = true;
+        }
+        if (!runningAway)
+        {
+            this.setDestination(getLocation(Channels.rallyLoc));
+        }
+        if (rc.isCoreReady())
+        {
+            micro(nearby);
+        }
     }
 
 
