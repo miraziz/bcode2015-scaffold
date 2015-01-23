@@ -40,7 +40,20 @@ public class Fighter
         super.run();
         // TODO Stop them from moving when they're in a clump to avoid wasting
 // supply
+
+        // TODO BE SURE TO CALL setUpDefender() in sbuclasses of FIGHTER such as
+        // drone/tank/soldier
+        //
+
+// }
+    }
+
+
+    private void setUpDefender()
+        throws GameActionException
+    {
         this.setDestination(getLocation(Channels.rallyLoc));
+
         attacking = rc.readBroadcast(Channels.attacking) == 1;
         rc.setIndicatorString(0, "Traveling to: "
             + getLocation(Channels.rallyLoc));

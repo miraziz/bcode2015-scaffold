@@ -47,10 +47,12 @@ public class Constants
 
     public static final int    MISSILE_MAX_RANGE_SQUARED = 49;
 
-    // other constants
+    // DPR = Damage per round
+    public static final double COMMANDER_DPR             = 10;
+
     static int                 beaverLimit               = 1;
     static int                 soldierLimit              = 6;
-    static int                 minerLimit                = 10;
+    static int                 minerLimit                = 0;
     static int                 droneLimit                = 1;
 
     static int                 tankCost                  =

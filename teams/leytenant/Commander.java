@@ -13,7 +13,6 @@ public class Commander
         throws GameActionException
     {
         super(rc);
-        // this.setDestination(allyHQ);
         lastRoundHealth = rc.getHealth();
         runningAway = true;
         this.setDestination(enemyHQ);
@@ -23,32 +22,30 @@ public class Commander
     public void run()
         throws GameActionException
     {
-        if (bug())
-        {
-            return;
-        }
+        super.run();
+        RobotInfo[] nearby =
+            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+        attack(nearby);
         if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 60)
         {
             runningAway = false;
         }
         if (runningAway)
         {
-            bug();
+            this.setDestination(allyHQ);
         }
         else if (shouldRunAway())
         {
             this.setDestination(allyHQ);
             runningAway = true;
         }
-        else
+        if (!runningAway)
         {
-            RobotInfo[] nearby =
-                rc.senseNearbyRobots(mType.sensorRadiusSquared);
-            attack(nearby);
-            if (rc.isCoreReady())
-            {
-                micro();
-            }
+            this.setDestination(getLocation(Channels.rallyLoc));
+        }
+        if (rc.isCoreReady())
+        {
+            micro(nearby);
         }
     }
 
@@ -58,7 +55,7 @@ public class Commander
         double healthDifference = lastRoundHealth - rc.getHealth();
         lastRoundHealth = rc.getHealth();
         if (healthDifference > rc.getHealth() || lastRoundHealth < 30
-            || rc.getSupplyLevel() < 150)
+            || rc.getSupplyLevel() < 1000)
         {
             return true;
         }
@@ -66,21 +63,52 @@ public class Commander
     }
 
 
-    private void micro()
+    private void micro(RobotInfo[] nearby)
         throws GameActionException
     {
-        MapLocation rally = getLocation(Channels.rallyLoc);
-        this.setDestination(rally);
+        int avgX = 0;
+        int avgY = 0;
+        int enemyCount = 0;
+        double enemyPower = 0;
+        for (int i = 0; i < nearby.length; i++)
+        {
+            if (nearby[i].team == enemyTeam)
+            {
+                avgX += nearby[i].location.x;
+                avgY += nearby[i].location.y;
+                if (rc.getLocation().distanceSquaredTo(nearby[i].location) <= nearby[i].type.attackRadiusSquared)
+                {
+                    enemyPower += getDPR(nearby[i].type);
+                }
+                enemyCount++;
+            }
+        }
+        if (enemyCount != 0 && enemyPower > Constants.COMMANDER_DPR)
+        {
+            avgX /= enemyCount;
+            avgY /= enemyCount;
+            Direction away = new MapLocation(avgX, avgY).directionTo(mLocation);
+            if (enemyPower > Constants.COMMANDER_DPR)
+            {
+                this.setDestination(rc.getLocation().add(away, 4));
+            }
+        }
         if (rc.getFlashCooldown() == 0)
         {
             MapLocation loc = findFlashLoc();
             if (loc != null)
             {
-                // rc.castFlash(loc);
-                // return;
+                rc.castFlash(loc);
+                return;
             }
         }
         bug();
+    }
+
+
+    private double getDPR(RobotType type)
+    {
+        return type.attackPower / type.attackDelay;
     }
 
 
@@ -90,7 +118,7 @@ public class Commander
         Direction dir = rc.getLocation().directionTo(dest);
         Direction right = dir.rotateRight().rotateRight();
         Direction left = dir.rotateLeft().rotateLeft();
-        if (!runningAway && rc.getLocation().distanceSquaredTo(dest) < 35)
+        if (!runningAway && rc.getLocation().distanceSquaredTo(dest) < 25)
         {
             return null;
         }

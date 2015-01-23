@@ -18,6 +18,7 @@ public abstract class Proletariat
         RUN
     }
 
+    private boolean       turnRight;
     private double        lastRoundHealth;
     private MapLocation   visited;
     protected MapLocation dest;
@@ -34,6 +35,8 @@ public abstract class Proletariat
         visited = rc.getLocation();
         onWall = false;
         dest = null;
+        turnRight = rand.nextBoolean();
+        rc.setIndicatorString(0, "Turning right: " + turnRight);
     }
 
 
@@ -134,103 +137,102 @@ public abstract class Proletariat
         {
             return false;
         }
-        Direction towardsRally = rc.getLocation().directionTo(dest);
-        boolean clearAhead =
-            isNormalTile(towardsRally)
-                && !visited.equals(rc.getLocation().add(towardsRally));
-        // visited.add(rc.getLocation());
-        visited = rc.getLocation();
-        if (clearAhead)
+        if (onWall)
         {
-            rc.setIndicatorString(0, "It's clear ahead");
-            onWall = false;
-            facing = towardsRally;
-            rc.setIndicatorString(1, "" + facing);
-            return move(facing);
-        }
-        else
-        {
-            onWall = true;
-            if (isNormalTile(facing.rotateRight()))
+            if (isClear(rotateBackward(facing)))
             {
-                facing = facing.rotateRight();
                 onWall = false;
+                facing = rotateBackward(facing);
                 return move(facing);
             }
-            if (isNormalTile(facing))
+            else if (isClear(facing))
             {
                 return move(facing);
             }
             else
             {
-                facing = facing.rotateLeft();
+                facing = rotateForward(facing);
                 return bug();
             }
         }
+        else
+        {
+            facing = rc.getLocation().directionTo(dest);
+            boolean clearAhead = isClear(facing);
+            if (clearAhead)
+            {
+                return move(facing);
+            }
+            else
+            {
+                onWall = true;
+                facing = rotateForward(facing);
+                return bug();
+            }
+        }
+    }
 
-// if (dest == null || !rc.isCoreReady())
-// {
-// return false;
-// }
-// // if we are already attached and traveling along a wall
-// if (onWall)
-// {
-// // TODO THIS IS MADNESS <---- agreed.
-// // there is a wall ahead of us, sets onWall to false, so that the
-// // next code will run
-// if (!isNormalTile(facing) || inEnemyTowerRange(facing))
-// {
-// onWall = false;
-// }
-// else if (isNormalTile(facing.rotateRight())
-// && !inEnemyTowerRange(facing.rotateRight()))
-// {
-// onWall = false;
-// }
-// }
-// // not against a wall, check for a wall ahead, and move forward
-// if (!onWall)
-// {
-// facing = rc.getLocation().directionTo(dest);
-//
-// int count = 0;
-// while ((!isNormalTile(facing) || inEnemyTowerRange(facing))
-// && count < 8)
-// {
-// count++;
-// if (turnRight)
-// {
-// facing = facing.rotateLeft();
-// }
-// else
-// {
-// facing = facing.rotateRight();
-// }
-// onWall = true;
-// }
-// }
-// if (move(facing))
-// {
-// // visited.add(mLocation);
-// // helper.addLast(mLocation);
-// return true;
-// }
-// else
-// {
-// return false;
-// }
+
+    private boolean isClear(Direction dir)
+        throws GameActionException
+    {
+        MapLocation next = rc.getLocation().add(dir);
+        RobotInfo rob = rc.senseRobotAtLocation(next);
+
+        return isNormalTile(dir) && !visited.equals(next)
+            && (rob == null || !(rob.type.isBuilding || rob.type.canBuild()))
+            && !this.inEnemyTowerRange(dir);
     }
 
 
     protected boolean move(Direction dir)
         throws GameActionException
     {
+
         if (rc.canMove(dir))
         {
+            if (!visited.equals(rc.getLocation()))
+            {
+                visited = rc.getLocation();
+            }
             rc.move(dir);
             return true;
         }
+        else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
+        {
+            System.out.println("HERE");
+            visited = rc.getLocation();
+            turnRight = !turnRight;
+            return bug();
+        }
         return false;
+    }
+
+
+    private Direction rotateForward(Direction dir)
+    {
+        if (turnRight)
+        {
+            return dir.rotateLeft();
+        }
+        else
+        {
+            return dir.rotateRight();
+        }
+    }
+
+
+    private Direction rotateBackward(Direction dir)
+    {
+        if (turnRight)
+        {
+            return dir.rotateRight();
+        }
+        else
+        {
+            return dir.rotateLeft();
+        }
+
     }
 
 
@@ -455,6 +457,15 @@ public abstract class Proletariat
     protected Direction[] getSpanningDirections(Direction dir)
     {
         return getSpanningDirections(dir, 8);
+    }
+
+
+    private void print(String nm)
+    {
+        if (Clock.getRoundNum() < 400)
+        {
+            System.out.println(nm);
+        }
     }
 
 
