@@ -32,7 +32,7 @@ public abstract class AttackBuilding
         throws GameActionException
     {
         this.findDefenseSpot();
-        // this.attack();
+        this.attack();
     }
 
 

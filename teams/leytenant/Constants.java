@@ -45,10 +45,13 @@ public class Constants
     public static final double FAST_MINER_FRACS        = 1;
     public static final double NORM_MINER_FRACS        = 9 + FAST_MINER_FRACS;
 
+    // DPR = Damage per round
+    public static final double COMMANDER_DPR           = 10;
+
     // other constants
     static int                 beaverLimit             = 1;
     static int                 soldierLimit            = 6;
-    static int                 minerLimit              = 2;
+    static int                 minerLimit              = 0;
     static int                 droneLimit              = 1;
 
     static int                 tankCost                = RobotType.TANK.oreCost;
