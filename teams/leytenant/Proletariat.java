@@ -20,18 +20,18 @@ public abstract class Proletariat
         RUN
     }
 
-    private double               lastRoundHealth;
-    private HashSet<MapLocation> visited;
-    protected MapLocation        dest;
-    protected Boolean            onWall;
-    protected Direction          facing;
+    private double        lastRoundHealth;
+    private MapLocation   visited;
+    protected MapLocation dest;
+    protected Boolean     onWall;
+    protected Direction   facing;
 
 
     public Proletariat(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        visited = new HashSet<MapLocation>();
+        visited = rc.getLocation();
         onWall = false;
         dest = null;
     }
@@ -135,8 +135,9 @@ public abstract class Proletariat
         Direction towardsRally = rc.getLocation().directionTo(dest);
         boolean clearAhead =
             isNormalTile(towardsRally)
-                && !visited.contains(rc.getLocation().add(towardsRally));
-        visited.add(rc.getLocation());
+                && !visited.equals(rc.getLocation().add(towardsRally));
+        // visited.add(rc.getLocation());
+        visited = rc.getLocation();
         if (clearAhead)
         {
             rc.setIndicatorString(0, "It's clear ahead");
