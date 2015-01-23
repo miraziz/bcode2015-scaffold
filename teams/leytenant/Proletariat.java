@@ -148,6 +148,12 @@ public abstract class Proletariat
         else
         {
             onWall = true;
+            if (isNormalTile(facing.rotateRight()))
+            {
+                facing = facing.rotateRight();
+                onWall = false;
+                return move(facing);
+            }
             if (isNormalTile(facing))
             {
                 return move(facing);
