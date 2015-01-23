@@ -11,6 +11,8 @@ public class Missile
         super();
         rc = myRC;
         enemyHQ = rc.senseEnemyHQLocation();
+        enemyTeam = rc.getTeam().opponent();
+        System.out.println("MADE with left: " + Clock.getBytecodesLeft());
     }
 
 
@@ -22,20 +24,22 @@ public class Missile
         System.out.println("Starting");
         mLocation = rc.getLocation();
         String doing = "Nothing";
+        String firstDir = "";
 
         RobotInfo[] nearbyEnemies =
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
         Direction bestDir = null;
-        int minDist = 50;
         for (int i = 0; i < nearbyEnemies.length; i++)
         {
-            MapLocation newLoc = nearbyEnemies[i].location;
-            int newDist = newLoc.distanceSquaredTo(mLocation);
-            Direction newDir = mLocation.directionTo(mLocation);
-            if (newDist < minDist && rc.canMove(newDir))
+            Direction newDir = mLocation.directionTo(nearbyEnemies[i].location);
+            if (firstDir == null)
             {
-                minDist = newDist;
-                bestDir = mLocation.directionTo(newLoc);
+                firstDir = newDir.toString();
+            }
+            if (rc.canMove(newDir))
+            {
+                bestDir = newDir;
+                break;
             }
         }
 
@@ -46,7 +50,7 @@ public class Missile
 
         if (bestDir != null)
         {
-            doing = "at enemy";
+            doing = "at enemy " + bestDir;
             rc.move(bestDir);
         }
         else
@@ -83,6 +87,7 @@ public class Missile
         int finishTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
         System.out.println("Total took: " + (finishTime - startTime));
 
+        rc.setIndicatorString(1, firstDir);
         rc.setIndicatorString(1, doing);
     }
 

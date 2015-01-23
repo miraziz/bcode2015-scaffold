@@ -192,8 +192,13 @@ public class Miner
                         MapLocation bestLoc = findClosestOre();
                         if (bestLoc != null)
                         {
-                            mLocation = rc.getLocation();
+                            doing = "Closest ore found";
+// mLocation = rc.getLocation();
                             setPath(bestLoc);
+                        }
+                        else
+                        {
+                            doing = "Closest ore not found";
                         }
                     }
                 }
@@ -397,14 +402,32 @@ public class Miner
         MapLocation[] trollQ =
             new MapLocation[GameConstants.MAP_MAX_WIDTH
                 * GameConstants.MAP_MAX_HEIGHT];
+
         int startQ = 0, endQ = 0;
-
-        MapLocation oreLoc = null;
-
-        trollQ[endQ++] = mLocation;
         mapPointers[mLocation.x - mapOffsetX][mLocation.y - mapOffsetY] = -1;
 
         int cX, cY, oX, oY;
+        cX = mLocation.x - mapOffsetX;
+        cY = mLocation.y - mapOffsetY;
+        for (int i = 0; i < 8; i += 2)
+        {
+            MapLocation next = mLocation.add(directions[i]);
+            oX = next.x - mapOffsetX;
+            oY = next.y - mapOffsetY;
+            if (mapPointers[oX][oY] == 0)
+            {
+                mapPointers[oX][oY] = cX * Constants.MAP_HEIGHT + cY;
+                mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
+                trollQ[endQ++] = next;
+            }
+
+            if (i == 6)
+            {
+                i = -1;
+            }
+        }
+
+        MapLocation oreLoc = null;
         while (startQ != endQ)
         {
             MapLocation cur = trollQ[startQ++];

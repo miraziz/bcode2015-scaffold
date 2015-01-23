@@ -36,7 +36,7 @@ public class Launcher
 
         int took2 = Clock.getRoundNum() - curRound;
 
-        if (took2 > 0 && took2 > took1)
+        if (took1 > 0)
         {
             System.out.println("ATTACKENEMIES TOOK AN EXTRA: " + took1);
             System.out.println("BUGGING TOOK AN EXTRA: " + took2);
