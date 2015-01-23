@@ -11,15 +11,13 @@ public class Basher
         throws GameActionException
     {
         super(rc);
+        mTypeChannel = Channels.basherCount;
     }
 
 
     public void run()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.basherCount,
-            rc.readBroadcast(Channels.basherCount) + 1);
         super.run();
     }
 

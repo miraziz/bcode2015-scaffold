@@ -76,6 +76,8 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
         submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
@@ -471,11 +473,12 @@ public class HQ
     public void transferSupplies()
         throws GameActionException
     {
-        RobotInfo[] nearby =
+        RobotInfo[] allies =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
-        for (RobotInfo r : nearby)
+
+        for (RobotInfo r : allies)
         {
             if (Clock.getBytecodesLeft() < 550)
             {

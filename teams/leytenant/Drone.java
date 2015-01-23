@@ -8,7 +8,7 @@ import battlecode.common.*;
  * @author Amit Bachchan
  */
 public class Drone
-    extends Proletariat
+    extends Fighter
 {
 
     private boolean turnDirection;
@@ -19,6 +19,7 @@ public class Drone
     {
         super(rc);
 
+        mTypeChannel = Channels.droneCount;
         turnDirection = rand.nextBoolean();
     }
 
@@ -26,9 +27,6 @@ public class Drone
     public void run()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.droneCount,
-            rc.readBroadcast(Channels.droneCount) + 1);
 
         if (rc.isCoreReady())
         {

@@ -20,7 +20,6 @@ public class Miner
     private int           pathFailedCount;
     private MapLocation   minerDest;
     private double        bestOreNum;
-    private int           myMinerID;
 
 
     public Miner(RobotController rc)
@@ -118,6 +117,7 @@ public class Miner
             minerDirs[6] = Direction.NORTH_EAST;
             minerDirs[7] = Direction.SOUTH_EAST;
         }
+        mTypeChannel = Channels.minerCount;
     }
 
 
@@ -130,8 +130,7 @@ public class Miner
     {
         super.run();
 
-        myMinerID = rc.readBroadcast(Channels.minerCount);
-        int mGroup = myMinerID % Constants.TOT_MINER_FRACS;
+        int mGroup = mTypeNumber % Constants.TOT_MINER_FRACS;
         if (mGroup < Constants.FAST_MINER_FRACS)
         {
             Constants.MIN_ORE = Constants.FAST_MIN_ORE;
@@ -144,8 +143,6 @@ public class Miner
         {
             Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
         }
-        rc.broadcast(Channels.minerCount, myMinerID + 1);
-
         findDefenseSpot();
 
         String doing = "Not set";
@@ -292,52 +289,6 @@ public class Miner
 
 
     /**
-     * Runs in the opposite direction of the average location of enemy units
-     * within attacking distance.
-     * 
-     * @return True if this miner moved away, false otherwise.
-     * @throws GameActionException
-     */
-    private boolean runAway()
-        throws GameActionException
-    {
-        RobotInfo[] enemies =
-            rc.senseNearbyRobots(mType.sensorRadiusSquared, enemyTeam);
-        if (enemies.length == 0)
-        {
-            return false;
-        }
-
-        int avgX = 0;
-        int avgY = 0;
-        for (RobotInfo enemy : enemies)
-        {
-            if (!enemy.type.canMine()
-                && enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
-            {
-                avgX += enemy.location.x;
-                avgY += enemy.location.y;
-            }
-        }
-        avgX /= enemies.length;
-        avgY /= enemies.length;
-
-        Direction dir =
-            mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
-
-        Direction[] dirs = getSpanningDirections(dir);
-        for (int i = 0; i < dirs.length; i++)
-        {
-            if (moveSafely(dirs[i]))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /**
      * Attempts to mine the current location. If location is mined out, attempts
      * to move to richest adjacent cell. If all adjacent cells are mined out,
      * moves in a random direction. Otherwise, does nothing.
@@ -471,45 +422,47 @@ public class Miner
                 oreLoc = cur;
                 break;
             }
-            else if (rc.canSenseLocation(cur))
+            else if (rc.isPathable(RobotType.MINER, cur))
             {
-                // TODO Go into previously seen ores (so don't do
-// rc.canSenseLocation)
-                RobotInfo robot = rc.senseRobotAtLocation(cur);
-                if (robot == null || !robot.type.isBuilding
-                    && !robot.type.canBuild())
+// else if (rc.canSenseLocation(cur))
+// {
+// // TODO Go into previously seen ores (so don't do
+// // rc.canSenseLocation)
+// RobotInfo robot = rc.senseRobotAtLocation(cur);
+// if (robot == null || !robot.type.isBuilding
+// && !robot.type.canBuild())
+// {
+// // TODO Avoid stationary units in another way (Not just
+// // avoid beavers)
+                if (ore >= Constants.MIN_ORE)
                 {
-                    // TODO Avoid stationary units in another way (Not just
-// avoid beavers)
-                    if (ore >= Constants.MIN_ORE)
-                    {
-                        oreLoc = cur;
-                        break;
-                    }
+                    oreLoc = cur;
+                    break;
+                }
 
-                    if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+                if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+                {
+                    for (int i = 0; i < 8; i += 2)
                     {
-                        for (int i = 0; i < 8; i += 2)
+                        MapLocation next = cur.add(directions[i]);
+                        oX = next.x - mapOffsetX;
+                        oY = next.y - mapOffsetY;
+                        if (mapPointers[oX][oY] == 0)
                         {
-                            MapLocation next = cur.add(directions[i]);
-                            oX = next.x - mapOffsetX;
-                            oY = next.y - mapOffsetY;
-                            if (mapPointers[oX][oY] == 0)
-                            {
-                                mapPointers[oX][oY] =
-                                    cX * Constants.MAP_HEIGHT + cY;
-                                mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
-                                trollQ[endQ++] = next;
-                            }
+                            mapPointers[oX][oY] =
+                                cX * Constants.MAP_HEIGHT + cY;
+                            mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
+                            trollQ[endQ++] = next;
+                        }
 
-                            if (i == 6)
-                            {
-                                i = -1;
-                            }
+                        if (i == 6)
+                        {
+                            i = -1;
                         }
                     }
                 }
             }
+
         }
 // System.out.println("Finishing findClosestOre: "
 // + Clock.getBytecodeNum());

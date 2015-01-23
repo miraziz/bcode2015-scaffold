@@ -60,4 +60,6 @@ public class Channels
     static int        towerVulnerability    = 990;
 
     public static int minerPotato           = 1337;
+
+    public static int launcherCount         = 1500;
 }

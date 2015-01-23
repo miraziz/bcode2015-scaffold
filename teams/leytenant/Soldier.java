@@ -16,15 +16,13 @@ public class Soldier
         throws GameActionException
     {
         super(rc);
+        mTypeChannel = Channels.soldierCount;
     }
 
 
     public void run()
         throws GameActionException
     {
-        rc.broadcast(
-            Channels.soldierCount,
-            rc.readBroadcast(Channels.soldierCount) + 1);
         super.run();
 
     }

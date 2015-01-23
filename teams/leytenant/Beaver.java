@@ -29,6 +29,7 @@ public class Beaver
         super(rc);
         task = getNextTask();
         reached = false;
+        mTypeChannel = Channels.beaverCount;
     }
 
 
@@ -58,9 +59,6 @@ public class Beaver
         throws GameActionException
     {
         super.run();
-        rc.broadcast(
-            Channels.beaverCount,
-            rc.readBroadcast(Channels.beaverCount) + 1);
 
         rc.setIndicatorString(1, "My task is: " + task);
         if (task == BeaverTask.JOIN_ARMY)
