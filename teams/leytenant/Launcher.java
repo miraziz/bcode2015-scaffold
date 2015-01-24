@@ -5,6 +5,11 @@ import battlecode.common.*;
 public class Launcher
     extends Fighter
 {
+    private int[][] nearbyMap;
+    private int     nearbyMapX;
+    private int     nearbyMapY;
+    private int     curRound;
+
 
     public Launcher(RobotController rc)
         throws GameActionException
@@ -19,7 +24,7 @@ public class Launcher
     public void run()
         throws GameActionException
     {
-        int curRound = Clock.getRoundNum();
+        curRound = Clock.getRoundNum();
         super.run();
 
         attackEnemies();
@@ -39,64 +44,129 @@ public class Launcher
         if (took1 > 0)
         {
             System.out.println("ATTACKENEMIES TOOK AN EXTRA: " + took1);
-            System.out.println("BUGGING TOOK AN EXTRA: " + took2);
+            System.out.println("BUGGING TOOK AN EXTRA: " + (took2 - took1));
             System.out.println("LEFTOVER BYTECODES: "
                 + Clock.getBytecodesLeft());
         }
     }
 
 
-    private boolean attackEnemies()
+    private void attackEnemies()
         throws GameActionException
     {
         // TODO Launch all at once
-        if (rc.getMissileCount() > 0)
+        int missileCount = rc.getMissileCount();
+        if (missileCount > 0)
         {
             RobotInfo[] nearbyEnemies =
                 rc.senseNearbyRobots(
                     Constants.MISSILE_MAX_RANGE_SQUARED,
                     enemyTeam);
-            for (int i = 0; i < nearbyEnemies.length; ++i)
+            if (nearbyEnemies.length > 0)
             {
-                Direction toEnemy =
-                    bestLaunchDir(0, mLocation, nearbyEnemies[i].location);
-                // TODO Is rc.canLaunch(toEnemy) necessary?
-                if (toEnemy != null)
+                RobotInfo[] nearbyAllies =
+                    rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED);
+                nearbyMap =
+                    new int[3 * Constants.MISSILE_MAX_RANGE][3 * Constants.MISSILE_MAX_RANGE];
+                nearbyMapX = mLocation.x - Constants.MISSILE_MAX_RANGE;
+                nearbyMapY = mLocation.y - Constants.MISSILE_MAX_RANGE;
+
+                for (int i = 0; i < nearbyAllies.length; ++i)
                 {
-// System.out.println("MISSILE LAUNCH");
-                    rc.launchMissile(toEnemy);
-                    return true;
+                    nearbyMap[nearbyAllies[i].location.x - nearbyMapX][nearbyAllies[i].location.y
+                        - nearbyMapY] = Constants.ALLY_NEAR_LAUNCHER;
+                }
+                for (int i = 0; i < nearbyEnemies.length; ++i)
+                {
+                    nearbyMap[nearbyEnemies[i].location.x - nearbyMapX][nearbyEnemies[i].location.y
+                        - nearbyMapY] = Constants.ENEMY_NEAR_LAUNCHER;
+                }
+
+                for (int i = 0; i < nearbyEnemies.length && missileCount > 0; ++i)
+                {
+                    if (nearbyEnemies[i].team != myTeam)
+                    {
+                        Direction toEnemy =
+                            bestLaunchDir(0, i + Constants.ALLY_NEAR_LAUNCHER
+                                + 1, mLocation, nearbyEnemies[i].location);
+                        ;
+                        // TODO Is rc.canLaunch(toEnemy) necessary?
+                        if (toEnemy != null)
+                        {
+                            // System.out.println("MISSILE LAUNCH");
+                            if (Clock.getRoundNum() != curRound)
+                            {
+                                System.out.println("Rounds behind: "
+                                    + (Clock.getRoundNum() - curRound));
+                            }
+                            rc.launchMissile(toEnemy);
+                            MapLocation newLoc = mLocation.add(toEnemy);
+                            nearbyMap[newLoc.x - nearbyMapX][newLoc.y
+                                - nearbyMapY] = Constants.ALLY_NEAR_LAUNCHER;
+                            missileCount--;
+                        }
+
+                    }
                 }
             }
         }
-        return false;
     }
 
 
-    private Direction bestLaunchDir(int moves, MapLocation cur, MapLocation dest)
+    private Direction bestLaunchDir(
+        int moves,
+        int mark,
+        MapLocation cur,
+        MapLocation dest)
         throws GameActionException
     {
         Direction bestDir = null;
-        if (moves < GameConstants.MISSILE_LIFESPAN)
+        if (moves < Constants.MISSILE_MAX_RANGE - 1)
         {
-            Direction[] dirs =
-                getSpanningForwardDirections(cur.directionTo(dest));
-            for (int i = 0; i < dirs.length; ++i)
+            nearbyMap[cur.x - nearbyMapX][cur.y - nearbyMapY] = mark;
+            Direction left = cur.directionTo(dest);
+            Direction right = left.rotateRight();
+            Direction nextDir = null;
+            int count = 0;
+            while (count < 3)
             {
-                MapLocation next = cur.add(dirs[i]);
-                if (next.equals(dest))
+                if (count % 2 == 0)
                 {
-                    return dirs[i];
+                    nextDir = left;
+                    left = left.rotateLeft();
                 }
-                else if (rc.isPathable(RobotType.MISSILE, next))
+                else
                 {
-                    Direction res = bestLaunchDir(moves + 1, next, dest);
-                    if (res != null)
+                    nextDir = right;
+                    right = right.rotateRight();
+                }
+
+                MapLocation next = cur.add(nextDir);
+                int robotOnTile =
+                    nearbyMap[next.x - nearbyMapX][next.y - nearbyMapY];
+                if (robotOnTile == Constants.ENEMY_NEAR_LAUNCHER)
+                {
+                    if (moves > 0)
                     {
-                        bestDir = dirs[i];
+                        bestDir = nextDir;
                         break;
                     }
                 }
+                else if (robotOnTile != Constants.ALLY_NEAR_LAUNCHER
+                    && robotOnTile != mark)
+                {
+                    Direction res = bestLaunchDir(moves + 1, mark, next, dest);
+                    if (res != null)
+                    {
+                        // TODO Mark all tiles this missile would go through as
+// blocked for any future attempted missile launches
+                        // nearbyMap[cur.x - nearbyMapX][cur.y - nearbyMapY] =
+// Constants.ALLY_NEAR_LAUNCHER;
+                        bestDir = nextDir;
+                        break;
+                    }
+                }
+                count++;
             }
         }
         return bestDir;

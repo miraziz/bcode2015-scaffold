@@ -50,6 +50,12 @@ public class Constants
     // DPR = Damage per round
     public static final double COMMANDER_DPR             = 10;
 
+    public static final int    MISSILE_MAX_RANGE         = 7;
+
+    public static final int    ENEMY_NEAR_LAUNCHER       = 2;
+
+    public static final int    ALLY_NEAR_LAUNCHER        = 3;
+
     static int                 beaverLimit               = 1;
     static int                 soldierLimit              = 6;
     static int                 minerLimit                = 40;

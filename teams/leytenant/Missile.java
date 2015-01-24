@@ -12,7 +12,7 @@ public class Missile
         rc = myRC;
         enemyHQ = rc.senseEnemyHQLocation();
         enemyTeam = rc.getTeam().opponent();
-        System.out.println("MADE with left: " + Clock.getBytecodesLeft());
+// System.out.println("MADE with left: " + Clock.getBytecodesLeft());
     }
 
 
@@ -20,8 +20,9 @@ public class Missile
     public void run()
         throws GameActionException
     {
-        int startTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-        System.out.println("Starting");
+        int curRound = Clock.getRoundNum();
+// int startTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+// System.out.println("Starting");
         mLocation = rc.getLocation();
         String doing = "Nothing";
         String firstDir = "";
@@ -43,25 +44,26 @@ public class Missile
                 {
                     firstDir = newDir.toString();
                 }
-                if (rc.canMove(newDir))
+
+                if (mLocation.isAdjacentTo(nearbyEnemies[i].location))
+                {
+                    bestDir = Direction.NONE;
+                    break;
+                }
+                else if (rc.canMove(newDir))
                 {
                     bestDir = newDir;
                     break;
                 }
             }
 
-            int closestEnemiesTime =
-                Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-            System.out.println("Closest enemy took: "
-                + (closestEnemiesTime - startTime));
-            System.out.println("Enemies processed: " + enemiesProcessed);
+// int closestEnemiesTime =
+// Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+// System.out.println("Closest enemy took: "
+// + (closestEnemiesTime - startTime));
+// System.out.println("Enemies processed: " + enemiesProcessed);
 
-            if (bestDir != null)
-            {
-                doing = "at enemy " + bestDir;
-                rc.move(bestDir);
-            }
-            else
+            if (bestDir == null)
             {
                 Direction left = mLocation.directionTo(enemyHQ);
                 Direction right = left.rotateRight();
@@ -87,21 +89,34 @@ public class Missile
                     count++;
                 }
 
-// int movingTime =
-// Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-// System.out.println("Moving took: "
-// + (movingTime - closestEnemiesTime));
+                // int movingTime =
+                // Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+                // System.out.println("Moving took: "
+                // + (movingTime - closestEnemiesTime));
+            }
+            else if (bestDir != Direction.NONE)
+            {
+                doing = "at enemy " + bestDir;
+                rc.move(bestDir);
             }
         }
+// int finishTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+// System.out.println("Total took: " + (finishTime - startTime));
 
-        int finishTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-        System.out.println("Total took: " + (finishTime - startTime));
-
+        if (Clock.getRoundNum() != curRound)
+        {
+            System.out.println("MISSILE BEHIND: "
+                + (Clock.getRoundNum() - curRound) + " WITH BYTECODES: "
+                + Clock.getBytecodesLeft());
+        }
         rc.setIndicatorString(1, firstDir);
         rc.setIndicatorString(1, doing);
     }
 
 
+    /**
+     * Ain't nobody got time for dat.
+     */
     @Override
     public void transferSupplies()
         throws GameActionException
