@@ -298,7 +298,12 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
-        if (rc.getSupplyLevel() > 500)
+        int supplyThreshhold = 500;
+        if (rc.getType() == RobotType.COMMANDER)
+        {
+            supplyThreshhold = 5000;
+        }
+        if (rc.getSupplyLevel() > supplyThreshhold)
         {
             if (Clock.getBytecodesLeft() < 700)
             {

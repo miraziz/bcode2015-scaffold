@@ -63,7 +63,6 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -72,19 +71,19 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
@@ -119,9 +118,9 @@ public class HQ
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
-        if (roundNum > 1000)
+        if (roundNum > 400)
         {
-            Constants.beaverLimit = 3;
+            Constants.beaverLimit = 4;
         }
         else if (roundNum > 25)
         {
