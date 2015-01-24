@@ -26,6 +26,7 @@ public abstract class Proletariat
     protected Direction   facing;
     protected int         mTypeNumber;
     protected int         mTypeChannel;
+    int                   turnCount;
 
 
     public Proletariat(RobotController rc)
@@ -47,6 +48,7 @@ public abstract class Proletariat
     public void run()
         throws GameActionException
     {
+        turnCount = 0;
         mLocation = rc.getLocation();
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
@@ -133,6 +135,11 @@ public abstract class Proletariat
     protected boolean bug()
         throws GameActionException
     {
+        if (this.turnCount == 9)
+        {
+            return false;
+        }
+        turnCount++;
         if (dest == null || !rc.isCoreReady())
         {
             return false;
