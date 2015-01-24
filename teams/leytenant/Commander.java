@@ -30,7 +30,7 @@ public class Commander
         {
             return;
         }
-        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 150)
+        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 100)
         {
             runningAway = false;
         }
@@ -76,6 +76,8 @@ public class Commander
         boolean inEnemyAttackRange = false;
         boolean inDangerousArea = false;
         Direction away = null;
+        MapLocation lowestHealthLoc = null;
+        double lowestHealth = Double.MAX_VALUE;
         for (int i = 0; i < nearby.length; i++)
         {
             if (nearby[i].team == enemyTeam && nearby[i].type.canAttack()
@@ -88,6 +90,11 @@ public class Commander
                     enemyAttackDamage += getDPR(nearby[i].type);
                     inEnemyAttackRange = true;
                 }
+                if (nearby[i].health < lowestHealth)
+                {
+                    lowestHealth = nearby[i].health;
+                    lowestHealthLoc = nearby[i].location;
+                }
                 enemyCount++;
                 inDangerousArea = true;
             }
@@ -96,7 +103,14 @@ public class Commander
         {
             avgX /= enemyCount;
             avgY /= enemyCount;
-            this.setDestination(new MapLocation(avgX, avgY));
+            if (inEnemyAttackRange)
+            {
+                this.setDestination(new MapLocation(avgX, avgY));
+            }
+            else
+            {
+                this.setDestination(lowestHealthLoc);
+            }
             if (enemyAttackDamage > rc.getHealth())
             {
                 runningAway = true;

@@ -179,8 +179,7 @@ public abstract class Proletariat
         MapLocation next = rc.getLocation().add(dir);
         RobotInfo rob = rc.senseRobotAtLocation(next);
 
-        return isNormalTile(dir) && !visited.equals(next)
-            && (rob == null || !(rob.type.isBuilding || rob.type.canBuild()))
+        return rc.isPathable(rc.getType(), next) && !visited.equals(next)
             && !this.inEnemyTowerRange(dir);
     }
 
