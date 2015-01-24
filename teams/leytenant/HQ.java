@@ -65,10 +65,14 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -113,7 +117,18 @@ public class HQ
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
-        Constants.beaverLimit = roundNum / 500 + 1;
+        if (roundNum > 1000)
+        {
+            Constants.beaverLimit = 3;
+        }
+        else if (roundNum > 25)
+        {
+            Constants.beaverLimit = 2;
+        }
+        else
+        {
+            Constants.beaverLimit = 1;
+        }
 
         rc.broadcast(Channels.minerPotato, 4 - roundNum / 501);
 
@@ -441,7 +456,7 @@ public class HQ
         rc.broadcast(Channels.shouldSpawnBasher, 0);
         rc.broadcast(Channels.shouldSpawnSoldier, 0);
         rc.broadcast(Channels.shouldSpawnDrone, 0);
-        if (droneCount == 0)
+        if (droneCount < Constants.droneLimit)
         {
             rc.broadcast(Channels.shouldSpawnDrone, 1);
         }

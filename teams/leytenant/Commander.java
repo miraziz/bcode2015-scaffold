@@ -30,7 +30,7 @@ public class Commander
         {
             return;
         }
-        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 150)
+        if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 100)
         {
             runningAway = false;
         }
@@ -64,50 +64,84 @@ public class Commander
     private void micro(RobotInfo[] nearby)
         throws GameActionException
     {
+        if (runningAway)
+        {
+            travel(runningAway);
+            return;
+        }
         int avgX = 0;
         int avgY = 0;
         int enemyCount = 0;
         double enemyAttackDamage = 0;
-        boolean shouldMove = true;
+        boolean inEnemyAttackRange = false;
+        boolean inDangerousArea = false;
+        Direction away = null;
+        MapLocation lowestHealthLoc = null;
+        double lowestHealth = Double.MAX_VALUE;
         for (int i = 0; i < nearby.length; i++)
         {
-            if (nearby[i].team == enemyTeam)
+            if (nearby[i].team == enemyTeam && nearby[i].type.canAttack()
+                && !nearby[i].type.isBuilding)
             {
                 avgX += nearby[i].location.x;
                 avgY += nearby[i].location.y;
                 if (rc.getLocation().distanceSquaredTo(nearby[i].location) <= nearby[i].type.attackRadiusSquared)
                 {
                     enemyAttackDamage += getDPR(nearby[i].type);
-                    shouldMove = false;
+                    inEnemyAttackRange = true;
+                }
+                if (nearby[i].health < lowestHealth)
+                {
+                    lowestHealth = nearby[i].health;
+                    lowestHealthLoc = nearby[i].location;
                 }
                 enemyCount++;
+                inDangerousArea = true;
             }
         }
         if (enemyCount != 0)
         {
             avgX /= enemyCount;
             avgY /= enemyCount;
+            if (inEnemyAttackRange)
+            {
+                this.setDestination(new MapLocation(avgX, avgY));
+            }
+            else
+            {
+                this.setDestination(lowestHealthLoc);
+            }
             if (enemyAttackDamage > rc.getHealth())
             {
                 runningAway = true;
                 this.setDestination(allyHQ);
             }
         }
-        if (shouldMove)
+        if (runningAway || !inDangerousArea)
         {
-            if (rc.getFlashCooldown() == 0
-                && rc.getLocation().distanceSquaredTo(dest) >= 20)
-            {
-                MapLocation loc = findFlashLoc();
-                if (loc != null)
-                {
-                    rc.castFlash(loc);
-                    return;
-                }
-            }
-            bug();
+            travel(true);
+        }
+        else if (!inEnemyAttackRange)
+        {
+            travel(false);
         }
 
+    }
+
+
+    private void travel(boolean withFlash)
+        throws GameActionException
+    {
+        if (rc.getFlashCooldown() == 0 && withFlash)
+        {
+            MapLocation loc = findFlashLoc();
+            if (loc != null)
+            {
+                rc.castFlash(loc);
+                return;
+            }
+        }
+        bug();
     }
 
 

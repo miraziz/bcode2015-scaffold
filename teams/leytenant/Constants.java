@@ -53,7 +53,7 @@ public class Constants
     static int                 beaverLimit               = 1;
     static int                 soldierLimit              = 6;
     static int                 minerLimit                = 40;
-    static int                 droneLimit                = 1;
+    static int                 droneLimit                = 0;
 
     static int                 tankCost                  =
                                                              RobotType.TANK.oreCost;
