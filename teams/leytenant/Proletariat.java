@@ -185,7 +185,12 @@ public abstract class Proletariat
     {
         MapLocation next = rc.getLocation().add(dir);
         RobotInfo rob = rc.senseRobotAtLocation(next);
-
+        if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
+        {
+            facing = facing.opposite();
+            turnRight = !turnRight;
+            turnCount = 0;
+        }
         return rc.isPathable(rc.getType(), next) && !visited.equals(next)
             && !this.inEnemyTowerRange(dir);
     }

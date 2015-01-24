@@ -28,9 +28,9 @@ public class HQ
         super(rc);
 
         // Set rally
-        // broadcastLocation(Channels.rallyLoc, findRallyPoint());
+        broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
-        broadcastLocation(Channels.rallyLoc, enemyHQ);
+        // broadcastLocation(Channels.rallyLoc, enemyHQ);
 
         // TODO Set miner limits based on map size
 
@@ -65,28 +65,30 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        // submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 

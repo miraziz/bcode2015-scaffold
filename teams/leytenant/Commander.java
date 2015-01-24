@@ -61,7 +61,7 @@ public class Commander
     }
 
 
-    private void micro(RobotInfo[] nearby)
+    protected void micro(RobotInfo[] nearby)
         throws GameActionException
     {
         if (runningAway)
