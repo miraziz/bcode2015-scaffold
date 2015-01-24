@@ -63,7 +63,7 @@ public class Launcher
                 // TODO Is rc.canLaunch(toEnemy) necessary?
                 if (toEnemy != null)
                 {
-                    System.out.println("MISSILE LAUNCH");
+// System.out.println("MISSILE LAUNCH");
                     rc.launchMissile(toEnemy);
                     return true;
                 }

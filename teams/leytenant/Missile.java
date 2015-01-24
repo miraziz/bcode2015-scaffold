@@ -26,62 +26,72 @@ public class Missile
         String doing = "Nothing";
         String firstDir = "";
 
-        RobotInfo[] nearbyEnemies =
-            rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
-        Direction bestDir = null;
-        for (int i = 0; i < nearbyEnemies.length; i++)
+        if (rc.isCoreReady())
         {
-            Direction newDir = mLocation.directionTo(nearbyEnemies[i].location);
-            if (firstDir == null)
+            int enemiesProcessed = 0;
+            RobotInfo[] nearbyEnemies =
+                rc.senseNearbyRobots(
+                    Constants.MISSILE_MAX_RANGE_SQUARED,
+                    enemyTeam);
+            Direction bestDir = null;
+            for (int i = 0; i < nearbyEnemies.length; i++)
             {
-                firstDir = newDir.toString();
-            }
-            if (rc.canMove(newDir))
-            {
-                bestDir = newDir;
-                break;
-            }
-        }
-
-        int closestEnemiesTime =
-            Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-        System.out.println("Closest enemy took: "
-            + (closestEnemiesTime - startTime));
-
-        if (bestDir != null)
-        {
-            doing = "at enemy " + bestDir;
-            rc.move(bestDir);
-        }
-        else
-        {
-            Direction left = mLocation.directionTo(enemyHQ);
-            Direction right = left.rotateRight();
-            Direction next = null;
-            int count = 0;
-            while (count < 3)
-            {
-                if (count % 2 == 0)
+                enemiesProcessed++;
+                Direction newDir =
+                    mLocation.directionTo(nearbyEnemies[i].location);
+                if (firstDir == null)
                 {
-                    next = left;
-                    left = left.rotateLeft();
+                    firstDir = newDir.toString();
                 }
-                else
+                if (rc.canMove(newDir))
                 {
-                    next = right;
-                    right = right.rotateRight();
-                }
-                if (rc.canMove(next))
-                {
-                    rc.move(next);
+                    bestDir = newDir;
                     break;
                 }
-                count++;
             }
 
-            int movingTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-            System.out.println("Moving took: "
-                + (movingTime - closestEnemiesTime));
+            int closestEnemiesTime =
+                Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+            System.out.println("Closest enemy took: "
+                + (closestEnemiesTime - startTime));
+            System.out.println("Enemies processed: " + enemiesProcessed);
+
+            if (bestDir != null)
+            {
+                doing = "at enemy " + bestDir;
+                rc.move(bestDir);
+            }
+            else
+            {
+                Direction left = mLocation.directionTo(enemyHQ);
+                Direction right = left.rotateRight();
+                Direction next = null;
+                int count = 0;
+                while (count < 3)
+                {
+                    if (count % 2 == 0)
+                    {
+                        next = left;
+                        left = left.rotateLeft();
+                    }
+                    else
+                    {
+                        next = right;
+                        right = right.rotateRight();
+                    }
+                    if (rc.canMove(next))
+                    {
+                        rc.move(next);
+                        break;
+                    }
+                    count++;
+                }
+
+// int movingTime =
+// Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
+// System.out.println("Moving took: "
+// + (movingTime - closestEnemiesTime));
+            }
         }
 
         int finishTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
