@@ -267,4 +267,22 @@ public class Fighter
         }
         return priority;
     }
+
+
+    protected MapLocation getClosestTowerOrHQ()
+    {
+        MapLocation closest = enemyHQ;
+        int closestDist = rc.getLocation().distanceSquaredTo(enemyHQ);
+        enemyTowers = rc.senseEnemyTowerLocations();
+        for (int i = 0; i < enemyTowers.length; i++)
+        {
+            int dist = rc.getLocation().distanceSquaredTo(enemyTowers[i]);
+            if (dist < closestDist)
+            {
+                closest = enemyTowers[i];
+                closestDist = dist;
+            }
+        }
+        return closest;
+    }
 }

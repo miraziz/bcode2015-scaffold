@@ -27,11 +27,11 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.LAUNCHER)
         {
-            robot = new Launcher(rc);
+            robot = new SimpleLauncher(rc);
         }
         else if (rc.getType() == RobotType.MISSILE)
         {
-            robot = new Missile(rc);
+            robot = new SimpleMissile(rc);
         }
         else if (rc.getType() == RobotType.SUPPLYDEPOT)
         {

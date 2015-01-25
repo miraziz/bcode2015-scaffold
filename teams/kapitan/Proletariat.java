@@ -594,7 +594,7 @@ public abstract class Proletariat
 
         if (rc.getType() == RobotType.LAUNCHER)
         {
-            supplyPriority = 5;
+            supplyPriority = 10;
         }
         else if (rc.getType() == RobotType.COMMANDER)
         {
