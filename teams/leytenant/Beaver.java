@@ -115,7 +115,6 @@ public class Beaver
                         bug();
                     }
                 }
-
                 if (reached)
                 {
                     if (build())

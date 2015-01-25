@@ -206,10 +206,4 @@ public abstract class Soveti
         return Direction.values()[rand.nextInt(8)];
     }
 
-
-    protected void broadcastSupplyNeeds()
-    {
-
-    }
-
 }
