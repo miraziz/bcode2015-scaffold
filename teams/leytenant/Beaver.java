@@ -86,7 +86,7 @@ public class Beaver
                 else
                 {
                     // TODO Why does this happen? If the build path is complete,
-// build anywhere instantly?
+// build anywhere instantly? yup
                     Direction dir = Direction.NORTH;
                     while (rc.senseTerrainTile(mLocation.add(dir)) != TerrainTile.NORMAL)
                     {
@@ -112,7 +112,7 @@ public class Beaver
                     }
                     else
                     {
-                        moveTowardsFacing();
+                        bug();
                     }
                 }
 

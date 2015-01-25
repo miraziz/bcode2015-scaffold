@@ -53,7 +53,7 @@ public class Commander
         double healthDifference = lastRoundHealth - rc.getHealth();
         lastRoundHealth = rc.getHealth();
         if (healthDifference > rc.getHealth() || lastRoundHealth < 100
-            || rc.getSupplyLevel() < 1000)
+            || rc.getSupplyLevel() < 100)
         {
             return true;
         }
@@ -61,7 +61,7 @@ public class Commander
     }
 
 
-    private void micro(RobotInfo[] nearby)
+    protected void micro(RobotInfo[] nearby)
         throws GameActionException
     {
         if (runningAway)
@@ -75,6 +75,7 @@ public class Commander
         double enemyAttackDamage = 0;
         boolean inEnemyAttackRange = false;
         boolean inDangerousArea = false;
+        boolean canAttackSomeone = false;
         Direction away = null;
         MapLocation lowestHealthLoc = null;
         double lowestHealth = Double.MAX_VALUE;
@@ -85,7 +86,13 @@ public class Commander
             {
                 avgX += nearby[i].location.x;
                 avgY += nearby[i].location.y;
-                if (rc.getLocation().distanceSquaredTo(nearby[i].location) <= nearby[i].type.attackRadiusSquared)
+                int dist =
+                    rc.getLocation().distanceSquaredTo(nearby[i].location);
+                if (dist <= rc.getType().attackRadiusSquared)
+                {
+                    canAttackSomeone = true;
+                }
+                if (dist <= nearby[i].type.attackRadiusSquared)
                 {
                     enemyAttackDamage += getDPR(nearby[i].type);
                     inEnemyAttackRange = true;
@@ -111,17 +118,25 @@ public class Commander
             {
                 this.setDestination(lowestHealthLoc);
             }
-            if (enemyAttackDamage > rc.getHealth())
+            if (enemyAttackDamage > rc.getHealth() + 15)
             {
                 runningAway = true;
                 this.setDestination(allyHQ);
             }
+        }
+        if (runningAway && enemyCount == 0 && rc.getSupplyLevel() > 1000)
+        {
+            return;
         }
         if (runningAway || !inDangerousArea)
         {
             travel(true);
         }
         else if (!inEnemyAttackRange)
+        {
+            travel(false);
+        }
+        else if (!canAttackSomeone)
         {
             travel(false);
         }

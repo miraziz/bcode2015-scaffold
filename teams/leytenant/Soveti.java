@@ -203,4 +203,10 @@ public abstract class Soveti
         return (Channels.LOCATION_CHANNEL_OFFSET + (loc.x - mapOffsetX)
             * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
     }
+
+
+    protected void broadcastSupplyNeeds()
+    {
+
+    }
 }

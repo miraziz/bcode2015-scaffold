@@ -49,7 +49,7 @@ public class Fighter
     }
 
 
-    private void setUpDefender()
+    protected void setUpDefender()
         throws GameActionException
     {
         this.setDestination(getLocation(Channels.rallyLoc));
@@ -93,7 +93,7 @@ public class Fighter
     }
 
 
-    private void micro(RobotInfo[] nearby)
+    protected void micro(RobotInfo[] nearby)
         throws GameActionException
     {
         if (!rc.isCoreReady())
