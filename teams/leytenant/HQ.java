@@ -28,9 +28,9 @@ public class HQ
         super(rc);
 
         // Set rally
-        broadcastLocation(Channels.rallyLoc, findRallyPoint());
+        // broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
-        // broadcastLocation(Channels.rallyLoc, enemyHQ);
+        broadcastLocation(Channels.rallyLoc, enemyHQ);
 
         // TODO Set miner limits based on map size
 
@@ -63,20 +63,6 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
@@ -85,16 +71,22 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
         submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
@@ -125,9 +117,9 @@ public class HQ
         throws GameActionException
     {
         int roundNum = Clock.getRoundNum();
-        if (roundNum > 400)
+        if (roundNum > 1000)
         {
-            Constants.beaverLimit = 4;
+            Constants.beaverLimit = 3;
         }
         else if (roundNum > 25)
         {
@@ -504,7 +496,7 @@ public class HQ
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
-        RobotInfo toGive = null;
+
         for (RobotInfo r : allies)
         {
             if (Clock.getBytecodesLeft() < 550)
@@ -513,33 +505,11 @@ public class HQ
             }
             if (r.type == RobotType.COMMANDER || r.type.canSpawn())
             {
-                if (r.type == RobotType.DRONE)
-                {
-                    toGive = r;
-                }
-                else if (r.type == RobotType.COMMANDER
-                    && (toGive != null && toGive.type != RobotType.DRONE))
-                {
-                    toGive = r;
-                }
-                else if (toGive != null && r.supplyLevel < toGive.supplyLevel
-                    && toGive.type != RobotType.COMMANDER
-                    && toGive.type != RobotType.DRONE)
-                {
-                    toGive = r;
-                }
-                else if (toGive == null && r.type.canSpawn())
-                {
-                    toGive = r;
-                }
+                rc.transferSupplies(
+                    (int)(rc.getSupplyLevel() * .90),
+                    r.location);
+                return;
             }
-        }
-        if (toGive != null)
-        {
-            rc.transferSupplies(
-                (int)(rc.getSupplyLevel() * .9),
-                toGive.location);
-
         }
     }
 }

@@ -200,8 +200,7 @@ public abstract class Soveti
 
     protected int getLocChannel(MapLocation loc)
     {
-        return (Channels.LOCATION_CHANNEL_OFFSET + (loc.x - mapOffsetX)
-            * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
+        return ((loc.x - mapOffsetX) * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
     }
 
 

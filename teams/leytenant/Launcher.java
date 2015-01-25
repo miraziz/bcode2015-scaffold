@@ -48,6 +48,8 @@ public class Launcher
             System.out.println("BUGGING TOOK AN EXTRA: " + (took2 - took1));
             System.out.println("LEFTOVER BYTECODES: "
                 + Clock.getBytecodesLeft());
+            System.out.println("LAUNCHER UNSUPPLIED: "
+                + (rc.getSupplyLevel() == 0));
         }
     }
 
