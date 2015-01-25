@@ -105,7 +105,8 @@ public class Miner
             minerDirs[6] = Direction.NORTH_WEST;
             minerDirs[7] = Direction.SOUTH_WEST;
         }
-        else if (allyHQ.x < enemyHQ.x && allyHQ.y < enemyHQ.y)
+        else
+        // if (allyHQ.x < enemyHQ.x && allyHQ.y < enemyHQ.y)
         {
             // fourth quadrant
             minerDirs[0] = Direction.WEST;

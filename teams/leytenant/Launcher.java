@@ -123,6 +123,45 @@ public class Launcher
     }
 
 
+    protected boolean runAway()
+        throws GameActionException
+    {
+        RobotInfo[] enemies =
+            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
+        if (enemies.length == 0)
+        {
+            return false;
+        }
+        int avgX = 0;
+        int avgY = 0;
+        boolean shouldRun = false;
+        int enemyCount = 0;
+        for (RobotInfo r : enemies)
+        {
+            if (r.type.canAttack())
+            {
+                shouldRun = true;
+                avgX += r.location.x;
+                avgY += r.location.y;
+                enemyCount++;
+            }
+        }
+        if (shouldRun)
+        {
+            avgX /= enemyCount;
+            avgY /= enemyCount;
+            Direction runDir =
+                this.getFreeStrafeDirection(rc.getLocation()
+                    .directionTo(new MapLocation(avgX, avgY)).opposite());
+            if (runDir != null)
+            {
+                rc.move(runDir);
+            }
+        }
+        return true;
+    }
+
+
     private Direction bestLaunchDir(
         int moves,
         int mark,
