@@ -21,9 +21,9 @@ public class Constants
 
     // TODO Figure out the math
     public static final int    MAP_WIDTH                 =
-                                                             2 * GameConstants.MAP_MAX_WIDTH + 10;
+                                                             (int)(1.5 * GameConstants.MAP_MAX_WIDTH) + 10;
     public static final int    MAP_HEIGHT                =
-                                                             2 * GameConstants.MAP_MAX_HEIGHT + 10;
+                                                             (int)(1.5 * GameConstants.MAP_MAX_HEIGHT) + 10;
 
     public static final double POTATO_MIN_ORE            = 1;
     public static final double NORM_MIN_ORE              = 2;

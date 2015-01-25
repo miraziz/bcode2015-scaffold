@@ -5,10 +5,11 @@ import battlecode.common.*;
 public class Launcher
     extends Fighter
 {
-    private int[][] nearbyMap;
-    private int     nearbyMapX;
-    private int     nearbyMapY;
-    private int     curRound;
+    private int[][]     nearbyMap;
+    private int         nearbyMapX;
+    private int         nearbyMapY;
+    private int         curRound;
+    private MapLocation reachableEnemyLoc = null;
 
 
     public Launcher(RobotController rc)
@@ -100,10 +101,17 @@ public class Launcher
                                     + (Clock.getRoundNum() - curRound));
                             }
                             rc.launchMissile(toEnemy);
+
+                            broadcastLocation(
+                                getLocChannel(mLocation.add(toEnemy)),
+                                reachableEnemyLoc);
+                            reachableEnemyLoc = null;
+
                             MapLocation newLoc = mLocation.add(toEnemy);
                             nearbyMap[newLoc.x - nearbyMapX][newLoc.y
                                 - nearbyMapY] = Constants.ALLY_NEAR_LAUNCHER;
-                            missileCount--;
+// missileCount--;
+                            break;
                         }
 
                     }
@@ -149,6 +157,7 @@ public class Launcher
                     if (moves > 0)
                     {
                         bestDir = nextDir;
+                        reachableEnemyLoc = next;
                         break;
                     }
                 }
