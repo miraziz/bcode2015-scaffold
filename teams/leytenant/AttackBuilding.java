@@ -11,6 +11,9 @@ public abstract class AttackBuilding
     extends Building
 {
 
+    protected Direction currentDir;
+
+
     /**
      * Broadcasts the building's score.
      * 
@@ -21,6 +24,7 @@ public abstract class AttackBuilding
         throws GameActionException
     {
         super(rc);
+        currentDir = Direction.NORTH;
     }
 
 
@@ -32,7 +36,10 @@ public abstract class AttackBuilding
         throws GameActionException
     {
         this.findDefenseSpot();
-        this.attack();
+        if (!this.attack())
+        {
+            this.circleAttack();
+        }
     }
 
 
@@ -113,5 +120,27 @@ public abstract class AttackBuilding
             return true;
         }
         return false;
+    }
+
+
+    protected void circleAttack()
+        throws GameActionException
+    {
+        if (!rc.isWeaponReady())
+        {
+            return;
+        }
+        int dist = 6;
+        while (dist > 0)
+        {
+            if (rc.canAttackLocation(rc.getLocation().add(currentDir, dist)))
+            {
+                rc.attackLocation(rc.getLocation().add(currentDir, dist));
+                currentDir = currentDir.rotateRight();
+                return;
+            }
+            dist--;
+        }
+        currentDir = currentDir.rotateRight();
     }
 }

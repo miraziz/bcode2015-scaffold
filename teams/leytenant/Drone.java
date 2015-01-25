@@ -27,7 +27,7 @@ public class Drone
     public void run()
         throws GameActionException
     {
-
+        super.run();
         if (rc.isCoreReady())
         {
             RobotInfo[] nearby =
