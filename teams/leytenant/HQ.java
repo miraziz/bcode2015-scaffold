@@ -1,6 +1,5 @@
 package leytenant;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import battlecode.common.*;
@@ -16,7 +15,6 @@ public class HQ
     private LinkedList<BeaverTask> tasks;
     boolean                        attacking;
     private boolean                shouldRun;
-    HashSet<MapLocation>           destroyedTowers;
     MapLocation                    defaultRallyLoc;
 
     private int                    buildingCount;
@@ -120,7 +118,6 @@ public class HQ
         fillBuildingPath();
 
         // Wait for towers to calculate vulnerability
-        destroyedTowers = new HashSet<MapLocation>();
         // analyzeTowers();
     }
 
@@ -132,6 +129,7 @@ public class HQ
     public void run()
         throws GameActionException
     {
+        allyTowers = rc.senseTowerLocations();
         int roundNum = Clock.getRoundNum();
         if (roundNum > 1000)
         {

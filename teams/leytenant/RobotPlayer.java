@@ -92,6 +92,7 @@ public class RobotPlayer
 
         while (true)
         {
+// int currentRound = Clock.getRoundNum();
             try
             {
                 robot.run();
@@ -101,6 +102,12 @@ public class RobotPlayer
             {
                 e.printStackTrace();
             }
+// int endRound = Clock.getRoundNum();
+// if (endRound != currentRound && rc.getType() != RobotType.MINER)
+// {
+// System.out.println("Used up all bytecodes: "
+// + (endRound - currentRound));
+// }
             rc.yield();
         }
     }

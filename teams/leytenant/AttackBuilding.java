@@ -86,17 +86,15 @@ public abstract class AttackBuilding
         {
             return false;
         }
-        int attackRadius = 24;
-        if (rc.getType() == RobotType.HQ)
+        int attackRadius = mType.attackRadiusSquared;
+        if (mType == RobotType.HQ && allyTowers.length >= 2)
         {
-            allyTowers = rc.senseTowerLocations();
-            if (allyTowers.length >= 2)
-            {
-                attackRadius = 35;
-            }
+            attackRadius = GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED;
         }
+
+        // TODO why -1?
         RobotInfo[] nearbyEnemies =
-            rc.senseNearbyRobots(attackRadius - 1, enemyTeam);
+            rc.senseNearbyRobots(attackRadius, enemyTeam);
         if (nearbyEnemies.length == 0)
         {
             rc.setIndicatorString(0, "Dont see anyone");
@@ -130,12 +128,18 @@ public abstract class AttackBuilding
         {
             return;
         }
-        int dist = 6;
+        int dist = mType.attackRadiusSquared;
+        if (mType == RobotType.HQ && allyTowers.length >= 5)
+        {
+            dist = GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED;
+        }
+
+        dist = (int)Math.sqrt(dist);
         while (dist > 0)
         {
-            if (rc.canAttackLocation(rc.getLocation().add(currentDir, dist)))
+            if (rc.canAttackLocation(mLocation.add(currentDir, dist)))
             {
-                rc.attackLocation(rc.getLocation().add(currentDir, dist));
+                rc.attackLocation(mLocation.add(currentDir, dist));
                 currentDir = currentDir.rotateRight();
                 return;
             }
