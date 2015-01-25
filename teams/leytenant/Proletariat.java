@@ -52,6 +52,7 @@ public abstract class Proletariat
         mLocation = rc.getLocation();
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
+        manageSupply();
     }
 
 
@@ -564,5 +565,54 @@ public abstract class Proletariat
     protected Direction[] getSpanningForwardDirections(Direction directionTo)
     {
         return getSpanningDirections(directionTo, 3);
+    }
+
+
+    protected void manageSupply()
+        throws GameActionException
+    {
+        int supplyPriority = getSupplyPriority(rc.getType());
+        if (rc.getSupplyLevel() < 500)
+        {
+            int distance = rc.getLocation().distanceSquaredTo(allyHQ);
+
+            int curPriority = rc.readBroadcast(Channels.supplyPriority);
+            if (supplyPriority > curPriority
+                || (distance > rc.readBroadcast(Channels.supplyDistance) && supplyPriority == curPriority))
+            {
+                rc.broadcast(Channels.supplyPriority, supplyPriority);
+                rc.broadcast(Channels.supplyDistance, distance);
+                broadcastLocation(Channels.supplyLoc, rc.getLocation());
+            }
+        }
+    }
+
+
+    int getSupplyPriority(RobotType type)
+    {
+        int supplyPriority = 1;
+
+        if (rc.getType() == RobotType.LAUNCHER)
+        {
+            supplyPriority = 5;
+        }
+        else if (rc.getType() == RobotType.COMMANDER)
+        {
+            supplyPriority = 4;
+        }
+        else if (rc.getType() == RobotType.MINER)
+        {
+            supplyPriority = 3;
+        }
+        if (rc.getType() == RobotType.TANK)
+        {
+            supplyPriority = 3;
+        }
+        else if (rc.getType() == RobotType.SOLDIER)
+        {
+            supplyPriority = 2;
+        }
+
+        return supplyPriority;
     }
 }

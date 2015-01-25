@@ -6,10 +6,14 @@ public class SupplyDrone
     extends Proletariat
 {
 
+    private boolean returningToBase;
+
+
     public SupplyDrone(RobotController rc)
         throws GameActionException
     {
         super(rc);
+        returningToBase = true;
         mTypeChannel = Channels.droneCount;
     }
 
@@ -17,10 +21,20 @@ public class SupplyDrone
     public void run()
         throws GameActionException
     {
-        if (rc.getSupplyLevel() < 100)
+        rc.broadcast(
+            Channels.droneCount,
+            rc.readBroadcast(Channels.droneCount) + 1);
+        if (returningToBase && rc.getSupplyLevel() > 20000)
         {
+            returningToBase = false;
+        }
+        else if (returningToBase || rc.getSupplyLevel() < 100)
+        {
+            this.setDestination(allyHQ);
+            returningToBase = true;
             rc.setIndicatorString(1, "Going back to HQ");
-            if (rc.isCoreReady())
+            if (rc.isCoreReady()
+                && rc.getLocation().distanceSquaredTo(allyHQ) >= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED)
             {
                 moveTowards(allyHQ);
             }
@@ -41,15 +55,17 @@ public class SupplyDrone
     public void transferSupplies()
         throws GameActionException
     {
+        if (rc.getSupplyLevel() < 100)
+        {
+            return;
+        }
         RobotInfo[] nearby =
             rc.senseNearbyRobots(
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
-        RobotInfo[] allNearby =
-            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, myTeam);
         for (RobotInfo r : nearby)
         {
-            if (Clock.getBytecodesLeft() < 550)
+            if (Clock.getBytecodesLeft() < 600)
             {
                 return;
             }
@@ -57,11 +73,15 @@ public class SupplyDrone
                 && rc.getSupplyLevel() > 100)
             {
                 double supplyTransfer =
-                    Math.min(rc.getSupplyLevel() - 50, 2000 * allNearby.length);
-                rc.transferSupplies((int)supplyTransfer, r.location);
+                    Math.min(
+                        rc.getSupplyLevel() - 50,
+                        (getSupplyPriority(r.type) * 1000) - r.supplyLevel);
+                if (supplyTransfer > 0)
+                {
+                    rc.transferSupplies((int)supplyTransfer, r.location);
+                }
             }
         }
-
         rc.broadcast(Channels.supplyPriority, 0);
         rc.broadcast(Channels.supplyDistance, 0);
     }
@@ -80,7 +100,6 @@ public class SupplyDrone
             && (!safeFromTowers(dir) || !safeFromEnemies(dir, nearbyEnemies) || !rc
                 .canMove(dir)))
         {
-            rc.setIndicatorString(2, "Turning: " + dir);
             if (count % 2 == 0)
             {
                 left = left.rotateLeft();
@@ -138,7 +157,6 @@ public class SupplyDrone
                 return false;
             }
         }
-
         return true;
     }
 }
