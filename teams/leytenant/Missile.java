@@ -5,14 +5,37 @@ import battlecode.common.*;
 public class Missile
     extends Soveti
 {
+
+    private int         diag = 0;
+    private int         count;
+    private MapLocation dest;
+    private Direction   left;
+    private Direction   right;
+
+
+// private Direction[] directions = {{Direction
+
     public Missile(RobotController myRC)
         throws GameActionException
     {
-        super();
         rc = myRC;
-        enemyHQ = rc.senseEnemyHQLocation();
         enemyTeam = rc.getTeam().opponent();
-// System.out.println("MADE with left: " + Clock.getBytecodesLeft());
+        mLocation = rc.getLocation();
+
+        allyHQ = rc.senseHQLocation();
+        enemyHQ = rc.senseEnemyHQLocation();
+        mapOffsetX =
+            Math.max(allyHQ.x, enemyHQ.x) - GameConstants.MAP_MAX_WIDTH;
+        mapOffsetY =
+            Math.max(allyHQ.y, enemyHQ.y) - GameConstants.MAP_MAX_HEIGHT;
+
+        dest = getLocation(getLocChannel(mLocation));
+        rc.setIndicatorString(0, "DEST: " + dest);
+// System.out.println("Constructor took: " + Clock.getBytecodeNum());
+// System.out.println("START: " + Clock.getBytecodeNum());
+// Direction.EAST.ordinal();
+// System.out.println("END: " + Clock.getBytecodeNum());
+
     }
 
 
@@ -21,87 +44,63 @@ public class Missile
         throws GameActionException
     {
         int curRound = Clock.getRoundNum();
-// int startTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-// System.out.println("Starting");
-        mLocation = rc.getLocation();
-        String doing = "Nothing";
-        String firstDir = "";
 
-        if (rc.isCoreReady())
+        if (diag < 3)
         {
-            int enemiesProcessed = 0;
             RobotInfo[] nearbyEnemies =
                 rc.senseNearbyRobots(
-                    Constants.MISSILE_MAX_RANGE_SQUARED,
+                    GameConstants.MISSILE_RADIUS_SQUARED,
                     enemyTeam);
-            Direction bestDir = null;
-            for (int i = 0; i < nearbyEnemies.length; i++)
-            {
-                enemiesProcessed++;
-                Direction newDir =
-                    mLocation.directionTo(nearbyEnemies[i].location);
-                if (firstDir == null)
-                {
-                    firstDir = newDir.toString();
-                }
 
-                if (mLocation.isAdjacentTo(nearbyEnemies[i].location))
-                {
-                    bestDir = Direction.NONE;
-                    break;
-                }
-                else if (rc.canMove(newDir))
-                {
-                    bestDir = newDir;
-                    break;
-                }
+            if (nearbyEnemies.length > 0)
+            {
+                rc.explode();
             }
-
-// int closestEnemiesTime =
-// Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-// System.out.println("Closest enemy took: "
-// + (closestEnemiesTime - startTime));
-// System.out.println("Enemies processed: " + enemiesProcessed);
-
-            if (bestDir == null)
+            else
             {
-                Direction left = mLocation.directionTo(enemyHQ);
-                Direction right = left.rotateRight();
-                Direction next = null;
-                int count = 0;
+                left = mLocation.directionTo(dest);
+                right = left.rotateRight();
+                count = 0;
                 while (count < 3)
                 {
                     if (count % 2 == 0)
                     {
-                        next = left;
-                        left = left.rotateLeft();
+                        if (rc.canMove(left))
+                        {
+                            rc.move(left);
+                            mLocation = mLocation.add(left);
+                            if (left.isDiagonal())
+                            {
+                                diag++;
+                            }
+                            break;
+                        }
+                        left.rotateLeft();
                     }
                     else
                     {
-                        next = right;
-                        right = right.rotateRight();
-                    }
-                    if (rc.canMove(next))
-                    {
-                        rc.move(next);
-                        break;
+                        if (rc.canMove(right))
+                        {
+                            rc.move(right);
+                            mLocation = mLocation.add(right);
+                            if (right.isDiagonal())
+                            {
+                                diag++;
+                            }
+                            break;
+                        }
+                        right.rotateRight();
                     }
                     count++;
                 }
+                rc.setIndicatorString(2, "COUNT: " + count);
+            }
 
-                // int movingTime =
-                // Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-                // System.out.println("Moving took: "
-                // + (movingTime - closestEnemiesTime));
-            }
-            else if (bestDir != Direction.NONE)
-            {
-                doing = "at enemy " + bestDir;
-                rc.move(bestDir);
-            }
         }
-// int finishTime = Clock.getRoundNum() * 500 + Clock.getBytecodeNum();
-// System.out.println("Total took: " + (finishTime - startTime));
+        else
+        {
+            diag = 0;
+        }
 
         if (Clock.getRoundNum() != curRound)
         {
@@ -109,8 +108,10 @@ public class Missile
                 + (Clock.getRoundNum() - curRound) + " WITH BYTECODES: "
                 + Clock.getBytecodesLeft());
         }
-        rc.setIndicatorString(1, firstDir);
-        rc.setIndicatorString(1, doing);
+        else
+        {
+// System.out.println("Took: " + Clock.getBytecodeNum());
+        }
     }
 
 

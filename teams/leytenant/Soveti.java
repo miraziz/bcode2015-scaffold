@@ -56,16 +56,10 @@ public abstract class Soveti
         enemyTowers = rc.senseEnemyTowerLocations();
         allyTowers = rc.senseTowerLocations();
 
-        if (allyHQ.x >= enemyHQ.x && allyHQ.y >= enemyHQ.y)
-        {
-            mapOffsetX = allyHQ.x - GameConstants.MAP_MAX_WIDTH;
-            mapOffsetY = allyHQ.y - GameConstants.MAP_MAX_HEIGHT;
-        }
-        else
-        {
-            mapOffsetX = enemyHQ.x - GameConstants.MAP_MAX_WIDTH;
-            mapOffsetY = enemyHQ.y - GameConstants.MAP_MAX_HEIGHT;
-        }
+        mapOffsetX =
+            Math.max(allyHQ.x, enemyHQ.x) - GameConstants.MAP_MAX_WIDTH;
+        mapOffsetY =
+            Math.max(allyHQ.y, enemyHQ.y) - GameConstants.MAP_MAX_HEIGHT;
     }
 
 
@@ -141,11 +135,8 @@ public abstract class Soveti
     protected void broadcastLocation(int channel, MapLocation loc)
         throws GameActionException
     {
-        int x = (loc.x - mapOffsetX);
-        int y = (loc.y - mapOffsetY);
-
-        int broadcast = Constants.MAP_HEIGHT * x + y;
-        rc.broadcast(channel, broadcast);
+        rc.broadcast(channel, (loc.x - mapOffsetX) * Constants.MAP_HEIGHT
+            + (loc.y - mapOffsetY));
     }
 
 
@@ -203,7 +194,13 @@ public abstract class Soveti
      */
     protected Direction getRandomDirection()
     {
-        return Direction.values()[rand.nextInt(8)];
+        return directions[rand.nextInt(8)];
     }
 
+
+    protected int getLocChannel(MapLocation loc)
+    {
+        return (Channels.LOCATION_CHANNEL_OFFSET + (loc.x - mapOffsetX)
+            * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
+    }
 }
