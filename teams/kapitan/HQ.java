@@ -84,12 +84,12 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -130,19 +130,19 @@ public class HQ
     {
         allyTowers = rc.senseTowerLocations();
         int roundNum = Clock.getRoundNum();
-        if (roundNum > 600)
-        {
-            Constants.beaverLimit = 6;
-        }
-        else if (roundNum > 500)
-        {
-            Constants.beaverLimit = 4;
-        }
-        else if (roundNum > 400)
-        {
-            Constants.beaverLimit = 3;
-        }
-        else if (roundNum > 25)
+// if (roundNum > 600)
+// {
+// Constants.beaverLimit = 5;
+// }
+// else if (roundNum > 500)
+// {
+// Constants.beaverLimit = 4;
+// }
+// else if (roundNum > 400)
+// {
+// Constants.beaverLimit = 3;
+// }
+        if (roundNum > 25)
         {
             Constants.beaverLimit = 2;
         }

@@ -26,7 +26,7 @@ public abstract class Proletariat
     protected Direction   facing;
     protected int         mTypeNumber;
     protected int         mTypeChannel;
-    int                   turnCount;
+    private int           turnCount;
 
 
     public Proletariat(RobotController rc)
@@ -192,8 +192,13 @@ public abstract class Proletariat
             turnRight = !turnRight;
             turnCount = 0;
         }
-        return rc.isPathable(rc.getType(), next) && !visited.equals(next)
-            && !this.inEnemyTowerRange(dir);
+        boolean clear =
+            rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
+        if (rc.getType() != RobotType.BEAVER)
+        {
+            clear = clear && !visited.equals(next);
+        }
+        return clear;
     }
 
 

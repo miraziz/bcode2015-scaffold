@@ -5,18 +5,21 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 
 public class SimpleMissile
     extends Soveti
 {
 
     private MapLocation target;
+    private int         steps;
 
 
     public SimpleMissile(RobotController rc)
         throws GameActionException
     {
         this.rc = rc;
+        steps = 0;
         allyHQ = rc.senseHQLocation();
         enemyHQ = rc.senseEnemyHQLocation();
         mapOffsetX =
@@ -25,8 +28,8 @@ public class SimpleMissile
             Math.max(allyHQ.y, enemyHQ.y) - GameConstants.MAP_MAX_HEIGHT;
         int channel = getLocChannel(rc.getLocation());
         rc.setIndicatorString(2, "My channel: " + channel);
+
         target = getLocation(channel);
-        rc.setIndicatorString(0, "target: " + target);
 
     }
 
@@ -39,9 +42,26 @@ public class SimpleMissile
         {
             return;
         }
-        if (rc.getLocation().isAdjacentTo(target))
+        if (steps > 0)
         {
-            rc.explode();
+            RobotInfo[] enemies =
+                rc.senseNearbyRobots(5, rc.getTeam().opponent());
+            if (enemies.length != 0)
+            {
+                target = enemies[0].location;
+                int minDistance =
+                    rc.getLocation().distanceSquaredTo(enemies[0].location);
+                for (int i = 1; i < enemies.length; ++i)
+                {
+                    int dist =
+                        rc.getLocation().distanceSquaredTo(enemies[i].location);
+                    if (rc.getLocation().distanceSquaredTo(enemies[i].location) < minDistance)
+                    {
+                        minDistance = dist;
+                        target = enemies[i].location;
+                    }
+                }
+            }
         }
         Direction dir = rc.getLocation().directionTo(target);
         Direction left = dir.rotateLeft();
@@ -64,6 +84,11 @@ public class SimpleMissile
         if (count < 5)
         {
             rc.move(dir);
+            steps++;
+        }
+        if (rc.getLocation().isAdjacentTo(target))
+        {
+            rc.explode();
         }
     }
 
