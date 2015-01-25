@@ -203,9 +203,4 @@ public abstract class Soveti
         return ((loc.x - mapOffsetX) * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
     }
 
-
-    protected void broadcastSupplyNeeds()
-    {
-
-    }
 }

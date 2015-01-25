@@ -28,13 +28,12 @@ public class SupplyDrone
         {
             returningToBase = false;
         }
-        else if (returningToBase || rc.getSupplyLevel() < 100)
+        else if (returningToBase || rc.getSupplyLevel() < 500)
         {
             this.setDestination(allyHQ);
             returningToBase = true;
             rc.setIndicatorString(1, "Going back to HQ");
-            if (rc.isCoreReady()
-                && rc.getLocation().distanceSquaredTo(allyHQ) >= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED)
+            if (rc.isCoreReady())
             {
                 moveTowards(allyHQ);
             }
