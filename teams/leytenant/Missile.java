@@ -7,7 +7,7 @@ public class Missile
 {
 
     private MapLocation dest;
-    private boolean     firstRun;
+    private int         turn;
     private byte[]      frontalDirections = { 7, 1, 0, 0, 2, 1, 1, 3, 2, 2, 4,
         3, 3, 5, 4, 4, 6, 5, 5, 7, 6, 6, 0, 7 };
 
@@ -33,8 +33,6 @@ public class Missile
         dest =
             new MapLocation(val / Constants.MAP_HEIGHT + mapOffsetX, val
                 % Constants.MAP_HEIGHT + mapOffsetY);
-
-        firstRun = true;
     }
 
 
@@ -46,7 +44,33 @@ public class Missile
 
         MapLocation mLocation = rc.getLocation();
 
-        if (!firstRun)
+        if (turn < 3)
+        {
+            int ord = mLocation.directionTo(dest).ordinal() * 3;
+            if (ord == 27)
+            {
+                rc.explode();
+            }
+            else if (rc.isCoreReady())
+            {
+                byte[] dirs = frontalDirections;
+                Direction[] directions = this.directions;
+                if (rc.canMove(directions[dirs[ord]]))
+                {
+                    rc.move(directions[dirs[ord]]);
+                }
+                else if (rc.canMove(directions[dirs[++ord]]))
+                {
+                    rc.move(directions[dirs[ord]]);
+                }
+                else if (rc.canMove(directions[dirs[++ord]]))
+                {
+                    rc.move(directions[dirs[ord]]);
+                }
+            }
+            turn++;
+        }
+        else
         {
             RobotInfo[] nearbyEnemies =
                 rc.senseNearbyRobots(
@@ -80,32 +104,6 @@ public class Missile
                     {
                         rc.move(directions[dirs[ord]]);
                     }
-                }
-            }
-            firstRun = false;
-        }
-        else
-        {
-            int ord = mLocation.directionTo(dest).ordinal() * 3;
-            if (ord == 27)
-            {
-                rc.explode();
-            }
-            else if (rc.isCoreReady())
-            {
-                byte[] dirs = frontalDirections;
-                Direction[] directions = this.directions;
-                if (rc.canMove(directions[dirs[ord]]))
-                {
-                    rc.move(directions[dirs[ord]]);
-                }
-                else if (rc.canMove(directions[dirs[++ord]]))
-                {
-                    rc.move(directions[dirs[ord]]);
-                }
-                else if (rc.canMove(directions[dirs[++ord]]))
-                {
-                    rc.move(directions[dirs[ord]]);
                 }
             }
         }

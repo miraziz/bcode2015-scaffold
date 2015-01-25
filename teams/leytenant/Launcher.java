@@ -115,7 +115,29 @@ public class Launcher
 // missileCount--;
                             break;
                         }
+                    }
+                }
+            }
+            else
+            {
+                Direction toTower = null;
+                enemyTowers = rc.senseEnemyTowerLocations();
+                int N = enemyTowers.length;
+                for (int i = 0; i < N; ++i)
+                {
+                    if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                    {
+                        toTower = mLocation.directionTo(enemyTowers[i]);
+                        if (rc.canLaunch(toTower))
+                        {
+                            rc.launchMissile(toTower);
 
+                            MapLocation newLoc = mLocation.add(toTower);
+                            broadcastLocation(
+                                getLocChannel(newLoc),
+                                enemyTowers[i]);
+                            break;
+                        }
                     }
                 }
             }
