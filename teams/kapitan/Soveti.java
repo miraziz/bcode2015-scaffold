@@ -1,4 +1,4 @@
-package team025;
+package kapitan;
 
 import java.util.Random;
 import battlecode.common.*;

@@ -1,28 +1,28 @@
-package team025;
+package kapitan;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 /**
- * Tank class.
+ * Supply depot class.
  * 
  * @author Amit Bachchan
  */
-public class Tank
-    extends Fighter
+public class SupplyDepot
+    extends ProductionBuilding
 {
 
-    public Tank(RobotController rc)
+    public SupplyDepot(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        mTypeChannel = Channels.tankCount;
     }
 
 
+    @Override
     public void run()
-        throws GameActionException
     {
-        super.run();
+        // TODO: Do something
     }
+
 }

@@ -1,4 +1,4 @@
-package team025;
+package kapitan;
 
 import java.util.LinkedList;
 import java.util.PriorityQueue;

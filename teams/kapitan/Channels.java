@@ -1,4 +1,4 @@
-package team025;
+package kapitan;
 
 /**
  * Constants used for channel communication.

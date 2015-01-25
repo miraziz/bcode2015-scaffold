@@ -1,17 +1,22 @@
-package team025;
+package kapitan;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
-public class Basher
+/**
+ * Tank class.
+ * 
+ * @author Amit Bachchan
+ */
+public class Tank
     extends Fighter
 {
 
-    public Basher(RobotController rc)
+    public Tank(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        mTypeChannel = Channels.basherCount;
+        mTypeChannel = Channels.tankCount;
     }
 
 
@@ -20,5 +25,4 @@ public class Basher
     {
         super.run();
     }
-
 }

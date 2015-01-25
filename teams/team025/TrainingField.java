@@ -2,23 +2,28 @@ package team025;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
-public class Basher
-    extends Fighter
+public class TrainingField
+    extends Building
 {
 
-    public Basher(RobotController rc)
+    public TrainingField(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        mTypeChannel = Channels.basherCount;
     }
 
 
+    @Override
     public void run()
         throws GameActionException
     {
-        super.run();
+
+        if (!rc.hasCommander())
+        {
+            this.spawnToEnemy(RobotType.COMMANDER);
+        }
     }
 
 }
