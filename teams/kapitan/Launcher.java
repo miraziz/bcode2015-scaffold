@@ -36,7 +36,7 @@ public class Launcher
         {
             if (!runAway())
             {
-                bug();
+                bugWithCounter();
             }
         }
 
