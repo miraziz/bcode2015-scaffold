@@ -10,7 +10,6 @@ import battlecode.common.RobotType;
 public class SimpleLauncher
     extends Proletariat
 {
-
     public SimpleLauncher(RobotController rc)
         throws GameActionException
     {
@@ -43,34 +42,66 @@ public class SimpleLauncher
     private void attackEnemies(RobotInfo[] enemies)
         throws GameActionException
     {
-        if (enemies.length == 0 || rc.getMissileCount() == 0)
+        if (rc.getMissileCount() == 0)
         {
             return;
         }
-        RobotInfo closest = null;
-        int minDistance = 0;
-        int maxPriority = 0;
-        for (int i = 0; i < enemies.length; i++)
+
+        MapLocation closestLoc = null;
+        RobotType closestType = null;
+        int minDistance = 100;
+        int maxPriority = 1;
+        int enemyNum = enemies.length;
+        if (enemyNum > 0)
         {
-            int priority = getMissilePriority(enemies[i].type);
-            int dist = rc.getLocation().distanceSquaredTo(enemies[i].location);
-            if (priority > maxPriority)
+            for (int i = 0; i < enemyNum; ++i)
             {
-                maxPriority = priority;
-                minDistance = dist;
-                closest = enemies[i];
-            }
-            else if (dist < minDistance)
-            {
-                minDistance = dist;
-                closest = enemies[i];
+                int priority = getMissilePriority(enemies[i].type);
+                int dist = mLocation.distanceSquaredTo(enemies[i].location);
+                if (priority > maxPriority)
+                {
+                    maxPriority = priority;
+                    minDistance = dist;
+                    closestLoc = enemies[i].location;
+                    closestType = enemies[i].type;
+                }
+                else if (priority == maxPriority && dist < minDistance)
+                {
+                    minDistance = dist;
+                    closestLoc = enemies[i].location;
+                    closestType = enemies[i].type;
+                }
             }
         }
-        if (closest == null)
+        else
         {
-            return;
+            enemyNum = enemyTowers.length;
+            for (int i = 0; i < enemyNum; ++i)
+            {
+                // TODO Aim for closest towers?
+                if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestLoc = enemyTowers[i];
+                    closestType = RobotType.TOWER;
+                    break;
+                }
+            }
+
+            if (closestLoc == null)
+            {
+                // TODO Aim at HQ before nearby towers?
+                if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestLoc = enemyHQ;
+                }
+                else
+                {
+                    return;
+                }
+            }
         }
-        Direction spawnDir = getMissileSpawnDir(closest.location);
+
+        Direction spawnDir = getMissileSpawnDir(closestLoc);
         if (spawnDir == null)
         {
             return;
@@ -78,14 +109,14 @@ public class SimpleLauncher
         else
         {
             rc.launchMissile(spawnDir);
-            int channel = getLocChannel(rc.getLocation().add(spawnDir));
-            if (closest.type == RobotType.LAUNCHER)
+            int channel = getLocChannel(mLocation.add(spawnDir));
+            if (closestType == RobotType.LAUNCHER)
             {
-                broadcastLocation(channel, closest.location.add(spawnDir));
+                broadcastLocation(channel, closestLoc.add(spawnDir));
             }
             else
             {
-                broadcastLocation(channel, closest.location);
+                broadcastLocation(channel, closestLoc);
             }
         }
     }
@@ -93,22 +124,22 @@ public class SimpleLauncher
 
     protected Direction getMissileSpawnDir(MapLocation target)
     {
-        Direction dir = rc.getLocation().directionTo(target);
-        if (rc.isPathable(RobotType.MISSILE, rc.getLocation().add(dir)))
+        Direction dir = mLocation.directionTo(target);
+        if (rc.isPathable(RobotType.MISSILE, target))
         {
             return dir;
         }
-        else if (rc.isPathable(
-            RobotType.MISSILE,
-            rc.getLocation().add(dir.rotateRight())))
+
+        dir = dir.rotateRight();
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
-            return dir.rotateRight();
+            return dir;
         }
-        else if (rc.isPathable(
-            RobotType.MISSILE,
-            rc.getLocation().add(dir.rotateLeft())))
+
+        dir = dir.rotateLeft().rotateLeft();
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
-            return dir.rotateLeft();
+            return dir;
         }
         return null;
     }
@@ -121,14 +152,14 @@ public class SimpleLauncher
         {
             return false;
         }
+
+        boolean shouldRun = false;
         int avgX = 0;
         int avgY = 0;
-        boolean shouldRun = false;
         int enemyCount = 0;
         for (RobotInfo r : enemies)
         {
-            if (r.type.canAttack()
-                && rc.getLocation().distanceSquaredTo(r.location) <= RobotType.COMMANDER.sensorRadiusSquared)
+            if (!r.type.canMine() && r.type.canMove())
             {
                 shouldRun = true;
                 avgX += r.location.x;
@@ -141,8 +172,8 @@ public class SimpleLauncher
             avgX /= enemyCount;
             avgY /= enemyCount;
             Direction runDir =
-                this.getFreeStrafeDirection(rc.getLocation()
-                    .directionTo(new MapLocation(avgX, avgY)).opposite());
+                this.getFreeStrafeDirection(mLocation.directionTo(
+                    new MapLocation(avgX, avgY)).opposite());
             if (runDir != null)
             {
                 rc.move(runDir);
@@ -155,17 +186,18 @@ public class SimpleLauncher
     private int getMissilePriority(RobotType type)
     {
         int priority = 1;
-        if (type.canAttack())
+
+        if (type == RobotType.MISSILE)
+        {
+            priority = 0;
+        }
+        else if (type.canAttack())
         {
             priority = 6;
             if (type.canMine())
             {
                 priority = 5;
             }
-        }
-        if (type == RobotType.MISSILE)
-        {
-            priority = 0;
         }
         return priority;
     }
