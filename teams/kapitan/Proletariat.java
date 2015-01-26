@@ -27,6 +27,7 @@ public abstract class Proletariat
     protected int         mTypeNumber;
     protected int         mTypeChannel;
     private int           turnCount;
+    private int           bugFailureCount;
 
 
     public Proletariat(RobotController rc)
@@ -53,6 +54,11 @@ public abstract class Proletariat
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
         manageSupply();
+        if (rc.getType() == RobotType.BEAVER)
+        {
+            rc.setIndicatorString(2, "My visited loc: " + visited
+                + ", error count: " + this.bugFailureCount);
+        }
     }
 
 
@@ -181,6 +187,30 @@ public abstract class Proletariat
     }
 
 
+    protected boolean bugWithCounter()
+        throws GameActionException
+    {
+        if (bugFailureCount < 3)
+        {
+            if (bug())
+            {
+                bugFailureCount = 0;
+                return true;
+            }
+            else
+            {
+                bugFailureCount++;
+                return false;
+            }
+        }
+        else
+        {
+            visited = rc.getLocation();
+            return bug();
+        }
+    }
+
+
     private boolean isClear(Direction dir)
         throws GameActionException
     {
@@ -190,14 +220,14 @@ public abstract class Proletariat
         {
             facing = facing.opposite();
             turnRight = !turnRight;
-            turnCount = 0;
         }
         boolean clear =
             rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
-        if (rc.getType() != RobotType.BEAVER)
-        {
-            clear = clear && !visited.equals(next);
-        }
+// if (rc.getType() != RobotType.BEAVER)
+// {
+        clear = clear && !visited.equals(next);
+
+// }
         return clear;
     }
 
@@ -213,6 +243,7 @@ public abstract class Proletariat
                 visited = rc.getLocation();
             }
             rc.move(dir);
+            this.bugFailureCount = 0;
             return true;
         }
         else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)

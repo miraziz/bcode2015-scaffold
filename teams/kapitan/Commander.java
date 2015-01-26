@@ -158,7 +158,7 @@ public class Commander
                 return;
             }
         }
-        bug();
+        bugWithCounter();
     }
 
 

@@ -13,6 +13,7 @@ public class Beaver
     private BeaverTask  task;
     private boolean     reached;
     private MapLocation buildLoc;
+    private boolean     building;
 
 
     // TODO If a building is destroyed, what happens?
@@ -29,6 +30,7 @@ public class Beaver
         task = getNextTask();
         reached = false;
         mTypeChannel = Channels.beaverCount;
+        building = false;
     }
 
 
@@ -63,6 +65,11 @@ public class Beaver
 
         if (rc.isCoreReady())
         {
+            if (building)
+            {
+                building = false;
+                task = getNextTask();
+            }
             RobotInfo robAtBuildLoc = null;
             if (buildLoc != null)
             {
@@ -72,11 +79,8 @@ public class Beaver
                 || (robAtBuildLoc != null && robAtBuildLoc.type.isBuilding))
             {
                 int count = rc.readBroadcast(Channels.buildPathCount);
-                if (count < rc.readBroadcast(Channels.buildPathLength))
-                {
-                    buildLoc = getLocation(count + Channels.buildPath);
-                    rc.broadcast(Channels.buildPathCount, count + 1);
-                }
+                buildLoc = getLocation(count + Channels.buildPath);
+                rc.broadcast(Channels.buildPathCount, count + 1);
             }
             this.setDestination(buildLoc);
             rc.setIndicatorString(0, "My build loc: " + buildLoc);
@@ -89,20 +93,20 @@ public class Beaver
                 {
                     reached = true;
                 }
-                else if (rc.getLocation().distanceSquaredTo(buildLoc) <= 2)
+                else if (rc.getLocation().isAdjacentTo(buildLoc))
                 {
                     reached = true;
                 }
                 else
                 {
-                    bug();
+                    bugWithCounter();
                 }
             }
             if (reached)
             {
                 if (build())
                 {
-                    task = getNextTask();
+                    building = true;
                     reached = false;
                     return;
                 }

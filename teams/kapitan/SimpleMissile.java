@@ -50,7 +50,7 @@ public class SimpleMissile
 
         if (rc.isCoreReady())
         {
-
+// TODO FIX BUG ON MESH, run and you'll see it
             Direction dir = rc.getLocation().directionTo(target);
             Direction left = dir.rotateLeft();
             Direction right = dir.rotateRight();

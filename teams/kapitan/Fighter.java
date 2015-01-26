@@ -168,7 +168,7 @@ public class Fighter
         }
         if (enemyCount == 0)
         {
-            bug();
+            bugWithCounter();
             return;
         }
         avgX /= enemyCount;
@@ -183,7 +183,7 @@ public class Fighter
         committed = false;
         if (myTeamHealth >= enemyTeamHealth * 2)
         {
-            bug();
+            bugWithCounter();
         }
         else if (myTeamHealth < enemyTeamHealth * 2)
         {
@@ -194,7 +194,7 @@ public class Fighter
         }
         else if (!inDangerRange)
         {
-            bug();
+            bugWithCounter();
         }
 
     }

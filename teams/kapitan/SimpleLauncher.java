@@ -47,7 +47,7 @@ public class SimpleLauncher
                 if (closestTowerOrHQ == null)
                 {
                     doing = "Bugging";
-                    bug();
+                    bugWithCounter();
                 }
                 else if (rc.getMissileCount() == 0)
                 {
@@ -118,8 +118,10 @@ public class SimpleLauncher
         int minDistance = 100;
         int maxPriority = 1;
         int enemyNum = enemies.length;
-        for (int i = 0; i < enemyNum; ++i)
+        int counter = 0;
+        for (int i = 0; i < enemyNum && Clock.getBytecodeNum() < 1000; ++i)
         {
+            counter++;
             int priority = getMissilePriority(enemies[i].type);
             int dist = mLocation.distanceSquaredTo(enemies[i].location);
             if (priority > maxPriority)
@@ -138,6 +140,10 @@ public class SimpleLauncher
                 closestID = enemies[i].ID;
             }
         }
+        if (Clock.getBytecodeNum() > 1000)
+        {
+            System.out.println(counter);
+        }
 
         if (closestLoc == null)
         {
@@ -154,6 +160,10 @@ public class SimpleLauncher
         Direction spawnDir = getMissileSpawnDir(closestLoc);
         if (spawnDir != null)
         {
+            if (Clock.getBytecodesLeft() > 4000)
+            {
+
+            }
             rc.launchMissile(spawnDir);
             MapLocation spawnSpot = mLocation.add(spawnDir);
             int channel = getLocChannel(spawnSpot);
