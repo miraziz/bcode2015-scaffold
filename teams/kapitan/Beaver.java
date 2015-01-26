@@ -72,11 +72,8 @@ public class Beaver
                 || (robAtBuildLoc != null && robAtBuildLoc.type.isBuilding))
             {
                 int count = rc.readBroadcast(Channels.buildPathCount);
-                if (count < rc.readBroadcast(Channels.buildPathLength))
-                {
-                    buildLoc = getLocation(count + Channels.buildPath);
-                    rc.broadcast(Channels.buildPathCount, count + 1);
-                }
+                buildLoc = getLocation(count + Channels.buildPath);
+                rc.broadcast(Channels.buildPathCount, count + 1);
             }
             this.setDestination(buildLoc);
             rc.setIndicatorString(0, "My build loc: " + buildLoc);
