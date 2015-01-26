@@ -7,6 +7,7 @@ public class Missile
 {
 
     private MapLocation dest;
+    private int         enemyId;
     private int         turn;
     private byte[]      frontalDirections = { 7, 1, 0, 0, 2, 1, 1, 3, 2, 2, 4,
         3, 3, 5, 4, 4, 6, 5, 5, 7, 6, 6, 0, 7 };
@@ -29,10 +30,12 @@ public class Missile
         int channel =
             (mLocation.x - mapOffsetX) * Constants.MAP_HEIGHT
                 + (mLocation.y - mapOffsetY);
-        int val = rc.readBroadcast(channel);
-        dest =
-            new MapLocation(val / Constants.MAP_HEIGHT + mapOffsetX, val
-                % Constants.MAP_HEIGHT + mapOffsetY);
+// int val = rc.readBroadcast(channel);
+// dest =
+// new MapLocation(val / Constants.MAP_HEIGHT + mapOffsetX, val
+// % Constants.MAP_HEIGHT + mapOffsetY);
+        dest = getLocation(getLocChannel(rc.getLocation()));
+        enemyId = rc.readBroadcast(getIdChannel(rc.getLocation()));
     }
 
 
@@ -41,8 +44,18 @@ public class Missile
         throws GameActionException
     {
         int curRound = Clock.getRoundNum();
+        if (rc.canSenseRobot(enemyId))
+        {
 
+            // dest = rc.senseRobot(enemyId).location;
+        }
+        rc.setIndicatorLine(rc.getLocation(), dest, 0, 200, 255);
         MapLocation mLocation = rc.getLocation();
+        MapLocation m = getLocation(getLocChannel(rc.getLocation()));
+        if (m != null)
+        {
+            dest = m;
+        }
 
         if (turn < 3)
         {
@@ -110,9 +123,9 @@ public class Missile
 
         if (Clock.getRoundNum() != curRound)
         {
-            System.out.println("MISSILE BEHIND: "
-                + (Clock.getRoundNum() - curRound) + " WITH BYTECODES: "
-                + Clock.getBytecodesLeft());
+// System.out.println("MISSILE BEHIND: "
+// + (Clock.getRoundNum() - curRound) + " WITH BYTECODES: "
+// + Clock.getBytecodesLeft());
         }
         else
         {

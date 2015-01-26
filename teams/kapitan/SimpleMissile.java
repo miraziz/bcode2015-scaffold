@@ -1,5 +1,6 @@
 package kapitan;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
@@ -13,6 +14,7 @@ public class SimpleMissile
 
     private MapLocation target;
     private int         steps;
+    private int         enemyId;
 
 
     public SimpleMissile(RobotController rc)
@@ -30,7 +32,7 @@ public class SimpleMissile
         rc.setIndicatorString(2, "My channel: " + channel);
 
         target = getLocation(channel);
-
+        enemyId = rc.readBroadcast(channel + 1);
     }
 
 
@@ -42,25 +44,37 @@ public class SimpleMissile
         {
             return;
         }
+        if (rc.getLocation().isAdjacentTo(target))
+        {
+            rc.explode();
+        }
+// if (steps > 0)
+// {
+// RobotInfo[] enemies =
+// rc.senseNearbyRobots(5, rc.getTeam().opponent());
+// if (enemies.length != 0)
+// {
+// target = enemies[0].location;
+// int minDistance =
+// rc.getLocation().distanceSquaredTo(enemies[0].location);
+// for (int i = 1; i < enemies.length; ++i)
+// {
+// int dist =
+// rc.getLocation().distanceSquaredTo(enemies[i].location);
+// if (rc.getLocation().distanceSquaredTo(enemies[i].location) < minDistance)
+// {
+// minDistance = dist;
+// target = enemies[i].location;
+// }
+// }
+// }
+// }
+
         if (steps > 0)
         {
-            RobotInfo[] enemies =
-                rc.senseNearbyRobots(5, rc.getTeam().opponent());
-            if (enemies.length != 0)
+            if (rc.canSenseRobot(enemyId))
             {
-                target = enemies[0].location;
-                int minDistance =
-                    rc.getLocation().distanceSquaredTo(enemies[0].location);
-                for (int i = 1; i < enemies.length; ++i)
-                {
-                    int dist =
-                        rc.getLocation().distanceSquaredTo(enemies[i].location);
-                    if (rc.getLocation().distanceSquaredTo(enemies[i].location) < minDistance)
-                    {
-                        minDistance = dist;
-                        target = enemies[i].location;
-                    }
-                }
+                target = rc.senseRobot(enemyId).location;
             }
         }
         Direction dir = rc.getLocation().directionTo(target);
@@ -85,10 +99,6 @@ public class SimpleMissile
         {
             rc.move(dir);
             steps++;
-        }
-        if (rc.getLocation().isAdjacentTo(target))
-        {
-            rc.explode();
         }
     }
 

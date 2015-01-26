@@ -205,7 +205,15 @@ public abstract class Soveti
 
     protected int getLocChannel(MapLocation loc)
     {
-        return (Math.abs(loc.x - allyHQ.x) * 100) ^ Math.abs(loc.y - allyHQ.y)
-            + 1000;
+        return (3 * (Math.abs(loc.x - allyHQ.x) * 100))
+            ^ (7 * Math.abs(loc.y - allyHQ.y));
     }
+
+
+    protected int getIdChannel(MapLocation loc)
+    {
+        return (3 * (Math.abs(loc.x - allyHQ.x) * 100))
+            ^ (7 * Math.abs(loc.y - allyHQ.y)) + 1;
+    }
+
 }
