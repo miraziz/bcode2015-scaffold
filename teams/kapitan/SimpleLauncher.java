@@ -15,6 +15,7 @@ public class SimpleLauncher
     int[]               missileIds;
     int[]               missileTurnCount;
     int                 missileToAdd;
+    String              attacking = "";
 
 
     public SimpleLauncher(RobotController rc)
@@ -38,9 +39,11 @@ public class SimpleLauncher
         attackEnemies(enemies);
         if (rc.isCoreReady())
         {
+            doing = "Core is ready";
             // TODO Move away if empty?
             if (!runAway(enemies))
             {
+                doing = "Did not run away";
                 if (closestTowerOrHQ == null)
                 {
                     doing = "Bugging";
@@ -58,6 +61,10 @@ public class SimpleLauncher
                         rc.move(awayFromTowerOrHQ);
                     }
                 }
+            }
+            else
+            {
+                doing = "Ran away";
             }
         }
         else
@@ -87,6 +94,8 @@ public class SimpleLauncher
             }
         }
         rc.setIndicatorString(0, doing);
+        rc.setIndicatorString(1, "Is near tower or HQ: "
+            + (closestTowerOrHQ == null ? "No" : closestTowerOrHQ));
         int bytecodesUsed = Clock.getBytecodeNum();
         if (bytecodesUsed > 3500)
         {
@@ -98,7 +107,7 @@ public class SimpleLauncher
     private void attackEnemies(RobotInfo[] enemies)
         throws GameActionException
     {
-        if (rc.getMissileCount() == 0 || enemies.length == 0)
+        if (rc.getMissileCount() == 0)
         {
             return;
         }
