@@ -89,6 +89,14 @@ public class RobotPlayer
         {
             robot = new Commander(rc);
         }
+        else if (rc.getType() == RobotType.HANDWASHSTATION)
+        {
+            robot = new HandwashStation(rc);
+        }
+        else if (rc.getType() == RobotType.COMPUTER)
+        {
+            robot = new Computer(rc);
+        }
 
         while (true)
         {
