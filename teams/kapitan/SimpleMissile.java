@@ -1,12 +1,6 @@
 package kapitan;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
+import battlecode.common.*;
 
 public class SimpleMissile
     extends Soveti
@@ -21,7 +15,6 @@ public class SimpleMissile
         throws GameActionException
     {
         this.rc = rc;
-        steps = 0;
         allyHQ = rc.senseHQLocation();
         enemyHQ = rc.senseEnemyHQLocation();
         mapOffsetX =
@@ -40,65 +33,54 @@ public class SimpleMissile
     public void run()
         throws GameActionException
     {
-        if (!rc.isCoreReady())
-        {
-            return;
-        }
-        if (rc.getLocation().isAdjacentTo(target))
-        {
-            rc.explode();
-        }
-// if (steps > 0)
-// {
-// RobotInfo[] enemies =
-// rc.senseNearbyRobots(5, rc.getTeam().opponent());
-// if (enemies.length != 0)
-// {
-// target = enemies[0].location;
-// int minDistance =
-// rc.getLocation().distanceSquaredTo(enemies[0].location);
-// for (int i = 1; i < enemies.length; ++i)
-// {
-// int dist =
-// rc.getLocation().distanceSquaredTo(enemies[i].location);
-// if (rc.getLocation().distanceSquaredTo(enemies[i].location) < minDistance)
-// {
-// minDistance = dist;
-// target = enemies[i].location;
-// }
-// }
-// }
-// }
+        int curRound = Clock.getRoundNum();
 
         if (steps > 0)
         {
+            if (rc.getLocation().isAdjacentTo(target))
+            {
+                rc.explode();
+            }
+
             if (rc.canSenseRobot(enemyId))
             {
                 target = rc.senseRobot(enemyId).location;
             }
         }
-        Direction dir = rc.getLocation().directionTo(target);
-        Direction left = dir.rotateLeft();
-        Direction right = dir.rotateRight();
-        int count = 0;
-        while (!rc.canMove(dir) && count < 5)
+
+        if (rc.isCoreReady())
         {
-            if (count % 2 == 0)
+
+            Direction dir = rc.getLocation().directionTo(target);
+            Direction left = dir.rotateLeft();
+            Direction right = dir.rotateRight();
+            int count = 0;
+            while (!rc.canMove(dir) && count < 5)
             {
-                dir = left;
-                left = left.rotateLeft();
+                if (count % 2 == 0)
+                {
+                    dir = left;
+                    left = left.rotateLeft();
+                }
+                else
+                {
+                    dir = right;
+                    right = right.rotateRight();
+                }
+                count++;
             }
-            else
+            if (count < 5)
             {
-                dir = right;
-                right = right.rotateRight();
+                rc.move(dir);
             }
-            count++;
         }
-        if (count < 5)
+        steps++;
+
+        int endRound = Clock.getRoundNum();
+        if (curRound != endRound)
         {
-            rc.move(dir);
-            steps++;
+            System.out.println("Missile over bytecodes: "
+                + (endRound - curRound));
         }
     }
 

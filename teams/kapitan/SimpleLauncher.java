@@ -31,6 +31,7 @@ public class SimpleLauncher
         throws GameActionException
     {
         super.run();
+        String doing = "Not set";
         missileToAdd = -1;
         RobotInfo[] enemies =
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
@@ -38,9 +39,25 @@ public class SimpleLauncher
         if (rc.isCoreReady())
         {
             // TODO Move away if empty?
-            if (!runAway(enemies) && closestTowerOrHQ == null)
+            if (!runAway(enemies))
             {
-                bug();
+                if (closestTowerOrHQ == null)
+                {
+                    doing = "Bugging";
+                    bug();
+                }
+                else if (rc.getMissileCount() == 0)
+                {
+                    doing = "Near tower or HQ";
+                    Direction awayFromTowerOrHQ =
+                        getFreeStrafeDirection(mLocation.directionTo(
+                            closestTowerOrHQ).opposite());
+                    if (awayFromTowerOrHQ != null)
+                    {
+                        doing = "Near tower or HQ: moving away";
+                        rc.move(awayFromTowerOrHQ);
+                    }
+                }
             }
         }
         else
@@ -69,8 +86,9 @@ public class SimpleLauncher
                 }
             }
         }
+        rc.setIndicatorString(0, doing);
         int bytecodesUsed = Clock.getBytecodeNum();
-        if (bytecodesUsed > 3000)
+        if (bytecodesUsed > 3500)
         {
             System.out.println("Bytecodes used: " + bytecodesUsed);
         }
