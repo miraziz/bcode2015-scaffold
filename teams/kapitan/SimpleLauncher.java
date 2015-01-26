@@ -1,5 +1,6 @@
 package kapitan;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -10,9 +11,10 @@ import battlecode.common.RobotType;
 public class SimpleLauncher
     extends Proletariat
 {
-    int[] missileIds;
-    int[] missileTurnCount;
-    int   missileToAdd;
+    private MapLocation closestTowerOrHQ;
+    int[]               missileIds;
+    int[]               missileTurnCount;
+    int                 missileToAdd;
 
 
     public SimpleLauncher(RobotController rc)
@@ -35,14 +37,42 @@ public class SimpleLauncher
         attackEnemies(enemies);
         if (rc.isCoreReady())
         {
-            if (!runAway(enemies))
+            // TODO Move away if empty?
+            if (!runAway(enemies) && closestTowerOrHQ == null)
             {
                 bug();
             }
         }
         else
         {
+            // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
+// rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
+            closestTowerOrHQ = null;
             enemyTowers = rc.senseEnemyTowerLocations();
+            int enemyNum = enemyTowers.length;
+            for (int i = 0; i < enemyNum; ++i)
+            {
+                // TODO Aim for closest towers?
+                if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestTowerOrHQ = enemyTowers[i];
+                    break;
+                }
+            }
+
+            if (closestTowerOrHQ == null)
+            {
+                // TODO Aim at HQ before nearby towers?
+                if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestTowerOrHQ = enemyHQ;
+                }
+            }
+        }
+        int bytecodesUsed = Clock.getBytecodeNum();
+        if (bytecodesUsed > 3000)
+        {
+            System.out.println("Bytecodes used: " + bytecodesUsed);
         }
     }
 
@@ -50,53 +80,65 @@ public class SimpleLauncher
     private void attackEnemies(RobotInfo[] enemies)
         throws GameActionException
     {
-        if (enemies.length == 0 || rc.getMissileCount() == 0)
+        if (rc.getMissileCount() == 0 || enemies.length == 0)
         {
             return;
         }
-        RobotInfo closest = null;
-        int minDistance = 0;
+
+        MapLocation closestLoc = null;
+        RobotType closestType = null;
+        int closestID = -1;
+        int minDistance = 100;
         int maxPriority = 1;
-        for (int i = 0; i < enemies.length; i++)
+        int enemyNum = enemies.length;
+        for (int i = 0; i < enemyNum; ++i)
         {
             int priority = getMissilePriority(enemies[i].type);
-            int dist = rc.getLocation().distanceSquaredTo(enemies[i].location);
+            int dist = mLocation.distanceSquaredTo(enemies[i].location);
             if (priority > maxPriority)
             {
                 maxPriority = priority;
                 minDistance = dist;
-                closest = enemies[i];
+                closestLoc = enemies[i].location;
+                closestType = enemies[i].type;
+                closestID = enemies[i].ID;
             }
             else if (priority == maxPriority && dist < minDistance)
             {
                 minDistance = dist;
-                closest = enemies[i];
+                closestLoc = enemies[i].location;
+                closestType = enemies[i].type;
+                closestID = enemies[i].ID;
             }
         }
-        if (closest == null)
+
+        if (closestLoc == null)
         {
-            return;
-        }
-        Direction spawnDir = getMissileSpawnDir(closest.location);
-        if (spawnDir == null)
-        {
-            return;
-        }
-        else
-        {
-            rc.launchMissile(spawnDir);
-            MapLocation spawnSpot = rc.getLocation().add(spawnDir);
-            int channel = getLocChannel(spawnSpot);
-            if (closest.type == RobotType.LAUNCHER)
+            if (closestTowerOrHQ != null)
             {
-                broadcastLocation(channel, closest.location.add(spawnDir));
-                rc.broadcast(getIdChannel(spawnSpot), closest.ID);
+                closestLoc = closestTowerOrHQ;
             }
             else
             {
-                broadcastLocation(channel, closest.location);
-                rc.broadcast(getIdChannel(spawnSpot), closest.ID);
+                return;
             }
+        }
+
+        Direction spawnDir = getMissileSpawnDir(closestLoc);
+        if (spawnDir != null)
+        {
+            rc.launchMissile(spawnDir);
+            MapLocation spawnSpot = mLocation.add(spawnDir);
+            int channel = getLocChannel(spawnSpot);
+            if (closestType == RobotType.LAUNCHER)
+            {
+                broadcastLocation(channel, closestLoc.add(spawnDir));
+            }
+            else
+            {
+                broadcastLocation(channel, closestLoc);
+            }
+            rc.broadcast(channel + 1, closestID);
         }
         // this.manageMissiles();
     }
@@ -104,22 +146,22 @@ public class SimpleLauncher
 
     protected Direction getMissileSpawnDir(MapLocation target)
     {
-        Direction dir = rc.getLocation().directionTo(target);
-        if (rc.isPathable(RobotType.MISSILE, rc.getLocation().add(dir)))
+        Direction dir = mLocation.directionTo(target);
+        if (rc.isPathable(RobotType.MISSILE, target))
         {
             return dir;
         }
-        else if (rc.isPathable(
-            RobotType.MISSILE,
-            rc.getLocation().add(dir.rotateRight())))
+
+        dir = dir.rotateRight();
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
-            return dir.rotateRight();
+            return dir;
         }
-        else if (rc.isPathable(
-            RobotType.MISSILE,
-            rc.getLocation().add(dir.rotateLeft())))
+
+        dir = dir.rotateLeft().rotateLeft();
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
-            return dir.rotateLeft();
+            return dir;
         }
         return null;
     }
@@ -132,14 +174,14 @@ public class SimpleLauncher
         {
             return false;
         }
+
+        boolean shouldRun = false;
         int avgX = 0;
         int avgY = 0;
-        boolean shouldRun = false;
         int enemyCount = 0;
         for (RobotInfo r : enemies)
         {
-            if (r.type.canAttack()
-                && rc.getLocation().distanceSquaredTo(r.location) <= RobotType.COMMANDER.sensorRadiusSquared)
+            if (!r.type.canMine() && r.type.canMove())
             {
                 shouldRun = true;
                 avgX += r.location.x;
@@ -152,8 +194,8 @@ public class SimpleLauncher
             avgX /= enemyCount;
             avgY /= enemyCount;
             Direction runDir =
-                this.getFreeStrafeDirection(rc.getLocation()
-                    .directionTo(new MapLocation(avgX, avgY)).opposite());
+                this.getFreeStrafeDirection(mLocation.directionTo(
+                    new MapLocation(avgX, avgY)).opposite());
             if (runDir != null)
             {
                 rc.move(runDir);
@@ -231,7 +273,12 @@ public class SimpleLauncher
     private int getMissilePriority(RobotType type)
     {
         int priority = 1;
-        if (type.canAttack())
+
+        if (type == RobotType.MISSILE)
+        {
+            priority = 0;
+        }
+        else if (type.canAttack())
         {
             priority = 6;
             if (type.canMine())
@@ -242,10 +289,6 @@ public class SimpleLauncher
             {
                 priority = 2;
             }
-        }
-        if (type == RobotType.MISSILE)
-        {
-            priority = 0;
         }
         return priority;
     }

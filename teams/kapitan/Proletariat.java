@@ -445,7 +445,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!canMove(dir) && count < turns)
+        while (!rc.canMove(dir) && count < turns)
         {
             if (count % 2 == 0)
             {
@@ -467,12 +467,6 @@ public abstract class Proletariat
         {
             return null;
         }
-    }
-
-
-    private boolean canMove(Direction dir)
-    {
-        return rc.canMove(dir);
     }
 
 
