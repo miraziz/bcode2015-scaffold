@@ -1,5 +1,6 @@
 package kapitan;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -10,6 +11,9 @@ import battlecode.common.RobotType;
 public class SimpleLauncher
     extends Proletariat
 {
+    private MapLocation closestTowerOrHQ;
+
+
     public SimpleLauncher(RobotController rc)
         throws GameActionException
     {
@@ -27,14 +31,41 @@ public class SimpleLauncher
         attackEnemies(enemies);
         if (rc.isCoreReady())
         {
-            if (!runAway(enemies))
+            if (!runAway(enemies) && closestTowerOrHQ == null)
             {
                 bug();
             }
         }
         else
         {
+            // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
+// rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
+            closestTowerOrHQ = null;
             enemyTowers = rc.senseEnemyTowerLocations();
+            int enemyNum = enemyTowers.length;
+            for (int i = 0; i < enemyNum; ++i)
+            {
+                // TODO Aim for closest towers?
+                if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestTowerOrHQ = enemyTowers[i];
+                    break;
+                }
+            }
+
+            if (closestTowerOrHQ == null)
+            {
+                // TODO Aim at HQ before nearby towers?
+                if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+                {
+                    closestTowerOrHQ = enemyHQ;
+                }
+            }
+        }
+        int bytecodesUsed = Clock.getBytecodeNum();
+        if (bytecodesUsed > 3000)
+        {
+            System.out.println("Bytecodes used: " + bytecodesUsed);
         }
     }
 
@@ -42,7 +73,7 @@ public class SimpleLauncher
     private void attackEnemies(RobotInfo[] enemies)
         throws GameActionException
     {
-        if (rc.getMissileCount() == 0)
+        if (rc.getMissileCount() == 0 || enemies.length == 0)
         {
             return;
         }
@@ -52,61 +83,38 @@ public class SimpleLauncher
         int minDistance = 100;
         int maxPriority = 1;
         int enemyNum = enemies.length;
-        if (enemyNum > 0)
+        for (int i = 0; i < enemyNum; ++i)
         {
-            for (int i = 0; i < enemyNum; ++i)
+            int priority = getMissilePriority(enemies[i].type);
+            int dist = mLocation.distanceSquaredTo(enemies[i].location);
+            if (priority > maxPriority)
             {
-                int priority = getMissilePriority(enemies[i].type);
-                int dist = mLocation.distanceSquaredTo(enemies[i].location);
-                if (priority > maxPriority)
-                {
-                    maxPriority = priority;
-                    minDistance = dist;
-                    closestLoc = enemies[i].location;
-                    closestType = enemies[i].type;
-                }
-                else if (priority == maxPriority && dist < minDistance)
-                {
-                    minDistance = dist;
-                    closestLoc = enemies[i].location;
-                    closestType = enemies[i].type;
-                }
+                maxPriority = priority;
+                minDistance = dist;
+                closestLoc = enemies[i].location;
+                closestType = enemies[i].type;
             }
-        }
-        else
-        {
-            enemyNum = enemyTowers.length;
-            for (int i = 0; i < enemyNum; ++i)
+            else if (priority == maxPriority && dist < minDistance)
             {
-                // TODO Aim for closest towers?
-                if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
-                {
-                    closestLoc = enemyTowers[i];
-                    closestType = RobotType.TOWER;
-                    break;
-                }
-            }
-
-            if (closestLoc == null)
-            {
-                // TODO Aim at HQ before nearby towers?
-                if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
-                {
-                    closestLoc = enemyHQ;
-                }
-                else
-                {
-                    return;
-                }
+                minDistance = dist;
+                closestLoc = enemies[i].location;
+                closestType = enemies[i].type;
             }
         }
 
+        if (closestLoc == null)
+        {
+            if (closestTowerOrHQ != null)
+            {
+                closestLoc = closestTowerOrHQ;
+            }
+            else
+            {
+                return;
+            }
+        }
         Direction spawnDir = getMissileSpawnDir(closestLoc);
-        if (spawnDir == null)
-        {
-            return;
-        }
-        else
+        if (spawnDir != null)
         {
             rc.launchMissile(spawnDir);
             int channel = getLocChannel(mLocation.add(spawnDir));
