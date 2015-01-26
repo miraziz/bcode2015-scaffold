@@ -136,7 +136,7 @@ public abstract class Proletariat
     protected boolean bug()
         throws GameActionException
     {
-        if (this.turnCount == 9)
+        if (this.turnCount > 9)
         {
             return false;
         }

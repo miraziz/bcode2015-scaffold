@@ -303,6 +303,10 @@ public class SimpleLauncher
             {
                 priority = 5;
             }
+            if (type == RobotType.DRONE)
+            {
+                priority = 2;
+            }
         }
         return priority;
     }

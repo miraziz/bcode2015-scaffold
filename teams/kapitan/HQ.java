@@ -35,7 +35,7 @@ public class HQ
         // TODO Uh.........
         // builds minerfactory first then others
         tasks = new LinkedList<BeaverTask>();
-        submitBeaverTask(BeaverTask.MINE);
+        submitBeaverTask(BeaverTask.BUILD_HANDWASHSTATION);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -129,20 +129,23 @@ public class HQ
         throws GameActionException
     {
         allyTowers = rc.senseTowerLocations();
+        if (rc.readBroadcast(Channels.buildPathCount) > rc
+            .readBroadcast(Channels.buildPathLength) * .9)
+        {
+            // TODO Expand build path efficiently rather than running the whole
+// bfs again.
+            this.fillBuildingPath();
+        }
         int roundNum = Clock.getRoundNum();
-// if (roundNum > 600)
-// {
-// Constants.beaverLimit = 5;
-// }
-// else if (roundNum > 500)
-// {
-// Constants.beaverLimit = 4;
-// }
-// else if (roundNum > 400)
-// {
-// Constants.beaverLimit = 3;
-// }
-        if (roundNum > 25)
+        if (roundNum > 500)
+        {
+            Constants.beaverLimit = 6;
+        }
+        else if (roundNum > 400)
+        {
+            Constants.beaverLimit = 4;
+        }
+        else if (roundNum > 25)
         {
             Constants.beaverLimit = 2;
         }
