@@ -222,7 +222,8 @@ public class Fighter
         RobotInfo toAttack = null;
         for (RobotInfo r : nearby)
         {
-            if (r.team == this.enemyTeam && rc.canAttackLocation(r.location))
+            if (r.team == this.enemyTeam && rc.canAttackLocation(r.location)
+                && r.type != RobotType.MISSILE)
             {
                 int priority = getPriority(r.type);
                 if (priority > highestPriority)

@@ -338,7 +338,7 @@ public abstract class Proletariat
         int supplyThreshhold = 500;
         if (rc.getType() == RobotType.COMMANDER)
         {
-            supplyThreshhold = 5000;
+            supplyThreshhold = 3000;
         }
         if (rc.getSupplyLevel() > supplyThreshhold)
         {
@@ -351,21 +351,21 @@ public abstract class Proletariat
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                     myTeam);
 
-            if (rc.getID() == 16995)
-            {
-                for (int i = 0; i < allies.length && i < 3; ++i)
-                {
-                    int red = i == 2 ? 255 : 0;
-                    int green = i == 0 ? 255 : 0;
-                    int blue = i == 1 ? 255 : 0;
-                    rc.setIndicatorLine(
-                        new MapLocation(mapOffsetX, mapOffsetY),
-                        allies[i].location,
-                        red,
-                        green,
-                        blue);
-                }
-            }
+// if (rc.getID() == 16995)
+// {
+// for (int i = 0; i < allies.length && i < 3; ++i)
+// {
+// int red = i == 2 ? 255 : 0;
+// int green = i == 0 ? 255 : 0;
+// int blue = i == 1 ? 255 : 0;
+// rc.setIndicatorLine(
+// new MapLocation(mapOffsetX, mapOffsetY),
+// allies[i].location,
+// red,
+// green,
+// blue);
+// }
+// }
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {

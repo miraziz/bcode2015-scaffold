@@ -89,22 +89,43 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+
+        // SKILLORCZ BUILD
+        // ----------------------------
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
-        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+
+        // KAPITAN BUILD
+        // ---------------------------------
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+// submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+// submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         sendBeaverTasks();
         this.pathId = 1;
@@ -153,6 +174,7 @@ public class HQ
             fillBuildingPath();
         }
 
+        // Need to have better set of beaver timings.
         int roundNum = Clock.getRoundNum();
         if (roundNum > 500)
         {
@@ -227,6 +249,8 @@ public class HQ
     // -------------------------------------------------------------------------------
 
     /**
+     * for dat checkerboard
+     * 
      * @throws GameActionException
      */
     private void fillBuildingPath()

@@ -10,6 +10,7 @@ public class CombatDrone
     {
         super(rc);
         mTypeChannel = Channels.droneCount;
+        this.setDestination(enemyHQ);
     }
 
 
