@@ -190,7 +190,6 @@ public abstract class Proletariat
         {
             facing = facing.opposite();
             turnRight = !turnRight;
-            turnCount = 0;
         }
         boolean clear =
             rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
