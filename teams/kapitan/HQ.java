@@ -140,14 +140,19 @@ public class HQ
     public void run()
         throws GameActionException
     {
+        super.run();
+
         allyTowers = rc.senseTowerLocations();
-        if (rc.readBroadcast(Channels.buildPathCount) > rc
-            .readBroadcast(Channels.buildPathLength) * .9)
+        if (rc.readBroadcast(Channels.buildPathCount) >= 0.8 * maxBuildingCount)
         {
-            // TODO Expand build path efficiently rather than running the whole
-// bfs again.
-            this.fillBuildingPath();
+            maxBuildingCount += Constants.MAXIMUM_BUILDINGS;
+            fillBuildingPath();
         }
+        else if (buildingCount < maxBuildingCount)
+        {
+            fillBuildingPath();
+        }
+
         int roundNum = Clock.getRoundNum();
         if (roundNum > 500)
         {
@@ -167,8 +172,6 @@ public class HQ
         }
 
         rc.broadcast(Channels.minerPotato, 4 - roundNum / 501);
-
-        super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
         if (rc.isCoreReady() && roundNum >= 20)
@@ -229,7 +232,8 @@ public class HQ
     private void fillBuildingPath()
         throws GameActionException
     {
-        while (!queue.isEmpty() && buildingCount <= maxBuildingCount)
+        while (!queue.isEmpty() && buildingCount < maxBuildingCount
+            && Clock.getBytecodesLeft() > 5000)
         {
             MapLocation cur = queue.poll();
 
@@ -252,7 +256,6 @@ public class HQ
             }
         }
         rc.broadcast(Channels.buildPathLength, buildingCount);
-        System.out.println("Building count: " + buildingCount);
     }
 
 
@@ -433,7 +436,7 @@ public class HQ
         X_REFLECTION,
         Y_REFLECTION
     }
-    
+
 
     /**
      * Determines the symmetry of the map.
