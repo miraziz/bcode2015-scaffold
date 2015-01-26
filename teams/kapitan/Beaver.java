@@ -95,7 +95,7 @@ public class Beaver
                 }
                 else
                 {
-                    moveTowardsFacing();
+                    bug();
                 }
             }
             if (reached)
