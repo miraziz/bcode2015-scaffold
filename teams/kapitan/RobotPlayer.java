@@ -92,7 +92,6 @@ public class RobotPlayer
 
         while (true)
         {
-// int currentRound = Clock.getRoundNum();
             try
             {
                 robot.run();
