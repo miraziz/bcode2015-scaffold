@@ -2,6 +2,8 @@ package kapitan;
 
 import battlecode.common.*;
 
+// TODO Reduce bytecode usage
+
 public class Launcher
     extends Fighter
 {
