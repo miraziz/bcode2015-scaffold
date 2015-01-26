@@ -1,4 +1,4 @@
-package team025;
+package osnovnoy;
 
 /**
  * Enum class for different molotok tasks.

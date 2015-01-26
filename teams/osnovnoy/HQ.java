@@ -1,4 +1,4 @@
-package team025;
+package osnovnoy;
 
 import java.util.LinkedList;
 import java.util.PriorityQueue;
