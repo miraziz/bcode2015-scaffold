@@ -10,7 +10,6 @@ public class CombatDrone
     {
         super(rc);
         mTypeChannel = Channels.droneCount;
-        this.setDestination(enemyHQ);
     }
 
 
@@ -35,100 +34,97 @@ public class CombatDrone
             return;
         }
         int enemyCount = 0;
-        boolean inAttackRange = false;
-        double enemyHealth = 0;
-        double allyHealth = rc.getHealth();
-        boolean shouldRun = false;
-        boolean minersNearby = false;
         int avgX = 0;
         int avgY = 0;
-        MapLocation minerLoc = null;
-        for (int i = 0; i < nearby.length; ++i)
+        int enemyHealth = 0;
+        double allyHealth = rc.getHealth();
+        Direction enemyMissileDir = null;
+        boolean inDanger = false;
+        RobotInfo ri = null;
+        boolean attacking = false;
+        RobotInfo closest = null;
+        Integer minDistance = null;
+        for (int i = 0; i < nearby.length; i++)
         {
-            RobotInfo r = nearby[i];
-            int dist = rc.getLocation().distanceSquaredTo(r.location);
-            if (r.team == enemyTeam)
+            ri = nearby[i];
+            if (ri.team == enemyTeam)
             {
-                if (r.type.canAttack() && !r.type.canMine())
+                if (ri.type == RobotType.MISSILE
+                    && rc.getLocation().distanceSquaredTo(ri.location) < 10)
                 {
-                    if (dist <= r.type.attackRadiusSquared)
-                    {
-                        inAttackRange = true;
-                    }
-                    if (dist <= r.type.attackRadiusSquared + 4)
-                    {
-                        enemyHealth += r.health;
-                    }
-                    if (r.type == RobotType.MISSILE && dist <= 10)
-                    {
-                        shouldRun = true;
-                    }
+                    enemyMissileDir = ri.location.directionTo(rc.getLocation());
                 }
-                if (r.type.canMine())
+                else if (ri.type.canAttack() && !ri.type.isBuilding)
                 {
-                    minersNearby = true;
-                    if (minerLoc == null
-                        || dist < rc.getLocation().distanceSquaredTo(minerLoc))
+                    if (!ri.type.canMine())
                     {
-                        minerLoc = r.location;
+                        enemyHealth += ri.health;
                     }
-                }
-                if (!r.type.isBuilding)
-                {
-                    avgX += r.location.x;
-                    avgY += r.location.y;
+                    avgX += ri.location.x;
+                    avgY += ri.location.y;
                     enemyCount++;
+                    int dist = rc.getLocation().distanceSquaredTo(ri.location);
+                    if (dist < ri.type.attackRadiusSquared)
+                    {
+                        inDanger = true;
+                    }
+                    if (minDistance == null || dist < minDistance)
+                    {
+                        minDistance = dist;
+                        closest = ri;
+                    }
                 }
             }
-            else
+        }
+        for (int i = 0; i < nearby.length; i++)
+        {
+            ri = nearby[i];
+            if (ri.team == myTeam)
             {
-                if (r.type == RobotType.DRONE && dist <= 15)
+                if (ri.type.canAttack() && !ri.type.isBuilding
+                    && ri.type.canMine())
                 {
-                    allyHealth += r.health;
+                    allyHealth += ri.health;
                 }
             }
         }
         if (enemyCount == 0)
         {
-            this.bugWithCounter();
+            this.setDestination(getLocation(Channels.rallyLoc));
+        }
+        else
+        {
+            avgX /= enemyCount;
+            avgY /= enemyCount;
+            this.setDestination(new MapLocation(avgX, avgY));
+            if (enemyMissileDir != null)
+            {
+                Direction clearPath = getFreeStrafeDirection(enemyMissileDir);
+                this.setDestination(rc.getLocation().add(clearPath));
+            }
+            if (allyHealth > enemyHealth)
+            {
+                MapLocation enemy = new MapLocation(avgX, avgY);
+                this.setDestination(enemy);
+                attacking = true;
+            }
+            else if (inDanger)
+            {
+                Direction away =
+                    this.getFreeStrafeDirection(new MapLocation(avgX, avgY)
+                        .directionTo(rc.getLocation()));
+                this.setDestination(rc.getLocation().add(away));
+            }
+        }
+        Direction towards =
+            this.getFreeStrafeDirection(rc.getLocation().directionTo(dest));
+        if (!attacking
+            && closest != null
+            && rc.getLocation().add(towards)
+                .distanceSquaredTo(closest.location) <= closest.type.attackRadiusSquared)
+        {
             return;
         }
-        avgX /= enemyCount;
-        avgY /= enemyCount;
-        MapLocation enemy = new MapLocation(avgX, avgY);
-        Direction toEnemy = rc.getLocation().directionTo(enemy);
-
-        if (shouldRun)
-        {
-            this.setDestination(rc.getLocation().add(toEnemy.opposite()));
-        }
-        else if (minersNearby && allyHealth >= enemyHealth)
-        {
-            this.setDestination(minerLoc);
-        }
-        else if (allyHealth >= enemyHealth * 2)
-        {
-            if (inAttackRange)
-            {
-                if (rc.getWeaponDelay() == 3)
-                {
-                    this.setDestination(rc.getLocation()
-                        .add(toEnemy.opposite()));
-                }
-                else if (rc.getWeaponDelay() >= 1)
-                {
-                    this.setDestination(rc.getLocation().add(toEnemy));
-                }
-            }
-            else
-            {
-                this.setDestination(rc.getLocation().add(toEnemy));
-            }
-        }
-        else if (allyHealth < enemyHealth)
-        {
-            this.setDestination(rc.getLocation().add(toEnemy.opposite()));
-        }
-        this.bugWithCounter();
+        bug();
     }
 }

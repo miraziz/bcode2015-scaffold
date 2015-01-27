@@ -2,11 +2,6 @@ package osnovnoy;
 
 import battlecode.common.*;
 
-// TODO Avoid enemy towers and HQ when BFSing
-// TODO Reduce threshold when no ore found
-// TODO Attack other miners
-// TODO BFS Bug in patches.xml
-
 /**
  * Miner class.
  * 

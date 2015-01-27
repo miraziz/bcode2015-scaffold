@@ -13,10 +13,10 @@ public class Beaver
     private BeaverTask  task;
     private boolean     reached;
     private MapLocation buildLoc;
-    private boolean     building;
 
 
     // TODO If a building is destroyed, what happens?
+
     /**
      * Sets a task.
      * 
@@ -30,7 +30,6 @@ public class Beaver
         task = getNextTask();
         reached = false;
         mTypeChannel = Channels.beaverCount;
-        building = false;
     }
 
 
@@ -45,9 +44,9 @@ public class Beaver
         throws GameActionException
     {
         int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
-        rc.broadcast(Channels.beaverTasksTaken, tasksTaken + 1);
         int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
         BeaverTask myTask = BeaverTask.getTask(taskNum);
+
         return myTask;
     }
 
@@ -62,61 +61,72 @@ public class Beaver
         super.run();
 
         rc.setIndicatorString(1, "My task is: " + task);
-
-        if (rc.isCoreReady())
+        if (task == BeaverTask.JOIN_ARMY)
         {
-            if (building)
-            {
-                building = false;
-                task = getNextTask();
-            }
-            RobotInfo robAtBuildLoc = null;
-            if (buildLoc != null)
-            {
-                robAtBuildLoc = rc.senseRobotAtLocation(buildLoc);
-            }
-            if (buildLoc == null
-                || (robAtBuildLoc != null && robAtBuildLoc.type.isBuilding))
+            reached = false;
+            this.setDestination(getLocation(Channels.rallyLoc));
+            this.bug();
+            task = this.getNextTask();
+        }
+        else if (task == BeaverTask.MINE)
+        {
+            // TODO Doesn't mine?
+            reached = false;
+            task = this.getNextTask();
+        }
+        else
+        {
+            if (rc.isCoreReady())
             {
                 int count = rc.readBroadcast(Channels.buildPathCount);
-                buildLoc = getLocation(count + Channels.buildPath);
-                rc.broadcast(Channels.buildPathCount, count + 1);
-            }
-            this.setDestination(buildLoc);
-            rc.setIndicatorString(0, "My build loc: " + buildLoc);
+                if (count < rc.readBroadcast(Channels.buildPathLength))
+                {
+                    buildLoc = getLocation(count + Channels.buildPath);
+                }
+                else
+                {
+                    // TODO Why does this happen? If the build path is complete,
+// build anywhere instantly? yup
+                    Direction dir = Direction.NORTH;
+                    while (rc.senseTerrainTile(mLocation.add(dir)) != TerrainTile.NORMAL)
+                    {
+                        dir = dir.rotateRight();
+                    }
+                    buildLoc = mLocation.add(dir);
+                }
+                this.setDestination(buildLoc);
+                rc.setIndicatorString(0, "My build loc: " + buildLoc);
 
-            if (!reached)
-            {
-                rc.setIndicatorString(1, "HERE, trying to go to: " + buildLoc);
-                if (rc.getLocation().x == buildLoc.x
-                    && rc.getLocation().y == buildLoc.y)
+                if (!reached)
                 {
-                    reached = true;
+                    rc.setIndicatorString(1, "HERE, trying to go to: "
+                        + buildLoc);
+                    if (rc.getLocation().x == buildLoc.x
+                        && rc.getLocation().y == buildLoc.y)
+                    {
+                        reached = true;
+                    }
+                    else if (rc.getLocation().distanceSquaredTo(buildLoc) <= 2)
+                    {
+                        reached = true;
+                    }
+                    else
+                    {
+                        bug();
+                    }
                 }
-                else if (rc.getLocation().isAdjacentTo(buildLoc))
+                if (reached)
                 {
-                    reached = true;
-                }
-                else
-                {
-                    bugWithCounter();
-                }
-            }
-            if (reached)
-            {
-                if (build())
-                {
-                    building = true;
-                    reached = false;
-                    return;
-                }
-                else
-                {
-                    moveTowardsFacing();
+                    if (build())
+                    {
+                        rc.broadcast(Channels.buildPathCount, count + 1);
+                        task = getNextTask();
+                        reached = false;
+                        return;
+                    }
                 }
             }
         }
-
     }
 
 
@@ -130,12 +140,8 @@ public class Beaver
         throws GameActionException
     {
         facing = mLocation.directionTo(buildLoc);
-        if (facing == Direction.OMNI || facing == Direction.NONE)
-        {
-            facing = Direction.NORTH;
-        }
         // TODO Only move forward or sideways to goal, don't turn back?
-        Direction dir = this.getFreeDirection(facing);
+        Direction dir = getFreeStrafeDirection(facing);
         if (dir != null)
         {
             rc.move(dir);
@@ -152,6 +158,7 @@ public class Beaver
     private boolean build()
         throws GameActionException
     {
+        task = getNextTask();
         RobotType toBuild = getTaskBuildType(task);
 
         if (toBuild != null && rc.hasBuildRequirements(toBuild))
@@ -159,6 +166,7 @@ public class Beaver
             Direction dir = mLocation.directionTo(buildLoc);
             if (rc.canBuild(dir, toBuild))
             {
+                incrementTask();
                 rc.build(dir, toBuild);
                 return true;
             }
@@ -210,11 +218,25 @@ public class Beaver
         {
             toBuild = RobotType.TRAININGFIELD;
         }
-        else if (task == BeaverTask.BUILD_HANDWASHSTATION)
-        {
-            toBuild = RobotType.HANDWASHSTATION;
-        }
         return toBuild;
     }
 
+
+    /**
+     * Claims a task and updates the communications channels.
+     * 
+     * @throws GameActionException
+     */
+    private void incrementTask()
+        throws GameActionException
+    {
+        // TODO What happens when a unit dies?
+        int tasksTaken = rc.readBroadcast(Channels.beaverTasksTaken);
+        int taskNum = rc.readBroadcast(Channels.beaverTask1 + tasksTaken);
+        BeaverTask myTask = BeaverTask.getTask(taskNum);
+        if (!(myTask == BeaverTask.MINE || myTask == BeaverTask.JOIN_ARMY))
+        {
+            rc.broadcast(Channels.beaverTasksTaken, tasksTaken + 1);
+        }
+    }
 }

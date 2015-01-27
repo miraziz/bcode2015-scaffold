@@ -168,7 +168,7 @@ public class Fighter
         }
         if (enemyCount == 0)
         {
-            bugWithCounter();
+            bug();
             return;
         }
         avgX /= enemyCount;
@@ -183,7 +183,7 @@ public class Fighter
         committed = false;
         if (myTeamHealth >= enemyTeamHealth * 2)
         {
-            bugWithCounter();
+            bug();
         }
         else if (myTeamHealth < enemyTeamHealth * 2)
         {
@@ -194,7 +194,7 @@ public class Fighter
         }
         else if (!inDangerRange)
         {
-            bugWithCounter();
+            bug();
         }
 
     }
@@ -222,8 +222,7 @@ public class Fighter
         RobotInfo toAttack = null;
         for (RobotInfo r : nearby)
         {
-            if (r.team == this.enemyTeam && rc.canAttackLocation(r.location)
-                && r.type != RobotType.MISSILE)
+            if (r.team == this.enemyTeam && rc.canAttackLocation(r.location))
             {
                 int priority = getPriority(r.type);
                 if (priority > highestPriority)
@@ -267,23 +266,5 @@ public class Fighter
             priority = 1;
         }
         return priority;
-    }
-
-
-    protected MapLocation getClosestTowerOrHQ()
-    {
-        MapLocation closest = enemyHQ;
-        int closestDist = rc.getLocation().distanceSquaredTo(enemyHQ);
-        enemyTowers = rc.senseEnemyTowerLocations();
-        for (int i = 0; i < enemyTowers.length; i++)
-        {
-            int dist = rc.getLocation().distanceSquaredTo(enemyTowers[i]);
-            if (dist < closestDist)
-            {
-                closest = enemyTowers[i];
-                closestDist = dist;
-            }
-        }
-        return closest;
     }
 }

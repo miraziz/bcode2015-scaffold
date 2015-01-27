@@ -2,8 +2,6 @@ package osnovnoy;
 
 import battlecode.common.*;
 
-// TODO Reduce bytecode usage
-
 public class Launcher
     extends Fighter
 {
@@ -38,7 +36,7 @@ public class Launcher
         {
             if (!runAway())
             {
-                bugWithCounter();
+                bug();
             }
         }
 

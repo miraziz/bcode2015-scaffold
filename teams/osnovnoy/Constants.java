@@ -17,7 +17,7 @@ public class Constants
 
     public static final int    CHANNELS_PER_TOWER_VULN   = 3;
 
-    public static final int    MAXIMUM_BUILDINGS         = 8;
+    public static final int    MAXIMUM_BUILDINGS         = 101;
 
     // TODO Figure out the math
     public static final int    MAP_WIDTH                 =
@@ -59,12 +59,7 @@ public class Constants
     static int                 beaverLimit               = 1;
     static int                 soldierLimit              = 6;
     static int                 minerLimit                = 40;
-
-    // Drone limit for supply drone
     static int                 droneLimit                = 1;
-
-    // Drone limit for combat drone
-    // static int droneLimit = 10;
 
     static int                 tankCost                  =
                                                              RobotType.TANK.oreCost;

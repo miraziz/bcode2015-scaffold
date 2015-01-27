@@ -26,8 +26,7 @@ public abstract class Proletariat
     protected Direction   facing;
     protected int         mTypeNumber;
     protected int         mTypeChannel;
-    private int           turnCount;
-    private int           bugFailureCount;
+    int                   turnCount;
 
 
     public Proletariat(RobotController rc)
@@ -54,11 +53,6 @@ public abstract class Proletariat
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
         manageSupply();
-        if (rc.getType() == RobotType.BEAVER)
-        {
-            rc.setIndicatorString(2, "My visited loc: " + visited
-                + ", error count: " + this.bugFailureCount);
-        }
     }
 
 
@@ -142,7 +136,7 @@ public abstract class Proletariat
     protected boolean bug()
         throws GameActionException
     {
-        if (this.turnCount > 9)
+        if (this.turnCount == 9)
         {
             return false;
         }
@@ -187,30 +181,6 @@ public abstract class Proletariat
     }
 
 
-    protected boolean bugWithCounter()
-        throws GameActionException
-    {
-        if (bugFailureCount < 3)
-        {
-            if (bug())
-            {
-                bugFailureCount = 0;
-                return true;
-            }
-            else
-            {
-                bugFailureCount++;
-                return false;
-            }
-        }
-        else
-        {
-            visited = rc.getLocation();
-            return bug();
-        }
-    }
-
-
     private boolean isClear(Direction dir)
         throws GameActionException
     {
@@ -220,15 +190,10 @@ public abstract class Proletariat
         {
             facing = facing.opposite();
             turnRight = !turnRight;
+            turnCount = 0;
         }
-        boolean clear =
-            rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
-// if (rc.getType() != RobotType.BEAVER)
-// {
-        clear = clear && !visited.equals(next);
-
-// }
-        return clear;
+        return rc.isPathable(rc.getType(), next) && !visited.equals(next)
+            && !this.inEnemyTowerRange(dir);
     }
 
 
@@ -243,7 +208,6 @@ public abstract class Proletariat
                 visited = rc.getLocation();
             }
             rc.move(dir);
-            this.bugFailureCount = 0;
             return true;
         }
         else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
@@ -338,7 +302,7 @@ public abstract class Proletariat
         int supplyThreshhold = 500;
         if (rc.getType() == RobotType.COMMANDER)
         {
-            supplyThreshhold = 3000;
+            supplyThreshhold = 5000;
         }
         if (rc.getSupplyLevel() > supplyThreshhold)
         {
@@ -351,21 +315,21 @@ public abstract class Proletariat
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                     myTeam);
 
-// if (rc.getID() == 16995)
-// {
-// for (int i = 0; i < allies.length && i < 3; ++i)
-// {
-// int red = i == 2 ? 255 : 0;
-// int green = i == 0 ? 255 : 0;
-// int blue = i == 1 ? 255 : 0;
-// rc.setIndicatorLine(
-// new MapLocation(mapOffsetX, mapOffsetY),
-// allies[i].location,
-// red,
-// green,
-// blue);
-// }
-// }
+            if (rc.getID() == 16995)
+            {
+                for (int i = 0; i < allies.length && i < 3; ++i)
+                {
+                    int red = i == 2 ? 255 : 0;
+                    int green = i == 0 ? 255 : 0;
+                    int blue = i == 1 ? 255 : 0;
+                    rc.setIndicatorLine(
+                        new MapLocation(mapOffsetX, mapOffsetY),
+                        allies[i].location,
+                        red,
+                        green,
+                        blue);
+                }
+            }
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {
@@ -476,7 +440,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!rc.canMove(dir) && count < turns)
+        while (!canMove(dir) && count < turns)
         {
             if (count % 2 == 0)
             {
@@ -498,6 +462,12 @@ public abstract class Proletariat
         {
             return null;
         }
+    }
+
+
+    private boolean canMove(Direction dir)
+    {
+        return rc.canMove(dir);
     }
 
 
@@ -624,7 +594,7 @@ public abstract class Proletariat
 
         if (rc.getType() == RobotType.LAUNCHER)
         {
-            supplyPriority = 10;
+            supplyPriority = 5;
         }
         else if (rc.getType() == RobotType.COMMANDER)
         {
