@@ -11,8 +11,8 @@ public class Fighter
     extends Proletariat
 {
 
-    private boolean attacking;
-    private boolean committed;
+    protected boolean attacking;
+    protected boolean committed;
 
 
     /**

@@ -19,6 +19,7 @@ public class HQ
     private int                     maxBuildingCount;
     private boolean[][]             visited;
     private LinkedList<MapLocation> queue;
+    private boolean                 buildingBashers;
 
     private int                     buildingCount;
 
@@ -30,6 +31,9 @@ public class HQ
 
         // Set rally
         // broadcastLocation(Channels.rallyLoc, findRallyPoint());
+
+        buildingBashers = shouldBuildBarracks();
+        buildingBashers = false;
 
         broadcastLocation(Channels.rallyLoc, enemyHQ);
 
@@ -89,23 +93,44 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
-        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
-
+        if (buildingBashers)
+        {
+            broadcastLocation(Channels.rallyLoc, findRallyPoint());
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+            submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        }
+        else
+        {
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+            submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+            submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+            submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        }
         sendBeaverTasks();
         this.pathId = 1;
 
@@ -135,6 +160,14 @@ public class HQ
 
     // -----------------------------------------------------------------------
     // run
+
+    private boolean shouldBuildBarracks()
+    {
+        buildingBashers = true;
+        return enemyTowers.length <= 3
+            && allyHQ.distanceSquaredTo(enemyHQ) <= 2000;
+    }
+
 
     @Override
     public void run()
@@ -193,6 +226,12 @@ public class HQ
         shouldRun = false;
 
         manageRallyLoc(roundNum);
+        rc.broadcast(Channels.attacking, 0);
+        if (roundNum % 100 > 0 && roundNum % 100 < 5 && roundNum >= 500)
+        {
+            rc.broadcast(Channels.attacking, 1);
+        }
+
     }
 
 
@@ -359,9 +398,20 @@ public class HQ
         {
             rc.broadcast(Channels.shouldSpawnDrone, 1);
         }
-        if (soldierCount < Constants.soldierLimit)
+        if (soldierCount < 5)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
+        }
+        else
+        {
+            if (basherCount < soldierCount * 2)
+            {
+                rc.broadcast(Channels.shouldSpawnBasher, 1);
+            }
+            else
+            {
+                rc.broadcast(Channels.shouldSpawnSoldier, 1);
+            }
         }
         if (!attacking && tankCount >= Constants.requiredTanksForAttack)
         {
