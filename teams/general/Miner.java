@@ -213,6 +213,10 @@ public class Miner
                         {
                             cantFindOre = true;
                             doing = "Closest ore not found";
+                            System.out.println("CAN'T FIND ANY");
+                            rc.broadcast(
+                                Channels.MAP_OUT_OF_ORE,
+                                Constants.MAP_OUT_OF_ORE);
                         }
                     }
                 }

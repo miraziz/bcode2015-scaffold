@@ -27,7 +27,10 @@ public class Beaver
         throws GameActionException
     {
         super(rc);
-        task = getNextTask();
+        if (Clock.getRoundNum() > 5)
+        {
+            task = getNextTask();
+        }
         reached = false;
         mTypeChannel = Channels.beaverCount;
         building = false;
@@ -61,6 +64,10 @@ public class Beaver
     {
         super.run();
 
+        if (task == null && Clock.getRoundNum() > 5)
+        {
+            task = getNextTask();
+        }
         rc.setIndicatorString(1, "My task is: " + task);
 
         if (rc.isCoreReady())
@@ -79,40 +86,54 @@ public class Beaver
                 || (robAtBuildLoc != null && robAtBuildLoc.type.isBuilding))
             {
                 int count = rc.readBroadcast(Channels.buildPathCount);
-                buildLoc = getLocation(count + Channels.buildPath);
-                rc.broadcast(Channels.buildPathCount, count + 1);
+                int avail = rc.readBroadcast(Channels.buildPathLength);
+                if (count < avail)
+                {
+                    buildLoc = getLocation(count + Channels.buildPath);
+                    rc.broadcast(Channels.buildPathCount, count + 1);
+                }
             }
-            this.setDestination(buildLoc);
-            rc.setIndicatorString(0, "My build loc: " + buildLoc);
 
-            if (!reached)
+            if (buildLoc == null)
             {
-                rc.setIndicatorString(1, "HERE, trying to go to: " + buildLoc);
-                if (rc.getLocation().x == buildLoc.x
-                    && rc.getLocation().y == buildLoc.y)
-                {
-                    reached = true;
-                }
-                else if (rc.getLocation().isAdjacentTo(buildLoc))
-                {
-                    reached = true;
-                }
-                else
-                {
-                    bugWithCounter();
-                }
+                setDestination(enemyHQ);
+                bug();
             }
-            if (reached)
+            else
             {
-                if (build())
+                this.setDestination(buildLoc);
+                rc.setIndicatorString(0, "My build loc: " + buildLoc);
+
+                if (!reached)
                 {
-                    building = true;
-                    reached = false;
-                    return;
+                    rc.setIndicatorString(1, "HERE, trying to go to: "
+                        + buildLoc);
+                    if (rc.getLocation().x == buildLoc.x
+                        && rc.getLocation().y == buildLoc.y)
+                    {
+                        reached = true;
+                    }
+                    else if (rc.getLocation().isAdjacentTo(buildLoc))
+                    {
+                        reached = true;
+                    }
+                    else
+                    {
+                        bugWithCounter();
+                    }
                 }
-                else
+                if (reached)
                 {
-                    moveTowardsFacing();
+                    if (build())
+                    {
+                        building = true;
+                        reached = false;
+                        return;
+                    }
+                    else
+                    {
+                        moveTowardsFacing();
+                    }
                 }
             }
         }

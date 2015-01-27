@@ -68,4 +68,6 @@ public class Channels
     public static int       launcherCount         = 51500;
 
     public static final int NUMBER_OF_MISSILES    = 52000;
+
+    public static final int MAP_OUT_OF_ORE        = 60555;
 }

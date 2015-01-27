@@ -107,7 +107,7 @@ public class RobotPlayer
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+// e.printStackTrace();
             }
 // int endRound = Clock.getRoundNum();
 // if (endRound != currentRound && rc.getType() != RobotType.MINER)

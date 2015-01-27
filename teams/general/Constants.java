@@ -56,6 +56,8 @@ public class Constants
 
     public static final int    ALLY_NEAR_LAUNCHER        = 3;
 
+    public static final int    MAP_OUT_OF_ORE            = 1555;
+
     static int                 beaverLimit               = 1;
     static int                 soldierLimit              = 6;
     static int                 minerLimit                = 40;

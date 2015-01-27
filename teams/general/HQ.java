@@ -18,9 +18,10 @@ public class HQ
     MapLocation                     defaultRallyLoc;
     private int                     maxBuildingCount;
     private boolean[][]             visited;
+    private boolean[][]             isQueued;
     private LinkedList<MapLocation> queue;
     private boolean                 buildingBashers;
-
+    private Direction[]             minerDirs;
     private int                     buildingCount;
 
 
@@ -36,6 +37,107 @@ public class HQ
         buildingBashers = false;
 
         broadcastLocation(Channels.rallyLoc, enemyHQ);
+
+        minerDirs = new Direction[8];
+        if (allyHQ.x == enemyHQ.x)
+        {
+            minerDirs[0] = Direction.SOUTH;
+            minerDirs[1] = Direction.EAST;
+            minerDirs[2] = Direction.WEST;
+            minerDirs[3] = Direction.NORTH;
+            minerDirs[4] = Direction.SOUTH_WEST;
+            minerDirs[5] = Direction.SOUTH_EAST;
+            minerDirs[6] = Direction.NORTH_WEST;
+            minerDirs[7] = Direction.NORTH_EAST;
+
+            if (allyHQ.y > enemyHQ.y)
+            {
+                for (int i = 0; i < minerDirs.length; i++)
+                {
+                    minerDirs[i] = minerDirs[i].opposite();
+                }
+            }
+        }
+        else if (allyHQ.y == enemyHQ.y)
+        {
+            minerDirs[0] = Direction.EAST;
+            minerDirs[1] = Direction.NORTH;
+            minerDirs[2] = Direction.SOUTH;
+            minerDirs[3] = Direction.WEST;
+            minerDirs[4] = Direction.SOUTH_EAST;
+            minerDirs[5] = Direction.NORTH_EAST;
+            minerDirs[6] = Direction.SOUTH_WEST;
+            minerDirs[7] = Direction.NORTH_WEST;
+
+            if (allyHQ.x > enemyHQ.x)
+            {
+                for (int i = 0; i < minerDirs.length; i++)
+                {
+                    minerDirs[i] = minerDirs[i].opposite();
+                }
+            }
+
+        }
+        else if (allyHQ.x < enemyHQ.x && allyHQ.y > enemyHQ.y)
+        {
+            // TODO Take into account difference between x and y (prefer bigger
+// dimension)
+            // first quadrant
+            minerDirs[0] = Direction.WEST;
+            minerDirs[1] = Direction.SOUTH;
+            minerDirs[2] = Direction.NORTH;
+            minerDirs[3] = Direction.EAST;
+            minerDirs[4] = Direction.SOUTH_WEST;
+            minerDirs[5] = Direction.NORTH_WEST;
+            minerDirs[6] = Direction.SOUTH_EAST;
+            minerDirs[7] = Direction.NORTH_EAST;
+        }
+        else if (allyHQ.x > enemyHQ.x && allyHQ.y > enemyHQ.y)
+        {
+            // second quadrant
+            minerDirs[0] = Direction.EAST;
+            minerDirs[1] = Direction.SOUTH;
+            minerDirs[2] = Direction.NORTH;
+            minerDirs[3] = Direction.WEST;
+            minerDirs[4] = Direction.SOUTH_EAST;
+            minerDirs[5] = Direction.NORTH_EAST;
+            minerDirs[6] = Direction.SOUTH_WEST;
+            minerDirs[7] = Direction.NORTH_WEST;
+        }
+        else if (allyHQ.x > enemyHQ.x && allyHQ.y < enemyHQ.y)
+        {
+            // third quadrant
+            minerDirs[0] = Direction.EAST;
+            minerDirs[1] = Direction.NORTH;
+            minerDirs[2] = Direction.SOUTH;
+            minerDirs[3] = Direction.WEST;
+            minerDirs[4] = Direction.NORTH_EAST;
+            minerDirs[5] = Direction.SOUTH_EAST;
+            minerDirs[6] = Direction.NORTH_WEST;
+            minerDirs[7] = Direction.SOUTH_WEST;
+        }
+        else
+        // if (allyHQ.x < enemyHQ.x && allyHQ.y < enemyHQ.y)
+        {
+            // fourth quadrant
+            minerDirs[0] = Direction.WEST;
+            minerDirs[1] = Direction.NORTH;
+            minerDirs[2] = Direction.SOUTH;
+            minerDirs[3] = Direction.EAST;
+            minerDirs[4] = Direction.NORTH_WEST;
+            minerDirs[5] = Direction.SOUTH_WEST;
+            minerDirs[6] = Direction.NORTH_EAST;
+            minerDirs[7] = Direction.SOUTH_EAST;
+        }
+
+        for (int i = 0; i < 8; ++i)
+        {
+            if (rc.canSpawn(minerDirs[i], RobotType.BEAVER))
+            {
+                rc.spawn(minerDirs[i], RobotType.BEAVER);
+                break;
+            }
+        }
 
         // TODO Set miner limits based on map size
 
@@ -142,19 +244,21 @@ public class HQ
         System.out.println("Took " + Clock.getBytecodeNum()
             + " bytecodes so far");
 
+        // Wait for towers to calculate vulnerability
+        // analyzeTowers();
+
         maxBuildingCount = Constants.MAXIMUM_BUILDINGS;
 
         visited = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+        isQueued = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
         queue = new LinkedList<MapLocation>();
         queue.offer(allyHQ);
         System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
             + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
         visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
+        isQueued[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
 
         fillBuildingPath();
-
-        // Wait for towers to calculate vulnerability
-        // analyzeTowers();
     }
 
 
@@ -176,6 +280,7 @@ public class HQ
         super.run();
 
         allyTowers = rc.senseTowerLocations();
+        int roundNum = Clock.getRoundNum();
         if (rc.readBroadcast(Channels.buildPathCount) >= 0.8 * maxBuildingCount)
         {
             maxBuildingCount += Constants.MAXIMUM_BUILDINGS;
@@ -186,7 +291,6 @@ public class HQ
             fillBuildingPath();
         }
 
-        int roundNum = Clock.getRoundNum();
         if (roundNum > 500)
         {
             Constants.beaverLimit = 6;
@@ -213,9 +317,23 @@ public class HQ
             {
                 int buildCount = rc.readBroadcast(Channels.buildPathCount);
                 MapLocation loc = getLocation(Channels.buildPath + buildCount);
-                this.spawn(
-                    mLocation.directionTo(loc).rotateRight(),
-                    RobotType.BEAVER);
+                Direction toBuild = Direction.NORTH;
+                if (loc != null)
+                {
+                    toBuild = mLocation.directionTo(loc).rotateRight();
+                }
+                else
+                {
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        if (rc.canSpawn(minerDirs[i], RobotType.BEAVER))
+                        {
+                            toBuild = minerDirs[i];
+                            break;
+                        }
+                    }
+                }
+                this.spawn(toBuild, RobotType.BEAVER);
             }
         }
         // do broadcast things with the counts so people know what to do
@@ -271,29 +389,99 @@ public class HQ
     private void fillBuildingPath()
         throws GameActionException
     {
+        if (queue.isEmpty())
+        {
+            maxBuildingCount = Constants.MAXIMUM_BUILDINGS;
+
+            visited = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+            isQueued = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+            queue = new LinkedList<MapLocation>();
+            queue.offer(allyHQ);
+            System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
+                + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
+            visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
+            isQueued[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
+
+            buildingCount = 0;
+            rc.broadcast(Channels.buildPathLength, buildingCount);
+            System.out.println("QUEUE RESET");
+        }
+
+        int nextX, nextY, added, numDirs;
         while (!queue.isEmpty() && buildingCount < maxBuildingCount
             && Clock.getBytecodesLeft() > 5000)
         {
             MapLocation cur = queue.poll();
+// System.out.println("CUR: " + cur);
 
-            if (cur != allyHQ && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+            if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
             {
-                broadcastLocation(Channels.buildPath + buildingCount, cur);
-                buildingCount++;
-            }
-
-            for (int i = 1; i < 8; i += 2)
-            {
-                MapLocation next = cur.add(directions[i]);
-                if (!visited[next.x - mapOffsetX][next.y - mapOffsetY]
-                    && rc.canSenseLocation(next)
-                    && rc.senseTerrainTile(next) != TerrainTile.OFF_MAP)
+                if (!cur.equals(allyHQ))
                 {
-                    visited[next.x - mapOffsetX][next.y - mapOffsetY] = true;
-                    queue.offer(next);
+                    int buildCount = 4;
+                    MapLocation adj = cur.add(Direction.NORTH);
+                    if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL
+                        && !isQueued[adj.x - mapOffsetX][adj.y - mapOffsetY])
+                    {
+                        --buildCount;
+                    }
+                    adj = cur.add(Direction.SOUTH);
+                    if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL
+                        && !isQueued[adj.x - mapOffsetX][adj.y - mapOffsetY])
+                    {
+                        --buildCount;
+                    }
+                    adj = cur.add(Direction.EAST);
+                    if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL
+                        && !isQueued[adj.x - mapOffsetX][adj.y - mapOffsetY])
+                    {
+                        --buildCount;
+                    }
+                    adj = cur.add(Direction.WEST);
+                    if (rc.senseTerrainTile(adj) == TerrainTile.NORMAL
+                        && !isQueued[adj.x - mapOffsetX][adj.y - mapOffsetY])
+                    {
+                        --buildCount;
+                    }
+
+                    if (buildCount < 2)
+                    {
+                        isQueued[cur.x - mapOffsetX][cur.y - mapOffsetY] = true;
+// System.out.println("Can build at: " + cur);
+                        broadcastLocation(
+                            Channels.buildPath + buildingCount,
+                            cur);
+                        buildingCount++;
+                    }
+                }
+
+                added = 0;
+                numDirs = 8;
+                for (int i = 4; i < numDirs; ++i)
+                {
+                    MapLocation next = cur.add(minerDirs[i]);
+                    nextX = next.x - mapOffsetX;
+                    nextY = next.y - mapOffsetY;
+                    if (!visited[nextX][nextY])
+                    {
+                        visited[nextX][nextY] = true;
+                        if (rc.senseTerrainTile(next) == TerrainTile.UNKNOWN
+                            || rc.senseTerrainTile(next) == TerrainTile.NORMAL)
+                        {
+                            added++;
+                            queue.offer(next);
+                        }
+                    }
+
+                    if (i == 7 && added == 0)
+                    {
+                        i = -1;
+                        numDirs = 4;
+                    }
                 }
             }
         }
+// System.out.println("BUILD PATH LENGTH: " + buildingCount);
         rc.broadcast(Channels.buildPathLength, buildingCount);
     }
 
