@@ -570,7 +570,7 @@ public abstract class Proletariat
                 {
                     closestMiner = enemy.location;
                 }
-                else
+                else if (enemy.type.canAttack())
                 {
                     avgX += enemy.location.x;
                     avgY += enemy.location.y;

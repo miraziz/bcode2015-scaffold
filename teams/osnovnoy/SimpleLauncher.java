@@ -207,33 +207,37 @@ public class SimpleLauncher
             return false;
         }
 
-        boolean shouldRun = false;
+        int enemiesThatCanAttack = 0;
         int avgX = 0;
         int avgY = 0;
-        int enemyCount = 0;
-        for (RobotInfo r : enemies)
+        for (RobotInfo enemy : enemies)
         {
-            if (!r.type.canMine() && r.type.canMove())
+            if (!enemy.type.canMine() && enemy.type.canMove())
             {
-                shouldRun = true;
-                avgX += r.location.x;
-                avgY += r.location.y;
-                enemyCount++;
+                avgX += enemy.location.x;
+                avgY += enemy.location.y;
+                enemiesThatCanAttack++;
             }
         }
-        if (shouldRun)
+
+        if (enemiesThatCanAttack == 0)
         {
-            avgX /= enemyCount;
-            avgY /= enemyCount;
-            Direction runDir =
-                this.getFreeStrafeDirection(mLocation.directionTo(
-                    new MapLocation(avgX, avgY)).opposite());
-            if (runDir != null)
+            return false;
+        }
+        avgX /= enemiesThatCanAttack;
+        avgY /= enemiesThatCanAttack;
+
+        Direction dirAway =
+            mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
+        Direction[] dirs = getSpanningDirections(dirAway);
+        for (int i = 0; i < dirs.length; i++)
+        {
+            if (moveSafely(dirs[i]))
             {
-                rc.move(runDir);
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
 
