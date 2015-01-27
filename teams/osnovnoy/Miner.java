@@ -3,6 +3,7 @@ package osnovnoy;
 import battlecode.common.*;
 
 // TODO Avoid enemy towers and HQ when BFSing
+// TODO Have miners attack at the end
 // TODO Run if being hit while calculating closest ore
 /**
  * Miner class.
@@ -300,7 +301,7 @@ public class Miner
         {
             if (pathFailedCount > Constants.PATH_MAX_FAILED_TRIES)
             {
-                setDestination(path[path.length - 1]);
+                pathFollowing = false;
             }
             else
             {
@@ -420,6 +421,17 @@ public class Miner
         MapLocation[] trollQ =
             new MapLocation[GameConstants.MAP_MAX_WIDTH
                 * GameConstants.MAP_MAX_HEIGHT];
+// enemyTowers = rc.senseEnemyTowerLocations();
+// int towerNum = enemyTowers.length;
+
+// int towerRange = RobotType.TOWER.attackRadiusSquared;
+
+// for(int i = 0; i < towerNum; ++i)
+// {
+// int towerX = enemyTowers[i].x;
+// int towerY = enemyTowers[i].y;
+// for(int )
+// }
 
         int startQ = 0, endQ = 0;
         mapPointers[mLocation.x - mapOffsetX][mLocation.y - mapOffsetY] = -1;
@@ -427,9 +439,9 @@ public class Miner
         int cX, cY, oX, oY;
         cX = mLocation.x - mapOffsetX;
         cY = mLocation.y - mapOffsetY;
-        for (int i = 0; i < 8; i += 2)
+        for (int i = 0; i < 8; ++i)
         {
-            MapLocation next = mLocation.add(directions[i]);
+            MapLocation next = mLocation.add(minerDirs[i]);
             oX = next.x - mapOffsetX;
             oY = next.y - mapOffsetY;
             if (mapPointers[oX][oY] == 0)
@@ -437,11 +449,6 @@ public class Miner
                 mapPointers[oX][oY] = cX * Constants.MAP_HEIGHT + cY;
                 mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
                 trollQ[endQ++] = next;
-            }
-
-            if (i == 6)
-            {
-                i = -1;
             }
         }
 
@@ -486,9 +493,9 @@ public class Miner
                     break;
                 }
 
-                for (int i = 0; i < 8; i += 2)
+                for (int i = 0; i < 8; ++i)
                 {
-                    MapLocation next = cur.add(directions[i]);
+                    MapLocation next = cur.add(minerDirs[i]);
                     oX = next.x - mapOffsetX;
                     oY = next.y - mapOffsetY;
                     if (mapPointers[oX][oY] == 0)
@@ -496,11 +503,6 @@ public class Miner
                         mapPointers[oX][oY] = cX * Constants.MAP_HEIGHT + cY;
                         mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
                         trollQ[endQ++] = next;
-                    }
-
-                    if (i == 6)
-                    {
-                        i = -1;
                     }
                 }
             }

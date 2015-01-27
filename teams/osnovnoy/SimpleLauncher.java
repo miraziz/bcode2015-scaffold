@@ -31,6 +31,7 @@ public class SimpleLauncher
         missileToAdd = -1;
         RobotInfo[] enemies =
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
+        enemyTowers = rc.senseEnemyTowerLocations();
         attackEnemies(enemies);
         if (rc.isCoreReady())
         {
@@ -67,7 +68,6 @@ public class SimpleLauncher
             // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
 // rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
             closestTowerOrHQ = null;
-            enemyTowers = rc.senseEnemyTowerLocations();
             int enemyNum = enemyTowers.length;
             for (int i = 0; i < enemyNum; ++i)
             {
