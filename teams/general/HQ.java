@@ -170,14 +170,14 @@ public class HQ
         rc.setIndicatorString(
             2,
             "Distance: " + allyHQ.distanceSquaredTo(enemyHQ));
-        int maxDist = 750;
+        int maxDist = 500;
         if (enemyTowers.length == 1)
         {
-            maxDist = 500;
+            maxDist = 400;
         }
         else if (enemyTowers.length == 2)
         {
-            maxDist = 250;
+            maxDist = 300;
         }
         return allyHQ.distanceSquaredTo(enemyHQ) <= maxDist;
     }
