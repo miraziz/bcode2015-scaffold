@@ -28,12 +28,14 @@ public abstract class Proletariat
     protected int         mTypeChannel;
     private int           turnCount;
     private int           bugFailureCount;
+    protected boolean     avoidTowers;
 
 
     public Proletariat(RobotController rc)
         throws GameActionException
     {
         super(rc);
+        avoidTowers = true;
         visited = rc.getLocation();
         onWall = false;
         dest = null;
@@ -222,7 +224,8 @@ public abstract class Proletariat
             turnRight = !turnRight;
         }
         boolean clear =
-            rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
+            rc.isPathable(rc.getType(), next)
+                && (!avoidTowers || !this.inEnemyTowerRange(dir));
 // if (rc.getType() != RobotType.BEAVER)
 // {
         clear = clear && !visited.equals(next);
