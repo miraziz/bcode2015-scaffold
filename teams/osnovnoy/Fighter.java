@@ -168,7 +168,7 @@ public class Fighter
         }
         if (enemyCount == 0)
         {
-            bug();
+            bugWithCounter();
             return;
         }
         avgX /= enemyCount;
@@ -183,7 +183,7 @@ public class Fighter
         committed = false;
         if (myTeamHealth >= enemyTeamHealth * 2)
         {
-            bug();
+            bugWithCounter();
         }
         else if (myTeamHealth < enemyTeamHealth * 2)
         {
@@ -194,7 +194,7 @@ public class Fighter
         }
         else if (!inDangerRange)
         {
-            bug();
+            bugWithCounter();
         }
 
     }
@@ -266,5 +266,23 @@ public class Fighter
             priority = 1;
         }
         return priority;
+    }
+
+
+    protected MapLocation getClosestTowerOrHQ()
+    {
+        MapLocation closest = enemyHQ;
+        int closestDist = rc.getLocation().distanceSquaredTo(enemyHQ);
+        enemyTowers = rc.senseEnemyTowerLocations();
+        for (int i = 0; i < enemyTowers.length; i++)
+        {
+            int dist = rc.getLocation().distanceSquaredTo(enemyTowers[i]);
+            if (dist < closestDist)
+            {
+                closest = enemyTowers[i];
+                closestDist = dist;
+            }
+        }
+        return closest;
     }
 }

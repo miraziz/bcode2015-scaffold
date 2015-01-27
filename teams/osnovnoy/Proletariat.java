@@ -26,7 +26,8 @@ public abstract class Proletariat
     protected Direction   facing;
     protected int         mTypeNumber;
     protected int         mTypeChannel;
-    int                   turnCount;
+    private int           turnCount;
+    private int           bugFailureCount;
 
 
     public Proletariat(RobotController rc)
@@ -53,6 +54,11 @@ public abstract class Proletariat
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
         manageSupply();
+        if (rc.getType() == RobotType.BEAVER)
+        {
+            rc.setIndicatorString(2, "My visited loc: " + visited
+                + ", error count: " + this.bugFailureCount);
+        }
     }
 
 
@@ -136,7 +142,7 @@ public abstract class Proletariat
     protected boolean bug()
         throws GameActionException
     {
-        if (this.turnCount == 9)
+        if (this.turnCount > 9)
         {
             return false;
         }
@@ -181,6 +187,30 @@ public abstract class Proletariat
     }
 
 
+    protected boolean bugWithCounter()
+        throws GameActionException
+    {
+        if (bugFailureCount < 3)
+        {
+            if (bug())
+            {
+                bugFailureCount = 0;
+                return true;
+            }
+            else
+            {
+                bugFailureCount++;
+                return false;
+            }
+        }
+        else
+        {
+            visited = rc.getLocation();
+            return bug();
+        }
+    }
+
+
     private boolean isClear(Direction dir)
         throws GameActionException
     {
@@ -190,10 +220,15 @@ public abstract class Proletariat
         {
             facing = facing.opposite();
             turnRight = !turnRight;
-            turnCount = 0;
         }
-        return rc.isPathable(rc.getType(), next) && !visited.equals(next)
-            && !this.inEnemyTowerRange(dir);
+        boolean clear =
+            rc.isPathable(rc.getType(), next) && !this.inEnemyTowerRange(dir);
+// if (rc.getType() != RobotType.BEAVER)
+// {
+        clear = clear && !visited.equals(next);
+
+// }
+        return clear;
     }
 
 
@@ -208,6 +243,7 @@ public abstract class Proletariat
                 visited = rc.getLocation();
             }
             rc.move(dir);
+            this.bugFailureCount = 0;
             return true;
         }
         else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
@@ -440,7 +476,7 @@ public abstract class Proletariat
         Direction left = dir;
         Direction right = dir;
         int count = 0;
-        while (!canMove(dir) && count < turns)
+        while (!rc.canMove(dir) && count < turns)
         {
             if (count % 2 == 0)
             {
@@ -462,12 +498,6 @@ public abstract class Proletariat
         {
             return null;
         }
-    }
-
-
-    private boolean canMove(Direction dir)
-    {
-        return rc.canMove(dir);
     }
 
 
@@ -517,7 +547,7 @@ public abstract class Proletariat
      * @return True if this unit moved away, false otherwise.
      * @throws GameActionException
      */
-    protected boolean runAway()
+    protected boolean runAwayOrAttack()
         throws GameActionException
     {
         RobotInfo[] enemies =
@@ -527,25 +557,51 @@ public abstract class Proletariat
             return false;
         }
 
+        MapLocation closestMiner = null;
         int enemiesThatCanAttack = 0;
         int avgX = 0;
         int avgY = 0;
         for (RobotInfo enemy : enemies)
         {
-            if (!enemy.type.canMine()
-                && enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
+            int dist = mLocation.distanceSquaredTo(enemy.location);
+            if (dist <= enemy.type.attackRadiusSquared)
             {
-                avgX += enemy.location.x;
-                avgY += enemy.location.y;
-                enemiesThatCanAttack++;
+                if (enemy.type.canMine())
+                {
+                    closestMiner = enemy.location;
+                }
+                else
+                {
+                    avgX += enemy.location.x;
+                    avgY += enemy.location.y;
+                    enemiesThatCanAttack++;
+                }
             }
         }
-        avgX /= enemies.length;
-        avgY /= enemies.length;
 
         if (enemiesThatCanAttack == 0)
         {
-            return false;
+            if (closestMiner != null)
+            {
+                if (rc.isWeaponReady())
+                {
+                    rc.attackLocation(closestMiner);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            avgX /= enemiesThatCanAttack;
+            avgY /= enemiesThatCanAttack;
         }
 
         Direction dirAway =
@@ -594,7 +650,7 @@ public abstract class Proletariat
 
         if (rc.getType() == RobotType.LAUNCHER)
         {
-            supplyPriority = 5;
+            supplyPriority = 10;
         }
         else if (rc.getType() == RobotType.COMMANDER)
         {

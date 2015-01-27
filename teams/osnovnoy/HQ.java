@@ -12,12 +12,15 @@ import battlecode.common.*;
 public class HQ
     extends AttackBuilding
 {
-    private LinkedList<BeaverTask> tasks;
-    boolean                        attacking;
-    private boolean                shouldRun;
-    MapLocation                    defaultRallyLoc;
+    private LinkedList<BeaverTask>  tasks;
+    boolean                         attacking;
+    private boolean                 shouldRun;
+    MapLocation                     defaultRallyLoc;
+    private int                     maxBuildingCount;
+    private boolean[][]             visited;
+    private LinkedList<MapLocation> queue;
 
-    private int                    buildingCount;
+    private int                     buildingCount;
 
 
     public HQ(RobotController rc)
@@ -35,7 +38,7 @@ public class HQ
         // TODO Uh.........
         // builds minerfactory first then others
         tasks = new LinkedList<BeaverTask>();
-        submitBeaverTask(BeaverTask.MINE);
+        submitBeaverTask(BeaverTask.BUILD_HANDWASHSTATION);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
@@ -60,48 +63,47 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
         submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
         submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         sendBeaverTasks();
@@ -114,6 +116,15 @@ public class HQ
 
         System.out.println("Took " + Clock.getBytecodeNum()
             + " bytecodes so far");
+
+        maxBuildingCount = Constants.MAXIMUM_BUILDINGS;
+
+        visited = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+        queue = new LinkedList<MapLocation>();
+        queue.offer(allyHQ);
+        System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
+            + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
+        visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
 
         fillBuildingPath();
 
@@ -129,11 +140,27 @@ public class HQ
     public void run()
         throws GameActionException
     {
+        super.run();
+
         allyTowers = rc.senseTowerLocations();
-        int roundNum = Clock.getRoundNum();
-        if (roundNum > 1000)
+        if (rc.readBroadcast(Channels.buildPathCount) >= 0.8 * maxBuildingCount)
         {
-            Constants.beaverLimit = 3;
+            maxBuildingCount += Constants.MAXIMUM_BUILDINGS;
+            fillBuildingPath();
+        }
+        else if (buildingCount < maxBuildingCount)
+        {
+            fillBuildingPath();
+        }
+
+        int roundNum = Clock.getRoundNum();
+        if (roundNum > 500)
+        {
+            Constants.beaverLimit = 6;
+        }
+        else if (roundNum > 400)
+        {
+            Constants.beaverLimit = 4;
         }
         else if (roundNum > 25)
         {
@@ -145,8 +172,6 @@ public class HQ
         }
 
         rc.broadcast(Channels.minerPotato, 4 - roundNum / 501);
-
-        super.run();
 
         int beaverCount = rc.readBroadcast(Channels.beaverCount);
         if (rc.isCoreReady() && roundNum >= 20)
@@ -199,138 +224,6 @@ public class HQ
     }
 
 
-    private enum Symmetry
-    {
-        ROTATION,
-        X_REFLECTION,
-        Y_REFLECTION
-    }
-
-
-    /**
-     * Determines the symmetry of the map.
-     * 
-     * @return The symmetry of the map.
-     */
-    private Symmetry findSymmetry()
-    {
-        if (allyHQ.x == enemyHQ.x)
-        {
-            int yAxis = (allyHQ.y + enemyHQ.y) / 2;
-            boolean works = true;
-            for (MapLocation enemy : enemyTowers)
-            {
-                works = false;
-                for (MapLocation ally : allyTowers)
-                {
-                    if (enemy.x == ally.x
-                        && ((enemy.y - yAxis) == -(ally.y - yAxis)))
-                    {
-                        works = true;
-                        break;
-                    }
-                }
-                if (!works)
-                {
-                    break;
-                }
-            }
-
-            if (works)
-            {
-                return Symmetry.X_REFLECTION;
-            }
-            else
-            {
-                return Symmetry.ROTATION;
-            }
-        }
-        else if (allyHQ.y == enemyHQ.y)
-        {
-            int xAxis = (allyHQ.x + enemyHQ.x) / 2;
-            boolean works = true;
-            for (MapLocation enemy : enemyTowers)
-            {
-                works = false;
-                for (MapLocation ally : allyTowers)
-                {
-                    if (enemy.y == ally.y
-                        && ((enemy.x - xAxis) == -(ally.x - xAxis)))
-                    {
-                        works = true;
-                        break;
-                    }
-                }
-                if (!works)
-                {
-                    break;
-                }
-            }
-
-            if (works)
-            {
-                return Symmetry.Y_REFLECTION;
-            }
-            else
-            {
-                return Symmetry.ROTATION;
-            }
-        }
-        else
-        {
-            return Symmetry.ROTATION;
-        }
-    }
-
-
-    /**
-     * such a big method lol oops. puts the towers in order based on their
-     * vulnerability, now in the enemytowers and mytowers, the towers are
-     * ordered from most vulnerable to least, but only in the HQ. Needs testing
-     * 
-     * @throws GameActionException
-     */
-    private void analyzeTowers()
-        throws GameActionException
-    {
-        System.out.println("Starting tower analysis");
-
-        PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
-        for (int i = 0; i < allyTowers.length; i++)
-        {
-            int vulnerabilityScore =
-                rc.readBroadcast(Channels.towerVulnerability
-                    + Constants.CHANNELS_PER_TOWER_VULN * i + 1);
-            myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
-        }
-
-        System.out.println("Towers analyzed");
-        Symmetry symmetry = findSymmetry();
-
-        int i = 0;
-        while (!myTowers.isEmpty())
-        {
-            TowerRank t = myTowers.poll();
-            this.allyTowers[i] = t.loc;
-            int xOffset = allyHQ.x - allyTowers[i].x;
-            int yOffset = allyHQ.y - allyTowers[i].y;
-            int x = xOffset;
-            int y = yOffset;
-            if (symmetry == Symmetry.X_REFLECTION)
-            {
-                x *= -1;
-            }
-            else if (symmetry == Symmetry.Y_REFLECTION)
-            {
-                y *= -1;
-            }
-            this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
-            i++;
-        }
-
-    }
-
-
     // -------------------------------------------------------------------------------
 
     /**
@@ -339,15 +232,8 @@ public class HQ
     private void fillBuildingPath()
         throws GameActionException
     {
-        boolean[][] visited =
-            new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
-        LinkedList<MapLocation> queue = new LinkedList<MapLocation>();
-
-        queue.offer(allyHQ);
-        System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
-            + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
-        visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
-        while (!queue.isEmpty() && buildingCount <= Constants.MAXIMUM_BUILDINGS)
+        while (!queue.isEmpty() && buildingCount < maxBuildingCount
+            && Clock.getBytecodesLeft() > 5000)
         {
             MapLocation cur = queue.poll();
 
@@ -370,7 +256,6 @@ public class HQ
             }
         }
         rc.broadcast(Channels.buildPathLength, buildingCount);
-        System.out.println("Building count: " + buildingCount);
     }
 
 
@@ -494,6 +379,138 @@ public class HQ
         rc.broadcast(Channels.basherCount, 0);
         rc.broadcast(Channels.tankCount, 0);
         rc.broadcast(Channels.droneCount, 0);
+    }
+
+
+    /**
+     * such a big method lol oops. puts the towers in order based on their
+     * vulnerability, now in the enemytowers and mytowers, the towers are
+     * ordered from most vulnerable to least, but only in the HQ. Needs testing
+     * 
+     * @throws GameActionException
+     */
+    private void analyzeTowers()
+        throws GameActionException
+    {
+        System.out.println("Starting tower analysis");
+
+        PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
+        for (int i = 0; i < allyTowers.length; i++)
+        {
+            int vulnerabilityScore =
+                rc.readBroadcast(Channels.towerVulnerability
+                    + Constants.CHANNELS_PER_TOWER_VULN * i + 1);
+            myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
+        }
+
+        System.out.println("Towers analyzed");
+        Symmetry symmetry = findSymmetry();
+
+        int i = 0;
+        while (!myTowers.isEmpty())
+        {
+            TowerRank t = myTowers.poll();
+            this.allyTowers[i] = t.loc;
+            int xOffset = allyHQ.x - allyTowers[i].x;
+            int yOffset = allyHQ.y - allyTowers[i].y;
+            int x = xOffset;
+            int y = yOffset;
+            if (symmetry == Symmetry.X_REFLECTION)
+            {
+                x *= -1;
+            }
+            else if (symmetry == Symmetry.Y_REFLECTION)
+            {
+                y *= -1;
+            }
+            this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
+            i++;
+        }
+
+    }
+
+
+    private enum Symmetry
+    {
+        ROTATION,
+        X_REFLECTION,
+        Y_REFLECTION
+    }
+
+
+    /**
+     * Determines the symmetry of the map.
+     * 
+     * @return The symmetry of the map.
+     */
+    private Symmetry findSymmetry()
+    {
+        if (allyHQ.x == enemyHQ.x)
+        {
+            int yAxis = (allyHQ.y + enemyHQ.y) / 2;
+            boolean works = true;
+            for (MapLocation enemy : enemyTowers)
+            {
+                works = false;
+                for (MapLocation ally : allyTowers)
+                {
+                    if (enemy.x == ally.x
+                        && ((enemy.y - yAxis) == -(ally.y - yAxis)))
+                    {
+                        works = true;
+                        break;
+                    }
+                }
+                if (!works)
+                {
+                    break;
+                }
+            }
+
+            if (works)
+            {
+                return Symmetry.X_REFLECTION;
+            }
+            else
+            {
+                return Symmetry.ROTATION;
+            }
+        }
+        else if (allyHQ.y == enemyHQ.y)
+        {
+            int xAxis = (allyHQ.x + enemyHQ.x) / 2;
+            boolean works = true;
+            for (MapLocation enemy : enemyTowers)
+            {
+                works = false;
+                for (MapLocation ally : allyTowers)
+                {
+                    if (enemy.y == ally.y
+                        && ((enemy.x - xAxis) == -(ally.x - xAxis)))
+                    {
+                        works = true;
+                        break;
+                    }
+                }
+                if (!works)
+                {
+                    break;
+                }
+            }
+
+            if (works)
+            {
+                return Symmetry.Y_REFLECTION;
+            }
+            else
+            {
+                return Symmetry.ROTATION;
+            }
+        }
+        else
+        {
+            return Symmetry.ROTATION;
+        }
     }
 
 

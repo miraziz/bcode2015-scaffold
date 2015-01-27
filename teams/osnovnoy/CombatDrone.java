@@ -125,6 +125,6 @@ public class CombatDrone
         {
             return;
         }
-        bug();
+        bugWithCounter();
     }
 }

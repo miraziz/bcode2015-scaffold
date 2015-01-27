@@ -28,6 +28,7 @@ public class Commander
         attack(nearby);
         if (!rc.isCoreReady())
         {
+            enemyTowers = rc.senseEnemyTowerLocations();
             return;
         }
         if (runningAway && rc.getSupplyLevel() > 1000 && rc.getHealth() > 100)
@@ -157,7 +158,7 @@ public class Commander
                 return;
             }
         }
-        bug();
+        bugWithCounter();
     }
 
 

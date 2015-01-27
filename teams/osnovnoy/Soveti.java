@@ -198,9 +198,22 @@ public abstract class Soveti
     }
 
 
+    /*
+     * protected int getLocChannel(MapLocation loc) { return ((loc.x -
+     * mapOffsetX) * Constants.MAP_HEIGHT + (loc.y - mapOffsetY)); }
+     */
+
     protected int getLocChannel(MapLocation loc)
     {
-        return ((loc.x - mapOffsetX) * Constants.MAP_HEIGHT + (loc.y - mapOffsetY));
+        return (3 * (Math.abs(loc.x - allyHQ.x) * 100))
+            ^ (7 * Math.abs(loc.y - allyHQ.y));
+    }
+
+
+    protected int getIdChannel(MapLocation loc)
+    {
+        return (3 * (Math.abs(loc.x - allyHQ.x) * 100))
+            ^ (7 * Math.abs(loc.y - allyHQ.y)) + 1;
     }
 
 }

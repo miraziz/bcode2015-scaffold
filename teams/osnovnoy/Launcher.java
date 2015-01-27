@@ -2,6 +2,8 @@ package osnovnoy;
 
 import battlecode.common.*;
 
+// TODO Reduce bytecode usage
+
 public class Launcher
     extends Fighter
 {
@@ -34,9 +36,9 @@ public class Launcher
 
         if (rc.isCoreReady())
         {
-            if (!runAway())
+            if (!runAwayOrAttack())
             {
-                bug();
+                bugWithCounter();
             }
         }
 
@@ -145,7 +147,7 @@ public class Launcher
     }
 
 
-    protected boolean runAway()
+    protected boolean runAwayOrAttack()
         throws GameActionException
     {
         RobotInfo[] enemies =

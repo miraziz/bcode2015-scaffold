@@ -2,6 +2,10 @@ package osnovnoy;
 
 import battlecode.common.*;
 
+// TODO Avoid enemy towers and HQ when BFSing
+// TODO Reduce threshold when no ore found
+// TODO BFS Bug in patches.xml
+// TODO Run if being hit while calculating closest ore
 /**
  * Miner class.
  * 
@@ -153,9 +157,9 @@ public class Miner
             // TODO Don't go back in the direction of the enemy. Have some
 // memory that prevents you from going in that direction for some K turns before
 // trying again
-            if (runAway())
+            if (runAwayOrAttack())
             {
-                doing = "Running away";
+                doing = "Running away or attacking";
                 pathFollowing = false;
             }
             else

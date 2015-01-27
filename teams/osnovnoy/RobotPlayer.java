@@ -27,11 +27,11 @@ public class RobotPlayer
         }
         else if (rc.getType() == RobotType.LAUNCHER)
         {
-            robot = new Launcher(rc);
+            robot = new SimpleLauncher(rc);
         }
         else if (rc.getType() == RobotType.MISSILE)
         {
-            robot = new Missile(rc);
+            robot = new SimpleMissile(rc);
         }
         else if (rc.getType() == RobotType.SUPPLYDEPOT)
         {
@@ -89,10 +89,17 @@ public class RobotPlayer
         {
             robot = new Commander(rc);
         }
+        else if (rc.getType() == RobotType.HANDWASHSTATION)
+        {
+            robot = new HandwashStation(rc);
+        }
+        else if (rc.getType() == RobotType.COMPUTER)
+        {
+            robot = new Computer(rc);
+        }
 
         while (true)
         {
-// int currentRound = Clock.getRoundNum();
             try
             {
                 robot.run();
