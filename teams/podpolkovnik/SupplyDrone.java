@@ -24,7 +24,7 @@ public class SupplyDrone
         rc.broadcast(
             Channels.droneCount,
             rc.readBroadcast(Channels.droneCount) + 1);
-        if (returningToBase && rc.getSupplyLevel() > 20000)
+        if (returningToBase && rc.getSupplyLevel() > 10000)
         {
             returningToBase = false;
         }
@@ -54,7 +54,7 @@ public class SupplyDrone
     public void transferSupplies()
         throws GameActionException
     {
-        if (rc.getSupplyLevel() < 100)
+        if (rc.getSupplyLevel() < 500)
         {
             return;
         }
@@ -69,12 +69,21 @@ public class SupplyDrone
                 return;
             }
             if (this.isSupplyingUnit(r.type) && r.supplyLevel < 200
-                && rc.getSupplyLevel() > 100)
+                && rc.getSupplyLevel() > 500)
             {
                 double supplyTransfer =
                     Math.min(
-                        rc.getSupplyLevel() - 50,
+                        rc.getSupplyLevel() - 500,
                         (getSupplyPriority(r.type) * 1000) - r.supplyLevel);
+                if (rc.getLocation().distanceSquaredTo(
+                    getLocation(Channels.supplyLoc)) <= 25)
+                {
+                    supplyTransfer =
+                        Math.min(
+                            rc.getSupplyLevel() - 500,
+                            rc.getSupplyLevel() * .8);
+                }
+
                 if (supplyTransfer > 0)
                 {
                     rc.transferSupplies((int)supplyTransfer, r.location);
