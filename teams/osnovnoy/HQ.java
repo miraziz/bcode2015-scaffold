@@ -89,22 +89,45 @@ public class HQ
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
         submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
-        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+
+        if (shouldBuildBarracks())
+        {
+            broadcastLocation(Channels.rallyLoc, findRallyPoint());
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+            submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
+            submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        }
+        else
+        {
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+            submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+            submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+            submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+            submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        }
 
         sendBeaverTasks();
         this.pathId = 1;
@@ -154,6 +177,10 @@ public class HQ
         }
 
         int roundNum = Clock.getRoundNum();
+        if (roundNum > 350)
+        {
+            Constants.droneLimit = 2;
+        }
         if (roundNum > 500)
         {
             Constants.beaverLimit = 6;
@@ -359,10 +386,22 @@ public class HQ
         {
             rc.broadcast(Channels.shouldSpawnDrone, 1);
         }
-        if (soldierCount < Constants.soldierLimit)
+        if (soldierCount < 5)
         {
             rc.broadcast(Channels.shouldSpawnSoldier, 1);
         }
+        else
+        {
+            if (basherCount < soldierCount * 2)
+            {
+                rc.broadcast(Channels.shouldSpawnBasher, 1);
+            }
+            else
+            {
+                rc.broadcast(Channels.shouldSpawnSoldier, 1);
+            }
+        }
+
         if (!attacking && tankCount >= Constants.requiredTanksForAttack)
         {
             attacking = true;
@@ -528,19 +567,46 @@ public class HQ
                 GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                 myTeam);
 
+        int count = 0;
+        RobotInfo toGive = null;
         for (RobotInfo r : allies)
         {
-            if (Clock.getBytecodesLeft() < 550)
+            if (r.type == RobotType.DRONE)
             {
-                return;
+                toGive = r;
+                break;
             }
-            if (r.type == RobotType.COMMANDER || r.type.canSpawn())
+            else if (r.type.canAttack() && r.type != RobotType.BEAVER)
             {
-                rc.transferSupplies(
-                    (int)(rc.getSupplyLevel() * .90),
-                    r.location);
-                return;
+                if (toGive == null)
+                {
+                    toGive = r;
+                }
+                else if (r.supplyLevel < toGive.supplyLevel)
+                {
+                    toGive = r;
+                }
             }
         }
+        if (toGive != null)
+        {
+            if (toGive.type == RobotType.DRONE)
+            {
+                rc.transferSupplies((int)rc.getSupplyLevel(), toGive.location);
+            }
+            else
+            {
+                rc.transferSupplies(
+                    (int)(rc.getSupplyLevel() * .3),
+                    toGive.location);
+            }
+        }
+    }
+
+
+    private boolean shouldBuildBarracks()
+    {
+        return enemyTowers.length <= 3
+            && allyHQ.distanceSquaredTo(enemyHQ) <= 2000;
     }
 }

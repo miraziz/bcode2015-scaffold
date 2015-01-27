@@ -202,6 +202,14 @@ public class HQ
     private void manageRallyLoc(int roundNum)
         throws GameActionException
     {
+        if (((roundNum % 100) - 50) == 0 && roundNum >= 450)
+        {
+            rc.broadcast(Channels.attacking, 1);
+        }
+        else
+        {
+            rc.broadcast(Channels.attacking, 0);
+        }
         if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
             attacking = true;

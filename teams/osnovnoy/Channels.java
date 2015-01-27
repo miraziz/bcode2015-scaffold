@@ -39,6 +39,7 @@ public class Channels
     static int              supplyLoc             = 50030;
     static int              supplyPriority        = 50031;
     static int              supplyDistance        = 50032;
+    static int              supplyId              = 50033;
 
     // commands
     static int              beaverTasksTaken      = 50049;

@@ -45,7 +45,6 @@ public class Commander
             this.setDestination(getLocation(Channels.rallyLoc));
         }
         micro(nearby);
-
     }
 
 

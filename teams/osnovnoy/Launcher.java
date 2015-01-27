@@ -70,7 +70,9 @@ public class Launcher
             if (nearbyEnemies.length > 0)
             {
                 RobotInfo[] nearbyAllies =
-                    rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED);
+                    rc.senseNearbyRobots(
+                        Constants.MISSILE_MAX_RANGE_SQUARED,
+                        myTeam);
                 nearbyMap =
                     new int[3 * Constants.MISSILE_MAX_RANGE][3 * Constants.MISSILE_MAX_RANGE];
                 nearbyMapX = mLocation.x - Constants.MISSILE_MAX_RANGE;

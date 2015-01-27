@@ -84,6 +84,38 @@ public abstract class Proletariat
     }
 
 
+    protected Direction findSafeDir(Direction dir)
+        throws GameActionException
+    {
+        Direction left = dir;
+        Direction right = dir;
+        int count = 0;
+        while (!rc.canMove(dir) || inEnemyRange(mLocation.add(dir))
+            && count < 8)
+        {
+            if (count % 2 == 0)
+            {
+                left = left.rotateLeft();
+                dir = left;
+            }
+            else
+            {
+                right = right.rotateRight();
+                dir = right;
+            }
+            count++;
+        }
+        if (count < 8)
+        {
+            return dir;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+
     protected boolean moveSafely(Direction dir)
         throws GameActionException
     {
@@ -335,10 +367,14 @@ public abstract class Proletariat
     public void transferSupplies()
         throws GameActionException
     {
+        if (rc.isCoreReady() && rc.getType() != RobotType.COMMANDER)
+        {
+            return;
+        }
         int supplyThreshhold = 500;
         if (rc.getType() == RobotType.COMMANDER)
         {
-            supplyThreshhold = 5000;
+            supplyThreshhold = 2500;
         }
         if (rc.getSupplyLevel() > supplyThreshhold)
         {
@@ -351,21 +387,6 @@ public abstract class Proletariat
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                     myTeam);
 
-            if (rc.getID() == 16995)
-            {
-                for (int i = 0; i < allies.length && i < 3; ++i)
-                {
-                    int red = i == 2 ? 255 : 0;
-                    int green = i == 0 ? 255 : 0;
-                    int blue = i == 1 ? 255 : 0;
-                    rc.setIndicatorLine(
-                        new MapLocation(mapOffsetX, mapOffsetY),
-                        allies[i].location,
-                        red,
-                        green,
-                        blue);
-                }
-            }
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {
@@ -373,10 +394,11 @@ public abstract class Proletariat
                 {
                     return;
                 }
-                if (this.isSupplyingUnit(r.type)
+                if (r.type != RobotType.DRONE
+                    && this.isSupplyingUnit(r.type)
                     && r.supplyLevel < rc.getSupplyLevel()
                     && (targetRobot == null || r.supplyLevel < targetRobot.supplyLevel)
-                    && r.health > (r.type.maxHealth * .10)) // TODO Make
+                    && r.health > (r.type.maxHealth * .20)) // TODO Make
 // constant for percent
                 {
                     targetRobot = r;
@@ -391,7 +413,7 @@ public abstract class Proletariat
                 if (aboutToDie())
                 {
                     rc.transferSupplies(
-                        (int)(rc.getSupplyLevel() * .9),
+                        (int)(rc.getSupplyLevel() * .8),
                         targetRobot.location);
                 }
                 else
@@ -409,7 +431,7 @@ public abstract class Proletariat
     {
         double healthDifference = rc.getHealth() - lastRoundHealth;
         lastRoundHealth = rc.getHealth();
-        if (rc.getHealth() < rc.getType().maxHealth * .10)
+        if (rc.getHealth() < rc.getType().maxHealth * .20)
         {
             return true;
         }
@@ -628,17 +650,17 @@ public abstract class Proletariat
         throws GameActionException
     {
         int supplyPriority = getSupplyPriority(rc.getType());
-        if (rc.getSupplyLevel() < 500)
+        if (rc.getSupplyLevel() < 200)
         {
             int distance = rc.getLocation().distanceSquaredTo(allyHQ);
 
             int curPriority = rc.readBroadcast(Channels.supplyPriority);
-            if (supplyPriority > curPriority
-                || (distance > rc.readBroadcast(Channels.supplyDistance) && supplyPriority == curPriority))
+            if (supplyPriority > curPriority)
             {
                 rc.broadcast(Channels.supplyPriority, supplyPriority);
                 rc.broadcast(Channels.supplyDistance, distance);
                 broadcastLocation(Channels.supplyLoc, rc.getLocation());
+                rc.broadcast(Channels.supplyId, rc.getID());
             }
         }
     }

@@ -24,7 +24,24 @@ public class Soldier
         throws GameActionException
     {
         super.run();
-
+        attacking = rc.readBroadcast(Channels.attacking) == 1;
+        rc.setIndicatorString(0, "Traveling to: "
+            + getLocation(Channels.rallyLoc));
+        if (attacking || committed)
+        {
+            committed = true;
+            this.setDestination(enemyHQ);
+        }
+        else
+        {
+            this.setDestination(getLocation(Channels.rallyLoc));
+        }
+        RobotInfo[] nearby =
+            rc.senseNearbyRobots(rc.getType().sensorRadiusSquared);
+        if (!attack(nearby))
+        {
+            micro(nearby);
+        }
     }
 
 }

@@ -11,8 +11,8 @@ public class Fighter
     extends Proletariat
 {
 
-    private boolean attacking;
-    private boolean committed;
+    protected boolean attacking;
+    protected boolean committed;
 
 
     /**
@@ -57,28 +57,10 @@ public class Fighter
         attacking = rc.readBroadcast(Channels.attacking) == 1;
         rc.setIndicatorString(0, "Traveling to: "
             + getLocation(Channels.rallyLoc));
-        if (attacking)
+        if (attacking || committed)
         {
-            enemyTowers = rc.senseEnemyTowerLocations();
-            if (enemyTowers.length > 0)
-            {
-                MapLocation closest = enemyTowers[0];
-                int minDistance = Integer.MAX_VALUE;
-                for (MapLocation t : enemyTowers)
-                {
-                    int dist = rc.getLocation().distanceSquaredTo(t);
-                    if (dist < minDistance)
-                    {
-                        minDistance = dist;
-                        closest = t;
-                    }
-                }
-                this.setDestination(closest);
-            }
-            else
-            {
-                this.setDestination(enemyHQ);
-            }
+            committed = true;
+            this.setDestination(enemyHQ);
         }
         else
         {
@@ -251,19 +233,31 @@ public class Fighter
         int priority = 0;
         if (type == RobotType.TOWER || type == RobotType.HQ)
         {
-            priority = 4;
+            priority = 6;
+        }
+        else if (type == RobotType.COMMANDER)
+        {
+            priority = 5;
         }
         else if (isAttackingUnit(type))
         {
-            priority = 3;
+            priority = 4;
         }
         else if (type == RobotType.MINER || type == RobotType.BEAVER)
+        {
+            priority = 3;
+        }
+        else if (type.canSpawn())
         {
             priority = 2;
         }
         else if (type.canSpawn())
         {
             priority = 1;
+        }
+        if (rc.getType() == RobotType.SOLDIER && type == RobotType.MISSILE)
+        {
+            priority = 7;
         }
         return priority;
     }

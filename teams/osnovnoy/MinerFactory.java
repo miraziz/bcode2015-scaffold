@@ -37,7 +37,6 @@ public class MinerFactory
                 spawnToEnemy(RobotType.MINER);
             }
         }
-
         rc.broadcast(Channels.minerCount, 0);
     }
 }

@@ -181,9 +181,10 @@ public abstract class Soveti
 
     protected boolean isSupplyingUnit(RobotType type)
     {
-        return type == RobotType.SOLDIER || type == RobotType.TANK
-            || type == RobotType.MINER || type == RobotType.LAUNCHER
-            || type == RobotType.DRONE || type == RobotType.COMMANDER;
+        return type == RobotType.BASHER || type == RobotType.SOLDIER
+            || type == RobotType.TANK || type == RobotType.MINER
+            || type == RobotType.LAUNCHER || type == RobotType.DRONE
+            || type == RobotType.COMMANDER;
     }
 
 
