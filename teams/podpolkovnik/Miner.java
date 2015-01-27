@@ -1,4 +1,4 @@
-package osnovnoy;
+package podpolkovnik;
 
 import battlecode.common.*;
 

@@ -1,4 +1,4 @@
-package kapitan;
+package podpolkovnik;
 
 import battlecode.common.*;
 
@@ -71,7 +71,6 @@ public class Beaver
                 task = getNextTask();
             }
             RobotInfo robAtBuildLoc = null;
-
             if (buildLoc != null && rc.canSenseLocation(buildLoc))
             {
                 robAtBuildLoc = rc.senseRobotAtLocation(buildLoc);

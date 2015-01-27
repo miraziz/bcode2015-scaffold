@@ -1,4 +1,4 @@
-package osnovnoy;
+package podpolkovnik;
 
 import battlecode.common.*;
 
@@ -44,18 +44,6 @@ public class SimpleLauncher
                 {
                     doing = "Bugging";
                     bugWithCounter();
-                }
-                else if (rc.getMissileCount() == 0)
-                {
-                    doing = "Near tower or HQ";
-                    Direction awayFromTowerOrHQ =
-                        getFreeStrafeDirection(mLocation.directionTo(
-                            closestTowerOrHQ).opposite());
-                    if (awayFromTowerOrHQ != null)
-                    {
-                        doing = "Near tower or HQ: moving away";
-                        rc.move(awayFromTowerOrHQ);
-                    }
                 }
             }
             else
@@ -159,6 +147,13 @@ public class SimpleLauncher
             {
 
             }
+            if (rc.getID() == 15236)
+            {
+                System.out.println("DIRECTIN TO: "
+                    + mLocation.directionTo(closestLoc));
+                System.out.println("LAUNCHING TO: " + spawnDir);
+                System.out.println("I AM AT: " + mLocation);
+            }
             rc.launchMissile(spawnDir);
             MapLocation spawnSpot = mLocation.add(spawnDir);
             int channel = getLocChannel(spawnSpot);
@@ -179,7 +174,7 @@ public class SimpleLauncher
     protected Direction getMissileSpawnDir(MapLocation target)
     {
         Direction dir = mLocation.directionTo(target);
-        if (rc.isPathable(RobotType.MISSILE, target))
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
             return dir;
         }
@@ -207,37 +202,33 @@ public class SimpleLauncher
             return false;
         }
 
-        int enemiesThatCanAttack = 0;
+        boolean shouldRun = false;
         int avgX = 0;
         int avgY = 0;
-        for (RobotInfo enemy : enemies)
+        int enemyCount = 0;
+        for (RobotInfo r : enemies)
         {
-            if (!enemy.type.canMine() && enemy.type.canMove())
+            if (!r.type.canMine() && r.type.canMove())
             {
-                avgX += enemy.location.x;
-                avgY += enemy.location.y;
-                enemiesThatCanAttack++;
+                shouldRun = true;
+                avgX += r.location.x;
+                avgY += r.location.y;
+                enemyCount++;
             }
         }
-
-        if (enemiesThatCanAttack == 0)
+        if (shouldRun)
         {
-            return false;
-        }
-        avgX /= enemiesThatCanAttack;
-        avgY /= enemiesThatCanAttack;
-
-        Direction dirAway =
-            mLocation.directionTo(new MapLocation(avgX, avgY)).opposite();
-        Direction[] dirs = getSpanningDirections(dirAway);
-        for (int i = 0; i < dirs.length; i++)
-        {
-            if (moveSafely(dirs[i]))
+            avgX /= enemyCount;
+            avgY /= enemyCount;
+            Direction runDir =
+                this.getFreeStrafeDirection(mLocation.directionTo(
+                    new MapLocation(avgX, avgY)).opposite());
+            if (runDir != null)
             {
-                return true;
+                rc.move(runDir);
             }
         }
-        return false;
+        return true;
     }
 
 
