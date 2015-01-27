@@ -36,7 +36,7 @@ public class Launcher
 
         if (rc.isCoreReady())
         {
-            if (!runAway())
+            if (!runAwayOrAttack())
             {
                 bugWithCounter();
             }
@@ -147,7 +147,7 @@ public class Launcher
     }
 
 
-    protected boolean runAway()
+    protected boolean runAwayOrAttack()
         throws GameActionException
     {
         RobotInfo[] enemies =

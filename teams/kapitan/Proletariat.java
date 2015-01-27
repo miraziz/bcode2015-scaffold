@@ -547,7 +547,7 @@ public abstract class Proletariat
      * @return True if this unit moved away, false otherwise.
      * @throws GameActionException
      */
-    protected boolean runAway()
+    protected boolean runAwayOrAttack()
         throws GameActionException
     {
         RobotInfo[] enemies =
@@ -557,25 +557,51 @@ public abstract class Proletariat
             return false;
         }
 
+        MapLocation closestMiner = null;
         int enemiesThatCanAttack = 0;
         int avgX = 0;
         int avgY = 0;
         for (RobotInfo enemy : enemies)
         {
-            if (!enemy.type.canMine()
-                && enemy.location.distanceSquaredTo(mLocation) <= enemy.type.attackRadiusSquared)
+            int dist = mLocation.distanceSquaredTo(enemy.location);
+            if (dist <= enemy.type.attackRadiusSquared)
             {
-                avgX += enemy.location.x;
-                avgY += enemy.location.y;
-                enemiesThatCanAttack++;
+                if (enemy.type.canMine())
+                {
+                    closestMiner = enemy.location;
+                }
+                else
+                {
+                    avgX += enemy.location.x;
+                    avgY += enemy.location.y;
+                    enemiesThatCanAttack++;
+                }
             }
         }
-        avgX /= enemies.length;
-        avgY /= enemies.length;
 
         if (enemiesThatCanAttack == 0)
         {
-            return false;
+            if (closestMiner != null)
+            {
+                if (rc.isWeaponReady())
+                {
+                    rc.attackLocation(closestMiner);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            avgX /= enemiesThatCanAttack;
+            avgY /= enemiesThatCanAttack;
         }
 
         Direction dirAway =
