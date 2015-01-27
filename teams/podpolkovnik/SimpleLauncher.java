@@ -125,17 +125,6 @@ public class SimpleLauncher
         Direction spawnDir = getMissileSpawnDir(closestLoc);
         if (spawnDir != null)
         {
-            if (Clock.getBytecodesLeft() > 4000)
-            {
-
-            }
-            if (rc.getID() == 15236)
-            {
-                System.out.println("DIRECTIN TO: "
-                    + mLocation.directionTo(closestLoc));
-                System.out.println("LAUNCHING TO: " + spawnDir);
-                System.out.println("I AM AT: " + mLocation);
-            }
             rc.launchMissile(spawnDir);
             MapLocation spawnSpot = mLocation.add(spawnDir);
             int channel = getLocChannel(spawnSpot);

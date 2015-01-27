@@ -118,6 +118,19 @@ public class SimpleLauncher
             }
             else
             {
+                if (rc.getMissileCount() == 5 && rc.isWeaponReady())
+                {
+                    MapLocation target = mLocation.add(facing, 7);
+                    Direction spawnDir = getMissileSpawnDir(target);
+                    if (spawnDir != null)
+                    {
+                        rc.launchMissile(spawnDir);
+                        MapLocation spawnSpot = mLocation.add(spawnDir);
+                        int channel = getLocChannel(spawnSpot);
+                        broadcastLocation(channel, target);
+                        rc.broadcast(channel + 1, 32001);
+                    }
+                }
                 return;
             }
         }
@@ -125,17 +138,6 @@ public class SimpleLauncher
         Direction spawnDir = getMissileSpawnDir(closestLoc);
         if (spawnDir != null)
         {
-            if (Clock.getBytecodesLeft() > 4000)
-            {
-
-            }
-            if (rc.getID() == 15236)
-            {
-                System.out.println("DIRECTIN TO: "
-                    + mLocation.directionTo(closestLoc));
-                System.out.println("LAUNCHING TO: " + spawnDir);
-                System.out.println("I AM AT: " + mLocation);
-            }
             rc.launchMissile(spawnDir);
             MapLocation spawnSpot = mLocation.add(spawnDir);
             int channel = getLocChannel(spawnSpot);
