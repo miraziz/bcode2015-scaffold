@@ -31,6 +31,7 @@ public class SimpleLauncher
         missileToAdd = -1;
         RobotInfo[] enemies =
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
+        enemyTowers = rc.senseEnemyTowerLocations();
         attackEnemies(enemies);
         if (rc.isCoreReady())
         {
@@ -44,18 +45,6 @@ public class SimpleLauncher
                     doing = "Bugging";
                     bugWithCounter();
                 }
-//                else if (rc.getMissileCount() == 0)
-//                {
-//                    doing = "Near tower or HQ";
-//                    Direction awayFromTowerOrHQ =
-//                        getFreeStrafeDirection(mLocation.directionTo(
-//                            closestTowerOrHQ).opposite());
-//                    if (awayFromTowerOrHQ != null)
-//                    {
-//                        doing = "Near tower or HQ: moving away";
-//                        rc.move(awayFromTowerOrHQ);
-//                    }
-//                }
             }
             else
             {
@@ -67,7 +56,6 @@ public class SimpleLauncher
             // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
 // rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
             closestTowerOrHQ = null;
-            enemyTowers = rc.senseEnemyTowerLocations();
             int enemyNum = enemyTowers.length;
             for (int i = 0; i < enemyNum; ++i)
             {
@@ -159,6 +147,13 @@ public class SimpleLauncher
             {
 
             }
+            if (rc.getID() == 15236)
+            {
+                System.out.println("DIRECTIN TO: "
+                    + mLocation.directionTo(closestLoc));
+                System.out.println("LAUNCHING TO: " + spawnDir);
+                System.out.println("I AM AT: " + mLocation);
+            }
             rc.launchMissile(spawnDir);
             MapLocation spawnSpot = mLocation.add(spawnDir);
             int channel = getLocChannel(spawnSpot);
@@ -179,7 +174,7 @@ public class SimpleLauncher
     protected Direction getMissileSpawnDir(MapLocation target)
     {
         Direction dir = mLocation.directionTo(target);
-        if (rc.isPathable(RobotType.MISSILE, target))
+        if (rc.isPathable(RobotType.MISSILE, mLocation.add(dir)))
         {
             return dir;
         }

@@ -3,8 +3,7 @@ package podpolkovnik;
 import battlecode.common.*;
 
 // TODO Avoid enemy towers and HQ when BFSing
-// TODO Reduce threshold when no ore found
-// TODO BFS Bug in patches.xml
+// TODO Have miners attack at the end
 // TODO Run if being hit while calculating closest ore
 /**
  * Miner class.
@@ -24,6 +23,7 @@ public class Miner
     private int           pathFailedCount;
     private MapLocation   minerDest;
     private double        bestOreNum;
+    private boolean       cantFindOre;
 
 
     public Miner(RobotController rc)
@@ -135,22 +135,29 @@ public class Miner
     {
         super.run();
 
-        int mGroup = mTypeNumber % Constants.TOT_MINER_FRACS;
-        if (mGroup < Constants.FAST_MINER_FRACS)
+        String doing = "Not set";
+
+        if (cantFindOre)
         {
-            Constants.MIN_ORE = Constants.FAST_MIN_ORE;
-        }
-        else if (mGroup < Constants.NORM_MINER_FRACS)
-        {
-            Constants.MIN_ORE = Constants.NORM_MIN_ORE;
+            Constants.MIN_ORE = 0.2;
         }
         else
         {
-            Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
+            int mGroup = mTypeNumber % Constants.TOT_MINER_FRACS;
+            if (mGroup < Constants.FAST_MINER_FRACS)
+            {
+                Constants.MIN_ORE = Constants.FAST_MIN_ORE;
+            }
+            else if (mGroup < Constants.NORM_MINER_FRACS)
+            {
+                Constants.MIN_ORE = Constants.NORM_MIN_ORE;
+            }
+            else
+            {
+                Constants.MIN_ORE = Constants.POTATO_MIN_ORE;
+            }
         }
         findDefenseSpot();
-
-        String doing = "Not set";
 
         if (rc.isCoreReady())
         {
@@ -197,12 +204,14 @@ public class Miner
                         MapLocation bestLoc = findClosestOre();
                         if (bestLoc != null)
                         {
+                            cantFindOre = false;
                             doing = "Closest ore found";
 // mLocation = rc.getLocation();
                             setPath(bestLoc);
                         }
                         else
                         {
+                            cantFindOre = true;
                             doing = "Closest ore not found";
                         }
                     }
@@ -224,8 +233,8 @@ public class Miner
 
         rc.setIndicatorString(0, doing);
         rc.setIndicatorString(1, "IS FOLLOWING: " + pathFollowing);
-        rc.setIndicatorString(2, "DEST: " + minerDest);
-        rc.setIndicatorString(3, "ORE: " + bestOreNum);
+        rc.setIndicatorString(2, "DEST: " + minerDest + " Can't find ore: "
+            + cantFindOre);
 
         // TODO If nothing is found, go in a random direction or blow up
 
@@ -274,7 +283,12 @@ public class Miner
     {
         Direction dirToMove = mLocation.directionTo(path[curPathPos]);
         rc.setIndicatorLine(mLocation, path[path.length - 1], 0, 255, 0);
-        if (moveSafely(dirToMove))
+        if (rc.senseTerrainTile(path[curPathPos]) != TerrainTile.NORMAL)
+        {
+            pathFollowing = false;
+            return false;
+        }
+        else if (moveSafely(dirToMove))
         {
             curPathPos++;
             if (curPathPos == path.length)
@@ -407,6 +421,17 @@ public class Miner
         MapLocation[] trollQ =
             new MapLocation[GameConstants.MAP_MAX_WIDTH
                 * GameConstants.MAP_MAX_HEIGHT];
+// enemyTowers = rc.senseEnemyTowerLocations();
+// int towerNum = enemyTowers.length;
+
+// int towerRange = RobotType.TOWER.attackRadiusSquared;
+
+// for(int i = 0; i < towerNum; ++i)
+// {
+// int towerX = enemyTowers[i].x;
+// int towerY = enemyTowers[i].y;
+// for(int )
+// }
 
         int startQ = 0, endQ = 0;
         mapPointers[mLocation.x - mapOffsetX][mLocation.y - mapOffsetY] = -1;
@@ -414,9 +439,9 @@ public class Miner
         int cX, cY, oX, oY;
         cX = mLocation.x - mapOffsetX;
         cY = mLocation.y - mapOffsetY;
-        for (int i = 0; i < 8; i += 2)
+        for (int i = 0; i < 8; ++i)
         {
-            MapLocation next = mLocation.add(directions[i]);
+            MapLocation next = mLocation.add(minerDirs[i]);
             oX = next.x - mapOffsetX;
             oY = next.y - mapOffsetY;
             if (mapPointers[oX][oY] == 0)
@@ -424,11 +449,6 @@ public class Miner
                 mapPointers[oX][oY] = cX * Constants.MAP_HEIGHT + cY;
                 mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
                 trollQ[endQ++] = next;
-            }
-
-            if (i == 6)
-            {
-                i = -1;
             }
         }
 
@@ -439,18 +459,21 @@ public class Miner
             cX = cur.x - mapOffsetX;
             cY = cur.y - mapOffsetY;
 
-            if (Clock.getBytecodesLeft() < 100)
+            if (Clock.getBytecodesLeft() < 200)
             {
                 rc.yield();
             }
-            double ore = rc.senseOre(cur);
 
-            if (ore == -1)
+            TerrainTile tile = rc.senseTerrainTile(cur);
+            if (tile == TerrainTile.UNKNOWN)
             {
                 oreLoc = cur;
                 break;
             }
-            else if (rc.isPathable(RobotType.MINER, cur))
+            // TODO Find a better way to determine if you can move to this
+// location if seen (no robots) or not seen (normal terrain type)
+            else if (((!rc.canSenseLocation(cur) && tile == TerrainTile.NORMAL) || rc
+                .isPathable(RobotType.MINER, cur)))
             {
 // else if (rc.canSenseLocation(cur))
 // {
@@ -462,35 +485,27 @@ public class Miner
 // {
 // // TODO Avoid stationary units in another way (Not just
 // // avoid beavers)
+
+                double ore = rc.senseOre(cur);
                 if (ore >= Constants.MIN_ORE)
                 {
                     oreLoc = cur;
                     break;
                 }
 
-                if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+                for (int i = 0; i < 8; ++i)
                 {
-                    for (int i = 0; i < 8; i += 2)
+                    MapLocation next = cur.add(minerDirs[i]);
+                    oX = next.x - mapOffsetX;
+                    oY = next.y - mapOffsetY;
+                    if (mapPointers[oX][oY] == 0)
                     {
-                        MapLocation next = cur.add(directions[i]);
-                        oX = next.x - mapOffsetX;
-                        oY = next.y - mapOffsetY;
-                        if (mapPointers[oX][oY] == 0)
-                        {
-                            mapPointers[oX][oY] =
-                                cX * Constants.MAP_HEIGHT + cY;
-                            mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
-                            trollQ[endQ++] = next;
-                        }
-
-                        if (i == 6)
-                        {
-                            i = -1;
-                        }
+                        mapPointers[oX][oY] = cX * Constants.MAP_HEIGHT + cY;
+                        mapLevels[oX][oY] = mapLevels[cX][cY] + 1;
+                        trollQ[endQ++] = next;
                     }
                 }
             }
-
         }
 // System.out.println("Finishing findClosestOre: "
 // + Clock.getBytecodeNum());
