@@ -35,97 +35,100 @@ public class CombatDrone
             return;
         }
         int enemyCount = 0;
+        boolean inAttackRange = false;
+        double enemyHealth = 0;
+        double allyHealth = rc.getHealth();
+        boolean shouldRun = false;
+        boolean minersNearby = false;
         int avgX = 0;
         int avgY = 0;
-        int enemyHealth = 0;
-        double allyHealth = rc.getHealth();
-        Direction enemyMissileDir = null;
-        boolean inDanger = false;
-        RobotInfo ri = null;
-        boolean attacking = false;
-        RobotInfo closest = null;
-        Integer minDistance = null;
-        for (int i = 0; i < nearby.length; i++)
+        MapLocation minerLoc = null;
+        for (int i = 0; i < nearby.length; ++i)
         {
-            ri = nearby[i];
-            if (ri.team == enemyTeam)
+            RobotInfo r = nearby[i];
+            int dist = rc.getLocation().distanceSquaredTo(r.location);
+            if (r.team == enemyTeam)
             {
-                if (ri.type == RobotType.MISSILE
-                    && rc.getLocation().distanceSquaredTo(ri.location) < 10)
+                if (r.type.canAttack() && !r.type.canMine())
                 {
-                    enemyMissileDir = ri.location.directionTo(rc.getLocation());
+                    if (dist <= r.type.attackRadiusSquared)
+                    {
+                        inAttackRange = true;
+                    }
+                    if (dist <= r.type.attackRadiusSquared + 4)
+                    {
+                        enemyHealth += r.health;
+                    }
+                    if (r.type == RobotType.MISSILE && dist <= 10)
+                    {
+                        shouldRun = true;
+                    }
                 }
-                else if (ri.type.canAttack() && !ri.type.isBuilding)
+                if (r.type.canMine())
                 {
-                    if (!ri.type.canMine())
+                    minersNearby = true;
+                    if (minerLoc == null
+                        || dist < rc.getLocation().distanceSquaredTo(minerLoc))
                     {
-                        enemyHealth += ri.health;
+                        minerLoc = r.location;
                     }
-                    avgX += ri.location.x;
-                    avgY += ri.location.y;
+                }
+                if (!r.type.isBuilding)
+                {
+                    avgX += r.location.x;
+                    avgY += r.location.y;
                     enemyCount++;
-                    int dist = rc.getLocation().distanceSquaredTo(ri.location);
-                    if (dist < ri.type.attackRadiusSquared)
-                    {
-                        inDanger = true;
-                    }
-                    if (minDistance == null || dist < minDistance)
-                    {
-                        minDistance = dist;
-                        closest = ri;
-                    }
                 }
             }
-        }
-        for (int i = 0; i < nearby.length; i++)
-        {
-            ri = nearby[i];
-            if (ri.team == myTeam)
+            else
             {
-                if (ri.type.canAttack() && !ri.type.isBuilding
-                    && ri.type.canMine())
+                if (r.type == RobotType.DRONE && dist <= 15)
                 {
-                    allyHealth += ri.health;
+                    allyHealth += r.health;
                 }
             }
         }
         if (enemyCount == 0)
         {
-            this.setDestination(getLocation(Channels.rallyLoc));
-        }
-        else
-        {
-            avgX /= enemyCount;
-            avgY /= enemyCount;
-            this.setDestination(new MapLocation(avgX, avgY));
-            if (enemyMissileDir != null)
-            {
-                Direction clearPath = getFreeStrafeDirection(enemyMissileDir);
-                this.setDestination(rc.getLocation().add(clearPath));
-            }
-            if (allyHealth > enemyHealth)
-            {
-                MapLocation enemy = new MapLocation(avgX, avgY);
-                this.setDestination(enemy);
-                attacking = true;
-            }
-            else if (inDanger)
-            {
-                Direction away =
-                    this.getFreeStrafeDirection(new MapLocation(avgX, avgY)
-                        .directionTo(rc.getLocation()));
-                this.setDestination(rc.getLocation().add(away));
-            }
-        }
-        Direction towards =
-            this.getFreeStrafeDirection(rc.getLocation().directionTo(dest));
-        if (!attacking
-            && closest != null
-            && rc.getLocation().add(towards)
-                .distanceSquaredTo(closest.location) <= closest.type.attackRadiusSquared)
-        {
+            this.bugWithCounter();
             return;
         }
-        bugWithCounter();
+        avgX /= enemyCount;
+        avgY /= enemyCount;
+        MapLocation enemy = new MapLocation(avgX, avgY);
+        Direction toEnemy = rc.getLocation().directionTo(enemy);
+
+        if (shouldRun)
+        {
+            this.setDestination(rc.getLocation().add(toEnemy.opposite()));
+        }
+        else if (minersNearby && allyHealth >= enemyHealth)
+        {
+            this.setDestination(minerLoc);
+        }
+        else if (allyHealth >= enemyHealth * 2)
+        {
+            if (inAttackRange)
+            {
+                if (rc.getWeaponDelay() == 3)
+                {
+                    this.setDestination(rc.getLocation()
+                        .add(toEnemy.opposite()));
+                }
+                else if (rc.getWeaponDelay() >= 1)
+                {
+                    this.setDestination(rc.getLocation().add(toEnemy));
+                }
+            }
+            else
+            {
+                this.setDestination(rc.getLocation().add(toEnemy));
+            }
+        }
+        else if (allyHealth < enemyHealth)
+        {
+            this.setDestination(rc.getLocation().add(toEnemy.opposite()));
+        }
+        this.bugWithCounter();
     }
 }

@@ -61,10 +61,10 @@ public class Constants
     static int                 minerLimit                = 40;
 
     // Drone limit for supply drone
-    // static int droneLimit = 1;
+    static int                 droneLimit                = 1;
 
     // Drone limit for combat drone
-    static int                 droneLimit                = 10;
+    // static int droneLimit = 10;
 
     static int                 tankCost                  =
                                                              RobotType.TANK.oreCost;

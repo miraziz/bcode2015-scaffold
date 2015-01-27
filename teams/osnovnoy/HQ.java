@@ -28,6 +28,10 @@ public class HQ
     {
         super(rc);
 
+        boolean needEarlyCommander = false;
+
+        needEarlyCommander = true ? rc.getTeamMemory()[0] == 0 : false;
+
         // Set rally
         // broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
@@ -92,40 +96,41 @@ public class HQ
 
         // SKILLORCZ BUILD
         // ----------------------------
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
-        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
-        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+// submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+// submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+// submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+// submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         // KAPITAN BUILD
         // ---------------------------------
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-// submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
-// submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
-// submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
-// submitBeaverTask(BeaverTask.BUILD_HELIPAD);
-// submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_SUPPLYDEPOT);
+        submitBeaverTask(BeaverTask.BUILD_AEROSPACE);
+        submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
+        submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+        submitBeaverTask(BeaverTask.BUILD_HELIPAD);
+        submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
 
         sendBeaverTasks();
         this.pathId = 1;
