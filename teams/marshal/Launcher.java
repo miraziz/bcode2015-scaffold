@@ -44,15 +44,6 @@ public class Launcher
 
         int took2 = Clock.getRoundNum() - curRound;
 
-        if (took1 > 0)
-        {
-            System.out.println("ATTACKENEMIES TOOK AN EXTRA: " + took1);
-            System.out.println("BUGGING TOOK AN EXTRA: " + (took2 - took1));
-            System.out.println("LEFTOVER BYTECODES: "
-                + Clock.getBytecodesLeft());
-            System.out.println("LAUNCHER UNSUPPLIED: "
-                + (rc.getSupplyLevel() == 0));
-        }
     }
 
 
@@ -98,12 +89,6 @@ public class Launcher
                         // TODO Is rc.canLaunch(toEnemy) necessary?
                         if (toEnemy != null)
                         {
-                            // System.out.println("MISSILE LAUNCH");
-                            if (Clock.getRoundNum() != curRound)
-                            {
-                                System.out.println("Rounds behind: "
-                                    + (Clock.getRoundNum() - curRound));
-                            }
                             rc.launchMissile(toEnemy);
 
                             broadcastLocation(

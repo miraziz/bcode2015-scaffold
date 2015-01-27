@@ -139,16 +139,11 @@ public class HQ
         attacking = false;
         shouldRun = false;
 
-        System.out.println("Took " + Clock.getBytecodeNum()
-            + " bytecodes so far");
-
         maxBuildingCount = Constants.MAXIMUM_BUILDINGS;
 
         visited = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
         queue = new LinkedList<MapLocation>();
         queue.offer(allyHQ);
-        System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
-            + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
         visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
 
         fillBuildingPath();
@@ -167,9 +162,6 @@ public class HQ
         {
             return false;
         }
-        rc.setIndicatorString(
-            2,
-            "Distance: " + allyHQ.distanceSquaredTo(enemyHQ));
         int maxDist = 500;
         if (enemyTowers.length == 1)
         {
@@ -432,7 +424,6 @@ public class HQ
         if (!attacking && tankCount >= Constants.requiredTanksForAttack)
         {
             attacking = true;
-            System.out.println("Tanks should attack now");
             rc.broadcast(Channels.attacking, 1);
         }
 
@@ -458,7 +449,6 @@ public class HQ
     private void analyzeTowers()
         throws GameActionException
     {
-        System.out.println("Starting tower analysis");
 
         PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
         for (int i = 0; i < allyTowers.length; i++)
@@ -469,7 +459,6 @@ public class HQ
             myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
         }
 
-        System.out.println("Towers analyzed");
         Symmetry symmetry = findSymmetry();
 
         int i = 0;

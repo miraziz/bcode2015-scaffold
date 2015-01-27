@@ -97,8 +97,6 @@ public class Drone
             {
                 decision = Decision.ATTACK;
             }
-            rc.setIndicatorString(0, "Enemy count: " + enemyCount);
-            rc.setIndicatorString(1, "" + decision);
             if (decision != Decision.RUN && attack())
             {
                 return;

@@ -127,7 +127,6 @@ public class Commander
         }
         if (runningAway && enemyCount == 0 && rc.getSupplyLevel() > 1000)
         {
-            rc.setIndicatorString(2, "I'm waiting for health now.");
             return;
         }
         if (runningAway || !inDangerousArea)

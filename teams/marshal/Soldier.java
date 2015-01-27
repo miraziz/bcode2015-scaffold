@@ -24,8 +24,6 @@ public class Soldier
     {
         super.run();
         attacking = rc.readBroadcast(Channels.attacking) == 1;
-        rc.setIndicatorString(0, "Traveling to: "
-            + getLocation(Channels.rallyLoc));
         if (attacking || committed)
         {
             this.avoidTowers = false;

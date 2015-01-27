@@ -24,7 +24,6 @@ public class SimpleMissile
         mapOffsetY =
             Math.max(allyHQ.y, enemyHQ.y) - GameConstants.MAP_MAX_HEIGHT;
         int channel = getLocChannel(rc.getLocation());
-        rc.setIndicatorString(2, "My channel: " + channel);
 
         int num = rc.readBroadcast(channel);
         target =
@@ -40,8 +39,6 @@ public class SimpleMissile
     {
         int curRound = Clock.getRoundNum();
 
-        rc.setIndicatorString(1, "TARGET: " + target);
-        rc.setIndicatorString(2, "ID: " + enemyId);
         if (steps > 0)
         {
             if (enemyId == 32001)

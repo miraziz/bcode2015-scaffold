@@ -55,8 +55,6 @@ public class Fighter
         this.setDestination(getLocation(Channels.rallyLoc));
 
         attacking = rc.readBroadcast(Channels.attacking) == 1;
-        rc.setIndicatorString(0, "Traveling to: "
-            + getLocation(Channels.rallyLoc));
         if (attacking)
         {
             enemyTowers = rc.senseEnemyTowerLocations();
@@ -100,7 +98,6 @@ public class Fighter
         {
             return;
         }
-        rc.setIndicatorString(2, "attacking: " + attacking);
         boolean inDangerRange = false;
         boolean inEnemyAttackRange = false;
         boolean nearTowerRange = false;
@@ -146,7 +143,6 @@ public class Fighter
         }
         if (nearTowerRange)
         {
-            rc.setIndicatorLine(mLocation, dest, 150, 150, 150);
             if (rc.getLocation().distanceSquaredTo(dest) <= rc.getType().attackRadiusSquared)
             {
                 return;

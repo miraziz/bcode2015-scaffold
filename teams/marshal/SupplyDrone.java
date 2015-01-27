@@ -32,7 +32,6 @@ public class SupplyDrone
         {
             this.setDestination(allyHQ);
             returningToBase = true;
-            rc.setIndicatorString(1, "Going back to HQ");
             if (rc.isCoreReady())
             {
                 moveTowards(allyHQ);
@@ -41,7 +40,6 @@ public class SupplyDrone
         else
         {
             MapLocation loc = getLocation(Channels.supplyLoc);
-            rc.setIndicatorString(1, "Supplying towards: " + loc);
             if (rc.isCoreReady())
             {
                 moveTowards(getLocation(Channels.supplyLoc));
