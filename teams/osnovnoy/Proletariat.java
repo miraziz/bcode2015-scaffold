@@ -294,18 +294,21 @@ public abstract class Proletariat
     protected boolean inEnemyTowerRange(MapLocation loc)
     {
         int distance = loc.distanceSquaredTo(enemyHQ);
-        if (enemyTowers.length >= 2)
+        int enemyHQRange = RobotType.HQ.sensorRadiusSquared;
+        if (enemyTowers.length >= 5)
         {
-            distance -= 11;
+            // TODO Diagonals might still get hit
+            enemyHQRange++;
         }
-        if (distance <= RobotType.HQ.attackRadiusSquared + 3)
+        if (distance <= enemyHQRange)
         {
             return true;
         }
 
+        int towerRange = RobotType.TOWER.sensorRadiusSquared;
         for (MapLocation r : enemyTowers)
         {
-            if (r.distanceSquaredTo(loc) <= RobotType.TOWER.attackRadiusSquared)
+            if (r.distanceSquaredTo(loc) <= towerRange)
             {
                 return true;
             }
