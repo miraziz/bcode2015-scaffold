@@ -183,7 +183,8 @@ public abstract class Soveti
     {
         return type == RobotType.SOLDIER || type == RobotType.TANK
             || type == RobotType.MINER || type == RobotType.LAUNCHER
-            || type == RobotType.DRONE || type == RobotType.COMMANDER;
+            || type == RobotType.DRONE || type == RobotType.COMMANDER
+            || type == RobotType.BASHER;
     }
 
 

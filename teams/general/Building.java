@@ -42,7 +42,7 @@ public abstract class Building
                 myTeam);
         for (RobotInfo r : nearby)
         {
-            if (Clock.getBytecodesLeft() < 550)
+            if (Clock.getBytecodesLeft() < 600)
             {
                 return;
             }

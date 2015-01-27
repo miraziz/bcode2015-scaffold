@@ -33,7 +33,7 @@ public class HQ
         // broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
         buildingBashers = shouldBuildBarracks();
-        buildingBashers = false;
+        // buildingBashers = false;
 
         broadcastLocation(Channels.rallyLoc, enemyHQ);
 
@@ -105,9 +105,9 @@ public class HQ
             submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_BARRACKS);
-            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_TRAININGFIELD);
             submitBeaverTask(BeaverTask.BUILD_TECHINSTITUTE);
+            submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_BARRACKS);
             submitBeaverTask(BeaverTask.BUILD_MINERFACTORY);
@@ -163,9 +163,23 @@ public class HQ
 
     private boolean shouldBuildBarracks()
     {
-        buildingBashers = true;
-        return enemyTowers.length <= 3
-            && allyHQ.distanceSquaredTo(enemyHQ) <= 2000;
+        if (enemyTowers.length > 2)
+        {
+            return false;
+        }
+        rc.setIndicatorString(
+            2,
+            "Distance: " + allyHQ.distanceSquaredTo(enemyHQ));
+        int maxDist = 750;
+        if (enemyTowers.length == 1)
+        {
+            maxDist = 500;
+        }
+        else if (enemyTowers.length == 2)
+        {
+            maxDist = 250;
+        }
+        return allyHQ.distanceSquaredTo(enemyHQ) <= maxDist;
     }
 
 
@@ -226,8 +240,9 @@ public class HQ
         shouldRun = false;
 
         manageRallyLoc(roundNum);
+
         rc.broadcast(Channels.attacking, 0);
-        if (roundNum % 100 > 0 && roundNum % 100 < 5 && roundNum >= 500)
+        if (roundNum % 175 > 0 && roundNum % 175 < 5 && roundNum >= 500)
         {
             rc.broadcast(Channels.attacking, 1);
         }
@@ -241,6 +256,7 @@ public class HQ
     private void manageRallyLoc(int roundNum)
         throws GameActionException
     {
+
         if (!attacking && Clock.getRoundNum() > Constants.attackRound)
         {
             attacking = true;
