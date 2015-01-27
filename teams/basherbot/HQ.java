@@ -33,6 +33,7 @@ public class HQ
         // broadcastLocation(Channels.rallyLoc, findRallyPoint());
 
         buildingBashers = shouldBuildBarracks();
+        buildingBashers = false;
 
         broadcastLocation(Channels.rallyLoc, enemyHQ);
 
