@@ -33,6 +33,7 @@ public class SimpleLauncher
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
         enemyTowers = rc.senseEnemyTowerLocations();
         attackEnemies(enemies);
+        fixClosestTowerOrHQ();
         if (rc.isCoreReady())
         {
             doing = "Core is ready";
@@ -55,26 +56,7 @@ public class SimpleLauncher
         {
             // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
 // rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
-            closestTowerOrHQ = null;
-            int enemyNum = enemyTowers.length;
-            for (int i = 0; i < enemyNum; ++i)
-            {
-                // TODO Aim for closest towers?
-                if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
-                {
-                    closestTowerOrHQ = enemyTowers[i];
-                    break;
-                }
-            }
-
-            if (closestTowerOrHQ == null)
-            {
-                // TODO Aim at HQ before nearby towers?
-                if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
-                {
-                    closestTowerOrHQ = enemyHQ;
-                }
-            }
+            // fixClosestTowerOrHQ();
         }
         rc.setIndicatorString(0, doing);
         rc.setIndicatorString(1, "Is near tower or HQ: "
@@ -318,5 +300,30 @@ public class SimpleLauncher
             }
         }
         return priority;
+    }
+
+
+    private void fixClosestTowerOrHQ()
+    {
+        closestTowerOrHQ = null;
+        int enemyNum = enemyTowers.length;
+        for (int i = 0; i < enemyNum; ++i)
+        {
+            // TODO Aim for closest towers?
+            if (mLocation.distanceSquaredTo(enemyTowers[i]) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+            {
+                closestTowerOrHQ = enemyTowers[i];
+                break;
+            }
+        }
+
+        if (closestTowerOrHQ == null)
+        {
+            // TODO Aim at HQ before nearby towers?
+            if (mLocation.distanceSquaredTo(enemyHQ) <= Constants.MISSILE_MAX_RANGE_SQUARED)
+            {
+                closestTowerOrHQ = enemyHQ;
+            }
+        }
     }
 }
