@@ -77,7 +77,6 @@ public class Commander
         boolean inEnemyAttackRange = false;
         boolean inDangerousArea = false;
         boolean canAttackSomeone = false;
-        Direction away = null;
         MapLocation lowestHealthLoc = null;
         double lowestHealth = Double.MAX_VALUE;
         for (int i = 0; i < nearby.length; i++)
@@ -127,7 +126,6 @@ public class Commander
         }
         if (runningAway && enemyCount == 0 && rc.getSupplyLevel() > 1000)
         {
-            rc.setIndicatorString(2, "I'm waiting for health now.");
             return;
         }
         if (runningAway || !inDangerousArea)

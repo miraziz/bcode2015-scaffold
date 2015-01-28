@@ -27,7 +27,7 @@ public class SimpleLauncher
         throws GameActionException
     {
         super.run();
-        String doing = "Not set";
+// String doing = "Not set";
         missileToAdd = -1;
         RobotInfo[] enemies =
             rc.senseNearbyRobots(Constants.MISSILE_MAX_RANGE_SQUARED, enemyTeam);
@@ -36,20 +36,20 @@ public class SimpleLauncher
         fixClosestTowerOrHQ();
         if (rc.isCoreReady())
         {
-            doing = "Core is ready";
+// doing = "Core is ready";
             // TODO Move away if empty?
             if (!runAway(enemies))
             {
-                doing = "Did not run away";
+// doing = "Did not run away";
                 if (closestTowerOrHQ == null)
                 {
-                    doing = "Bugging";
+// doing = "Bugging";
                     bugWithCounter();
                 }
             }
             else
             {
-                doing = "Ran away";
+// doing = "Ran away";
             }
         }
         else
@@ -57,14 +57,6 @@ public class SimpleLauncher
             // TODO ONLY DO RIGHT BEFORE MOVING rc.CoreDelay() < 1.5 ||
 // rc.CoreDelay() < 2 && rc.getSupplyLevel() > 0
             // fixClosestTowerOrHQ();
-        }
-        rc.setIndicatorString(0, doing);
-        rc.setIndicatorString(1, "Is near tower or HQ: "
-            + (closestTowerOrHQ == null ? "No" : closestTowerOrHQ));
-        int bytecodesUsed = Clock.getBytecodeNum();
-        if (bytecodesUsed > 3500)
-        {
-            System.out.println("Bytecodes used: " + bytecodesUsed);
         }
     }
 
@@ -83,10 +75,8 @@ public class SimpleLauncher
         int minDistance = 100;
         int maxPriority = 1;
         int enemyNum = enemies.length;
-        int counter = 0;
         for (int i = 0; i < enemyNum && Clock.getBytecodeNum() < 1000; ++i)
         {
-            counter++;
             int priority = getMissilePriority(enemies[i].type);
             int dist = mLocation.distanceSquaredTo(enemies[i].location);
             if (priority > maxPriority)
@@ -104,10 +94,6 @@ public class SimpleLauncher
                 closestType = enemies[i].type;
                 closestID = enemies[i].ID;
             }
-        }
-        if (Clock.getBytecodeNum() > 1000)
-        {
-            System.out.println(counter);
         }
 
         if (closestLoc == null)
@@ -216,69 +202,69 @@ public class SimpleLauncher
     }
 
 
-    private void manageMissiles()
-        throws GameActionException
-    {
-        for (int i = 0; i < missileIds.length; i++)
-        {
-            if (missileToAdd > 0 && missileIds[i] == 0)
-            {
-                missileIds[i] = missileToAdd;
-                missileTurnCount[i] = 0;
-                missileToAdd = -1;
-            }
-            if (rc.canSenseRobot(missileIds[i]))
-            {
-                RobotInfo rob = rc.senseRobot(missileIds[i]);
-                RobotInfo[] nearbyToMissile =
-                    rc.senseNearbyRobots(
-                        rob.location,
-                        (6 * 6) - (missileTurnCount[i] * missileTurnCount[i]),
-                        this.enemyTeam);
-                MapLocation closest =
-                    findClosestEnemy(rob.location, nearbyToMissile);
-                if (closest != null)
-                {
-                    broadcastLocation(this.getLocChannel(rob.location), closest);
-                }
-                else
-                {
-                    rc.broadcast(this.getLocChannel(rob.location), 0);
-                }
-                missileTurnCount[i]++;
-            }
-            else
-            {
-                missileIds[i] = 0;
-                missileTurnCount[i] = 0;
-            }
-        }
-    }
+// private void manageMissiles()
+// throws GameActionException
+// {
+// for (int i = 0; i < missileIds.length; i++)
+// {
+// if (missileToAdd > 0 && missileIds[i] == 0)
+// {
+// missileIds[i] = missileToAdd;
+// missileTurnCount[i] = 0;
+// missileToAdd = -1;
+// }
+// if (rc.canSenseRobot(missileIds[i]))
+// {
+// RobotInfo rob = rc.senseRobot(missileIds[i]);
+// RobotInfo[] nearbyToMissile =
+// rc.senseNearbyRobots(
+// rob.location,
+// (6 * 6) - (missileTurnCount[i] * missileTurnCount[i]),
+// this.enemyTeam);
+// MapLocation closest =
+// findClosestEnemy(rob.location, nearbyToMissile);
+// if (closest != null)
+// {
+// broadcastLocation(this.getLocChannel(rob.location), closest);
+// }
+// else
+// {
+// rc.broadcast(this.getLocChannel(rob.location), 0);
+// }
+// missileTurnCount[i]++;
+// }
+// else
+// {
+// missileIds[i] = 0;
+// missileTurnCount[i] = 0;
+// }
+// }
+// }
 
 
-    private MapLocation findClosestEnemy(MapLocation source, RobotInfo[] robots)
-    {
-        if (robots.length == 0)
-        {
-            return null;
-        }
-        RobotInfo closest = null;
-        int minDistance = 100;
-        for (int i = 0; i < robots.length; i++)
-        {
-            int dist = source.distanceSquaredTo(robots[i].location);
-            if (dist < minDistance && robots[i].type.canAttack())
-            {
-                closest = robots[i];
-            }
-            else if ((closest == null || !closest.type.canAttack())
-                && dist < minDistance && robots[i].type.isBuilding)
-            {
-                closest = robots[i];
-            }
-        }
-        return closest.location;
-    }
+// private MapLocation findClosestEnemy(MapLocation source, RobotInfo[] robots)
+// {
+// if (robots.length == 0)
+// {
+// return null;
+// }
+// RobotInfo closest = null;
+// int minDistance = 100;
+// for (int i = 0; i < robots.length; i++)
+// {
+// int dist = source.distanceSquaredTo(robots[i].location);
+// if (dist < minDistance && robots[i].type.canAttack())
+// {
+// closest = robots[i];
+// }
+// else if ((closest == null || !closest.type.canAttack())
+// && dist < minDistance && robots[i].type.isBuilding)
+// {
+// closest = robots[i];
+// }
+// }
+// return closest.location;
+// }
 
 
     private int getMissilePriority(RobotType type)

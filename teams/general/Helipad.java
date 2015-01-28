@@ -31,7 +31,6 @@ public class Helipad
             Channels.helipadCount,
             rc.readBroadcast(Channels.helipadCount) + 1);
         int shouldSpawnDrone = rc.readBroadcast(Channels.shouldSpawnDrone);
-        rc.setIndicatorString(0, "Should spawn drone: " + shouldSpawnDrone);
         if (shouldSpawnDrone == 1)
         {
             spawnToEnemy(RobotType.DRONE);

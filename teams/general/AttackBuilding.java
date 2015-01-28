@@ -97,11 +97,9 @@ public abstract class AttackBuilding
             rc.senseNearbyRobots(attackRadius, enemyTeam);
         if (nearbyEnemies.length == 0)
         {
-            rc.setIndicatorString(0, "Dont see anyone");
             return false;
         }
 
-        rc.setIndicatorString(0, "See People");
         double lowestHealth = nearbyEnemies[0].health;
         MapLocation loc = nearbyEnemies[0].location;
         for (RobotInfo i : nearbyEnemies)

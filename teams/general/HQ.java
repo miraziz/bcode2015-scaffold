@@ -1,7 +1,6 @@
 package general;
 
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 import battlecode.common.*;
 
 /**
@@ -241,9 +240,6 @@ public class HQ
         attacking = false;
         shouldRun = false;
 
-        System.out.println("Took " + Clock.getBytecodeNum()
-            + " bytecodes so far");
-
         // Wait for towers to calculate vulnerability
         // analyzeTowers();
 
@@ -253,8 +249,6 @@ public class HQ
         isQueued = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
         queue = new LinkedList<MapLocation>();
         queue.offer(allyHQ);
-        System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
-            + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
         visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
         isQueued[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
 
@@ -271,9 +265,6 @@ public class HQ
         {
             return false;
         }
-        rc.setIndicatorString(
-            2,
-            "Distance: " + allyHQ.distanceSquaredTo(enemyHQ));
         int maxDist = 500;
         if (enemyTowers.length == 1)
         {
@@ -413,14 +404,11 @@ public class HQ
             isQueued = new boolean[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
             queue = new LinkedList<MapLocation>();
             queue.offer(allyHQ);
-            System.out.println("(" + allyHQ.x + ", " + allyHQ.y + ")"
-                + " x offset: " + mapOffsetX + ", y offset: " + mapOffsetY);
             visited[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
             isQueued[allyHQ.x - mapOffsetX][allyHQ.y - mapOffsetY] = true;
 
             buildingCount = 0;
             rc.broadcast(Channels.buildPathLength, buildingCount);
-            System.out.println("QUEUE RESET");
         }
 
         int nextX, nextY, added, numDirs;
@@ -428,7 +416,6 @@ public class HQ
             && Clock.getBytecodesLeft() > 5000)
         {
             MapLocation cur = queue.poll();
-// System.out.println("CUR: " + cur);
 
             if (rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
             {
@@ -463,7 +450,6 @@ public class HQ
                     if (buildCount < 2)
                     {
                         isQueued[cur.x - mapOffsetX][cur.y - mapOffsetY] = true;
-// System.out.println("Can build at: " + cur);
                         broadcastLocation(
                             Channels.buildPath + buildingCount,
                             cur);
@@ -497,7 +483,6 @@ public class HQ
                 }
             }
         }
-// System.out.println("BUILD PATH LENGTH: " + buildingCount);
         rc.broadcast(Channels.buildPathLength, buildingCount);
     }
 
@@ -582,13 +567,13 @@ public class HQ
         throws GameActionException
     {
         // building stuff
-        int roundNum = Clock.getRoundNum();
-        double myOre = rc.getTeamOre();
-
-        int barracksCount = rc.readBroadcast(Channels.barracksCount);
-        int helipadCount = rc.readBroadcast(Channels.helipadCount);
-        int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
-        int aerospaceCount = rc.readBroadcast(Channels.aerospaceCount);
+// int roundNum = Clock.getRoundNum();
+// double myOre = rc.getTeamOre();
+//
+// int barracksCount = rc.readBroadcast(Channels.barracksCount);
+// int helipadCount = rc.readBroadcast(Channels.helipadCount);
+// int tankFactoryCount = rc.readBroadcast(Channels.tankFactoryCount);
+// int aerospaceCount = rc.readBroadcast(Channels.aerospaceCount);
 
         int soldierCount = rc.readBroadcast(Channels.soldierCount);
         int basherCount = rc.readBroadcast(Channels.basherCount);
@@ -620,7 +605,6 @@ public class HQ
         if (!attacking && tankCount >= Constants.requiredTanksForAttack)
         {
             attacking = true;
-            System.out.println("Tanks should attack now");
             rc.broadcast(Channels.attacking, 1);
         }
 
@@ -636,137 +620,132 @@ public class HQ
     }
 
 
-    /**
-     * such a big method lol oops. puts the towers in order based on their
-     * vulnerability, now in the enemytowers and mytowers, the towers are
-     * ordered from most vulnerable to least, but only in the HQ. Needs testing
-     * 
-     * @throws GameActionException
-     */
-    private void analyzeTowers()
-        throws GameActionException
-    {
-        System.out.println("Starting tower analysis");
+// /**
+// * such a big method lol oops. puts the towers in order based on their
+// * vulnerability, now in the enemytowers and mytowers, the towers are
+// * ordered from most vulnerable to least, but only in the HQ. Needs testing
+// *
+// * @throws GameActionException
+// */
+// private void analyzeTowers()
+// throws GameActionException
+// {
+// PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
+// for (int i = 0; i < allyTowers.length; i++)
+// {
+// int vulnerabilityScore =
+// rc.readBroadcast(Channels.towerVulnerability
+// + Constants.CHANNELS_PER_TOWER_VULN * i + 1);
+// myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
+// }
+//
+// Symmetry symmetry = findSymmetry();
+//
+// int i = 0;
+// while (!myTowers.isEmpty())
+// {
+// TowerRank t = myTowers.poll();
+// this.allyTowers[i] = t.loc;
+// int xOffset = allyHQ.x - allyTowers[i].x;
+// int yOffset = allyHQ.y - allyTowers[i].y;
+// int x = xOffset;
+// int y = yOffset;
+// if (symmetry == Symmetry.X_REFLECTION)
+// {
+// x *= -1;
+// }
+// else if (symmetry == Symmetry.Y_REFLECTION)
+// {
+// y *= -1;
+// }
+// this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
+// i++;
+// }
+//
+// }
 
-        PriorityQueue<TowerRank> myTowers = new PriorityQueue<TowerRank>();
-        for (int i = 0; i < allyTowers.length; i++)
-        {
-            int vulnerabilityScore =
-                rc.readBroadcast(Channels.towerVulnerability
-                    + Constants.CHANNELS_PER_TOWER_VULN * i + 1);
-            myTowers.offer(new TowerRank(allyTowers[i], vulnerabilityScore));
-        }
-
-        System.out.println("Towers analyzed");
-        Symmetry symmetry = findSymmetry();
-
-        int i = 0;
-        while (!myTowers.isEmpty())
-        {
-            TowerRank t = myTowers.poll();
-            this.allyTowers[i] = t.loc;
-            int xOffset = allyHQ.x - allyTowers[i].x;
-            int yOffset = allyHQ.y - allyTowers[i].y;
-            int x = xOffset;
-            int y = yOffset;
-            if (symmetry == Symmetry.X_REFLECTION)
-            {
-                x *= -1;
-            }
-            else if (symmetry == Symmetry.Y_REFLECTION)
-            {
-                y *= -1;
-            }
-            this.enemyTowers[i] = new MapLocation(enemyHQ.x + x, enemyHQ.y + y);
-            i++;
-        }
-
-    }
-
-
-    private enum Symmetry
-    {
-        ROTATION,
-        X_REFLECTION,
-        Y_REFLECTION
-    }
-
+//
+// private enum Symmetry
+// {
+// ROTATION,
+// X_REFLECTION,
+// Y_REFLECTION
+// }
 
     /**
      * Determines the symmetry of the map.
      * 
      * @return The symmetry of the map.
      */
-    private Symmetry findSymmetry()
-    {
-        if (allyHQ.x == enemyHQ.x)
-        {
-            int yAxis = (allyHQ.y + enemyHQ.y) / 2;
-            boolean works = true;
-            for (MapLocation enemy : enemyTowers)
-            {
-                works = false;
-                for (MapLocation ally : allyTowers)
-                {
-                    if (enemy.x == ally.x
-                        && ((enemy.y - yAxis) == -(ally.y - yAxis)))
-                    {
-                        works = true;
-                        break;
-                    }
-                }
-                if (!works)
-                {
-                    break;
-                }
-            }
-
-            if (works)
-            {
-                return Symmetry.X_REFLECTION;
-            }
-            else
-            {
-                return Symmetry.ROTATION;
-            }
-        }
-        else if (allyHQ.y == enemyHQ.y)
-        {
-            int xAxis = (allyHQ.x + enemyHQ.x) / 2;
-            boolean works = true;
-            for (MapLocation enemy : enemyTowers)
-            {
-                works = false;
-                for (MapLocation ally : allyTowers)
-                {
-                    if (enemy.y == ally.y
-                        && ((enemy.x - xAxis) == -(ally.x - xAxis)))
-                    {
-                        works = true;
-                        break;
-                    }
-                }
-                if (!works)
-                {
-                    break;
-                }
-            }
-
-            if (works)
-            {
-                return Symmetry.Y_REFLECTION;
-            }
-            else
-            {
-                return Symmetry.ROTATION;
-            }
-        }
-        else
-        {
-            return Symmetry.ROTATION;
-        }
-    }
-
+// private Symmetry findSymmetry()
+// {
+// if (allyHQ.x == enemyHQ.x)
+// {
+// int yAxis = (allyHQ.y + enemyHQ.y) / 2;
+// boolean works = true;
+// for (MapLocation enemy : enemyTowers)
+// {
+// works = false;
+// for (MapLocation ally : allyTowers)
+// {
+// if (enemy.x == ally.x
+// && ((enemy.y - yAxis) == -(ally.y - yAxis)))
+// {
+// works = true;
+// break;
+// }
+// }
+// if (!works)
+// {
+// break;
+// }
+// }
+//
+// if (works)
+// {
+// return Symmetry.X_REFLECTION;
+// }
+// else
+// {
+// return Symmetry.ROTATION;
+// }
+// }
+// else if (allyHQ.y == enemyHQ.y)
+// {
+// int xAxis = (allyHQ.x + enemyHQ.x) / 2;
+// boolean works = true;
+// for (MapLocation enemy : enemyTowers)
+// {
+// works = false;
+// for (MapLocation ally : allyTowers)
+// {
+// if (enemy.y == ally.y
+// && ((enemy.x - xAxis) == -(ally.x - xAxis)))
+// {
+// works = true;
+// break;
+// }
+// }
+// if (!works)
+// {
+// break;
+// }
+// }
+//
+// if (works)
+// {
+// return Symmetry.Y_REFLECTION;
+// }
+// else
+// {
+// return Symmetry.ROTATION;
+// }
+// }
+// else
+// {
+// return Symmetry.ROTATION;
+// }
+// }
 
     // ---------------------------------------------------------------------
 

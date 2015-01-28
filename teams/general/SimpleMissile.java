@@ -24,7 +24,6 @@ public class SimpleMissile
         mapOffsetY =
             Math.max(allyHQ.y, enemyHQ.y) - GameConstants.MAP_MAX_HEIGHT;
         int channel = getLocChannel(rc.getLocation());
-        rc.setIndicatorString(2, "My channel: " + channel);
 
         int num = rc.readBroadcast(channel);
         target =
@@ -38,10 +37,6 @@ public class SimpleMissile
     public void run()
         throws GameActionException
     {
-        int curRound = Clock.getRoundNum();
-
-        rc.setIndicatorString(1, "TARGET: " + target);
-        rc.setIndicatorString(2, "ID: " + enemyId);
         if (steps > 0)
         {
             if (enemyId == 32001)
@@ -120,17 +115,8 @@ public class SimpleMissile
 
                 if (allyNum > enemyNum)
                 {
-                    int bytecodesUsed = Clock.getBytecodeNum();
-                    if (bytecodesUsed > 400)
-                        System.out.println("BYTECODES USED: " + bytecodesUsed
-                            + " on step: " + steps);
-                    System.out.println("Disintegrating");
                     rc.disintegrate();
                 }
-                int bytecodesUsed = Clock.getBytecodeNum();
-                if (bytecodesUsed > 400)
-                    System.out.println("BYTECODES USED: " + bytecodesUsed
-                        + " on step: " + steps);
             }
         }
         else if (steps == 4)
@@ -157,26 +143,10 @@ public class SimpleMissile
 
             if (allyNum > enemyNum)
             {
-                int bytecodesUsed = Clock.getBytecodeNum();
-                if (bytecodesUsed > 400)
-                    System.out.println("BYTECODES USED: " + bytecodesUsed
-                        + " on step: " + steps);
-                System.out.println("Disintegrating");
                 rc.disintegrate();
             }
-            int bytecodesUsed = Clock.getBytecodeNum();
-            if (bytecodesUsed > 400)
-                System.out.println("BYTECODES USED: " + bytecodesUsed
-                    + " on step: " + steps);
         }
         steps++;
-
-        int endRound = Clock.getRoundNum();
-        if (curRound != endRound)
-        {
-            System.out.println("Missile over bytecodes: "
-                + (endRound - curRound) + " on step: " + steps);
-        }
     }
 
 

@@ -21,8 +21,6 @@ public class Miner
     private boolean       pathFollowing;
     private int           curPathPos;
     private int           pathFailedCount;
-    private MapLocation   minerDest;
-    private double        bestOreNum;
     private boolean       cantFindOre;
 
 
@@ -135,7 +133,7 @@ public class Miner
     {
         super.run();
 
-        String doing = "Not set";
+// String doing = "Not set";
 
         if (cantFindOre)
         {
@@ -166,7 +164,7 @@ public class Miner
 // trying again
             if (runAwayOrAttack())
             {
-                doing = "Running away or attacking";
+// doing = "Running away or attacking";
                 pathFollowing = false;
             }
             else
@@ -177,13 +175,13 @@ public class Miner
                     // TODO Move out of way?
                     if (rc.senseOre(mLocation) >= Constants.PATH_ORE)
                     {
-                        doing = "Mining on path";
+// doing = "Mining on path";
                         rc.mine();
                         coreDelayed = true;
                     }
                     else
                     {
-                        doing = "Moving along path";
+// doing = "Moving along path";
                         coreDelayed = moveAlongPath();
                     }
                 }
@@ -192,11 +190,11 @@ public class Miner
                 {
                     if (unblockAlly())
                     {
-                        doing = "Unblocking ally";
+// doing = "Unblocking ally";
                     }
                     else if (moveOrMine())
                     {
-                        doing = "Moving or mining";
+// doing = "Moving or mining";
                     }
                     else
                     {
@@ -205,15 +203,14 @@ public class Miner
                         if (bestLoc != null)
                         {
                             cantFindOre = false;
-                            doing = "Closest ore found";
+// doing = "Closest ore found";
 // mLocation = rc.getLocation();
                             setPath(bestLoc);
                         }
                         else
                         {
                             cantFindOre = true;
-                            doing = "Closest ore not found";
-                            System.out.println("CAN'T FIND ANY");
+// doing = "Closest ore not found";
                             rc.broadcast(
                                 Channels.MAP_OUT_OF_ORE,
                                 Constants.MAP_OUT_OF_ORE);
@@ -234,12 +231,6 @@ public class Miner
 // }
 // System.out.println("CORE DELAY END: " + rc.getCoreDelay());
 // }
-
-        rc.setIndicatorString(0, doing);
-        rc.setIndicatorString(1, "IS FOLLOWING: " + pathFollowing);
-        rc.setIndicatorString(2, "DEST: " + minerDest + " Can't find ore: "
-            + cantFindOre);
-
         // TODO If nothing is found, go in a random direction or blow up
 
     }
@@ -286,7 +277,6 @@ public class Miner
         throws GameActionException
     {
         Direction dirToMove = mLocation.directionTo(path[curPathPos]);
-        rc.setIndicatorLine(mLocation, path[path.length - 1], 0, 255, 0);
         if (rc.senseTerrainTile(path[curPathPos]) != TerrainTile.NORMAL)
         {
             pathFollowing = false;
@@ -347,75 +337,70 @@ public class Miner
     }
 
 
-    private MapLocation checkBetterOre()
-    {
-        System.out
-            .println("Starting checkBetterOre: " + Clock.getBytecodeNum());
-        mapPointers = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
-        mapLevels = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
-        MapLocation[] trollQ =
-            new MapLocation[GameConstants.MAP_MAX_WIDTH
-                * GameConstants.MAP_MAX_HEIGHT];
-        int startQ = 0, endQ = 0;
-
-        bestOreNum = rc.senseOre(mLocation);
-        for (int i = 0; i < minerDirs.length; ++i)
-        {
-            bestOreNum =
-                Math.max(bestOreNum, rc.senseOre(mLocation.add(minerDirs[i])));
-        }
-        MapLocation bestLoc = null;
-
-        trollQ[endQ++] = mLocation;
-        mapPointers[mLocation.x - mapOffsetX][mLocation.y - mapOffsetY] = -1;
-
-        int cX, cY, oX, oY, cL;
-        while (startQ != endQ)
-        {
-            MapLocation cur = trollQ[startQ++];
-            cX = cur.x - mapOffsetX;
-            cY = cur.y - mapOffsetY;
-            cL = mapLevels[cX][cY];
-
-            double ore = rc.senseOre(cur);
-            if (ore >= 0)
-            {
-                if (cL >= Constants.BETTER_ORE_MIN_RANGE && ore > bestOreNum)
-                {
-                    bestOreNum = ore;
-                    bestLoc = cur;
-                }
-
-                if (cL <= Constants.BETTER_ORE_MAX_RANGE
-                    && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
-                {
-                    for (int i = 0; i < 8; i += 2)
-                    {
-                        MapLocation next = cur.add(directions[i]);
-                        oX = next.x - mapOffsetX;
-                        oY = next.y - mapOffsetY;
-                        if (mapPointers[oX][oY] == 0)
-                        {
-                            mapPointers[oX][oY] =
-                                cX * Constants.MAP_HEIGHT + cY;
-                            mapLevels[oX][oY] = cL + 1;
-                            trollQ[endQ++] = next;
-                        }
-
-                        if (i == 6)
-                        {
-                            i = -1;
-                        }
-                    }
-                }
-            }
-        }
-
-        System.out.println("Finishing checkBetterOre: "
-            + Clock.getBytecodeNum());
-        return bestLoc;
-    }
-
+// private MapLocation checkBetterOre()
+// {
+// mapPointers = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+// mapLevels = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+// MapLocation[] trollQ =
+// new MapLocation[GameConstants.MAP_MAX_WIDTH
+// * GameConstants.MAP_MAX_HEIGHT];
+// int startQ = 0, endQ = 0;
+//
+// bestOreNum = rc.senseOre(mLocation);
+// for (int i = 0; i < minerDirs.length; ++i)
+// {
+// bestOreNum =
+// Math.max(bestOreNum, rc.senseOre(mLocation.add(minerDirs[i])));
+// }
+// MapLocation bestLoc = null;
+//
+// trollQ[endQ++] = mLocation;
+// mapPointers[mLocation.x - mapOffsetX][mLocation.y - mapOffsetY] = -1;
+//
+// int cX, cY, oX, oY, cL;
+// while (startQ != endQ)
+// {
+// MapLocation cur = trollQ[startQ++];
+// cX = cur.x - mapOffsetX;
+// cY = cur.y - mapOffsetY;
+// cL = mapLevels[cX][cY];
+//
+// double ore = rc.senseOre(cur);
+// if (ore >= 0)
+// {
+// if (cL >= Constants.BETTER_ORE_MIN_RANGE && ore > bestOreNum)
+// {
+// bestOreNum = ore;
+// bestLoc = cur;
+// }
+//
+// if (cL <= Constants.BETTER_ORE_MAX_RANGE
+// && rc.senseTerrainTile(cur) == TerrainTile.NORMAL)
+// {
+// for (int i = 0; i < 8; i += 2)
+// {
+// MapLocation next = cur.add(directions[i]);
+// oX = next.x - mapOffsetX;
+// oY = next.y - mapOffsetY;
+// if (mapPointers[oX][oY] == 0)
+// {
+// mapPointers[oX][oY] =
+// cX * Constants.MAP_HEIGHT + cY;
+// mapLevels[oX][oY] = cL + 1;
+// trollQ[endQ++] = next;
+// }
+//
+// if (i == 6)
+// {
+// i = -1;
+// }
+// }
+// }
+// }
+// }
+//
+// return bestLoc;
+// }
 
     private MapLocation findClosestOre()
         throws GameActionException
@@ -519,7 +504,6 @@ public class Miner
 
     private void setPath(MapLocation cur)
     {
-        minerDest = cur;
         int cX = cur.x - mapOffsetX;
         int cY = cur.y - mapOffsetY;
         int level = mapLevels[cX][cY];

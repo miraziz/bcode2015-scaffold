@@ -68,7 +68,6 @@ public class Beaver
         {
             task = getNextTask();
         }
-        rc.setIndicatorString(1, "My task is: " + task);
 
         if (rc.isCoreReady())
         {
@@ -102,12 +101,9 @@ public class Beaver
             else
             {
                 this.setDestination(buildLoc);
-                rc.setIndicatorString(0, "My build loc: " + buildLoc);
 
                 if (!reached)
                 {
-                    rc.setIndicatorString(1, "HERE, trying to go to: "
-                        + buildLoc);
                     if (rc.getLocation().x == buildLoc.x
                         && rc.getLocation().y == buildLoc.y)
                     {

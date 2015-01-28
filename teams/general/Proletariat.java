@@ -40,7 +40,6 @@ public abstract class Proletariat
         onWall = false;
         dest = null;
         turnRight = rand.nextBoolean();
-        rc.setIndicatorString(0, "Turning right: " + turnRight);
     }
 
 
@@ -56,11 +55,6 @@ public abstract class Proletariat
         mTypeNumber = rc.readBroadcast(mTypeChannel);
         rc.broadcast(mTypeChannel, mTypeNumber + 1);
         manageSupply();
-        if (rc.getType() == RobotType.BEAVER)
-        {
-            rc.setIndicatorString(2, "My visited loc: " + visited
-                + ", error count: " + this.bugFailureCount);
-        }
     }
 
 
@@ -217,7 +211,6 @@ public abstract class Proletariat
         throws GameActionException
     {
         MapLocation next = rc.getLocation().add(dir);
-        RobotInfo rob = rc.senseRobotAtLocation(next);
         if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
         {
             facing = facing.opposite();
@@ -251,7 +244,6 @@ public abstract class Proletariat
         }
         else if (rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.OFF_MAP)
         {
-            System.out.println("HERE");
             visited = rc.getLocation();
             turnRight = !turnRight;
             return bug();
@@ -319,22 +311,22 @@ public abstract class Proletariat
     }
 
 
-    /**
-     * Checks whether the location in the given direction is a normal tile with
-     * no robots on it.
-     * 
-     * @param dir
-     *            The direction to check.
-     * @return True if there location is a normal tile with no other robots on
-     *         it, false otherwise.
-     * @throws GameActionException
-     */
-    private boolean isNormalTile(Direction dir)
-        throws GameActionException
-    {
-        return rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.NORMAL;
-    }
-
+//
+// /**
+// * Checks whether the location in the given direction is a normal tile with
+// * no robots on it.
+// *
+// * @param dir
+// * The direction to check.
+// * @return True if there location is a normal tile with no other robots on
+// * it, false otherwise.
+// * @throws GameActionException
+// */
+// private boolean isNormalTile(Direction dir)
+// throws GameActionException
+// {
+// return rc.senseTerrainTile(rc.getLocation().add(dir)) == TerrainTile.NORMAL;
+// }
 
     @Override
     public void transferSupplies()
@@ -356,21 +348,6 @@ public abstract class Proletariat
                     GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED,
                     myTeam);
 
-            if (rc.getID() == 16995)
-            {
-                for (int i = 0; i < allies.length && i < 3; ++i)
-                {
-                    int red = i == 2 ? 255 : 0;
-                    int green = i == 0 ? 255 : 0;
-                    int blue = i == 1 ? 255 : 0;
-                    rc.setIndicatorLine(
-                        new MapLocation(mapOffsetX, mapOffsetY),
-                        allies[i].location,
-                        red,
-                        green,
-                        blue);
-                }
-            }
             RobotInfo targetRobot = null;
             for (RobotInfo r : allies)
             {
@@ -509,15 +486,6 @@ public abstract class Proletariat
     protected Direction[] getSpanningDirections(Direction dir)
     {
         return getSpanningDirections(dir, 8);
-    }
-
-
-    private void print(String nm)
-    {
-        if (Clock.getRoundNum() < 400)
-        {
-            System.out.println(nm);
-        }
     }
 
 
