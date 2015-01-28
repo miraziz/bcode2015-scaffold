@@ -62,10 +62,6 @@ public class SimpleLauncher
         rc.setIndicatorString(1, "Is near tower or HQ: "
             + (closestTowerOrHQ == null ? "No" : closestTowerOrHQ));
         int bytecodesUsed = Clock.getBytecodeNum();
-        if (bytecodesUsed > 3500)
-        {
-            System.out.println("Bytecodes used: " + bytecodesUsed);
-        }
     }
 
 
@@ -104,10 +100,6 @@ public class SimpleLauncher
                 closestType = enemies[i].type;
                 closestID = enemies[i].ID;
             }
-        }
-        if (Clock.getBytecodeNum() > 1000)
-        {
-            System.out.println(counter);
         }
 
         if (closestLoc == null)

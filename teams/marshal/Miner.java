@@ -219,23 +219,6 @@ public class Miner
             }
         }
 
-// if (!rc.isCoreReady() && !pathFollowing && rc.getSupplyLevel() > 14)
-// {
-// System.out.println("CORE DELAY START: " + rc.getCoreDelay());
-// MapLocation bestLoc = checkBetterOre();
-// if (bestLoc != null)
-// {
-// setPath(bestLoc);
-// run();
-// }
-// System.out.println("CORE DELAY END: " + rc.getCoreDelay());
-// }
-
-        rc.setIndicatorString(0, doing);
-        rc.setIndicatorString(1, "IS FOLLOWING: " + pathFollowing);
-        rc.setIndicatorString(2, "DEST: " + minerDest + " Can't find ore: "
-            + cantFindOre);
-
         // TODO If nothing is found, go in a random direction or blow up
 
     }
@@ -282,7 +265,6 @@ public class Miner
         throws GameActionException
     {
         Direction dirToMove = mLocation.directionTo(path[curPathPos]);
-        rc.setIndicatorLine(mLocation, path[path.length - 1], 0, 255, 0);
         if (rc.senseTerrainTile(path[curPathPos]) != TerrainTile.NORMAL)
         {
             pathFollowing = false;

@@ -31,7 +31,6 @@ public class MinerFactory
         if (rc.isCoreReady())
         {
             int minerCount = rc.readBroadcast(Channels.minerCount);
-            rc.setIndicatorString(1, "Miner count: " + minerCount);
             if (minerCount < Constants.minerLimit && Clock.getRoundNum() < 1250)
             {
                 spawnToEnemy(RobotType.MINER);

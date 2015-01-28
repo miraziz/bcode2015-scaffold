@@ -49,7 +49,6 @@ public class Missile
 
             // dest = rc.senseRobot(enemyId).location;
         }
-        rc.setIndicatorLine(rc.getLocation(), dest, 0, 200, 255);
         MapLocation mLocation = rc.getLocation();
         MapLocation m = getLocation(getLocChannel(rc.getLocation()));
         if (m != null)
