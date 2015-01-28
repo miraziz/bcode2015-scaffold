@@ -1,4 +1,4 @@
-package team025;
+package supremecommander;
 
 /**
  * Constants used for channel communication.

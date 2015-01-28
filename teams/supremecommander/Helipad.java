@@ -1,4 +1,4 @@
-package team025;
+package supremecommander;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;

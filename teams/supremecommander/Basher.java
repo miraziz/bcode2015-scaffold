@@ -1,21 +1,16 @@
-package team025;
+package supremecommander;
 
 import battlecode.common.*;
 
-/**
- * Soldier class.
- * 
- * @author Amit Bachchan
- */
-public class Soldier
+public class Basher
     extends Fighter
 {
 
-    public Soldier(RobotController rc)
+    public Basher(RobotController rc)
         throws GameActionException
     {
         super(rc);
-        mTypeChannel = Channels.soldierCount;
+        mTypeChannel = Channels.basherCount;
     }
 
 
@@ -26,8 +21,8 @@ public class Soldier
         attacking = rc.readBroadcast(Channels.attacking) == 1;
         if (attacking || committed)
         {
-            this.avoidTowers = false;
             committed = true;
+            this.avoidTowers = false;
             this.setDestination(enemyHQ);
         }
         else
@@ -36,10 +31,7 @@ public class Soldier
         }
         RobotInfo[] nearby =
             rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, enemyTeam);
-        if (!attack(nearby))
-        {
-            micro(nearby);
-        }
+        micro(nearby);
     }
 
 
@@ -86,5 +78,4 @@ public class Soldier
         }
         this.bugWithCounter();
     }
-
 }

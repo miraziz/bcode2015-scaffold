@@ -1,4 +1,4 @@
-package team025;
+package supremecommander;
 
 import java.util.LinkedList;
 import battlecode.common.*;

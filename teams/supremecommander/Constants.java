@@ -1,4 +1,4 @@
-package team025;
+package supremecommander;
 
 import battlecode.common.GameConstants;
 import battlecode.common.RobotType;
